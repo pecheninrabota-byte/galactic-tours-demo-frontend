@@ -2,10 +2,11 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galactic Tours</title>
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             background: #0b0f1a;
             color: white;
             margin: 0;
@@ -27,6 +28,11 @@
             text-align: center;
             cursor: pointer;
             margin-top: 10px;
+            user-select: none;
+        }
+
+        .btn:hover {
+            opacity: 0.95;
         }
 
         .task {
@@ -37,93 +43,112 @@
             text-decoration: line-through;
             opacity: 0.5;
         }
+
+        .chat-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        #response {
+            margin-top: 15px;
+            white-space: pre-line;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>👨‍🚀 Привет, Алекс</h2>
-    <p>День 1 — Добро пожаловать</p>
-    <p>Прогресс: <span id="progress">0</span>/4</p>
+    <div class="card">
+        <h2>👨‍🚀 Привет, Алекс</h2>
+        <p>День 1 — Добро пожаловать</p>
+        <p>Прогресс: <span id="progress">0</span>/4</p>
 
-    <div class="btn" onclick="start()">Начать адаптацию</div>
-</div>
-
-<div class="card">
-    <h3>📋 Задачи</h3>
-
-    <div class="task"><input type="checkbox" onclick="update(this)"> Ознакомиться с должностной инструкцией</div>
-    <div class="task"><input type="checkbox" onclick="update(this)"> Изучить оргполитику</div>
-    <div class="task"><input type="checkbox" onclick="update(this)"> Настроить подпись</div>
-    <div class="task"><input type="checkbox" onclick="update(this)"> Пройти обучение</div>
-
-</div>
-
-<script>
-let count = 0;
-
-function update(el) {
-    if (el.checked) count++;
-    else count--;
-    document.getElementById("progress").innerText = count;
-}
-
-function start() {
-    alert("🚀 Адаптация началась!");
-}
-</script>
+        <div class="btn" onclick="start()">Начать адаптацию</div>
+    </div>
 
     <div class="card">
-    <h3>🤖 HR-ассистент</h3>
-    <input id="input" placeholder="Напиши вопрос..." style="width:100%; padding:10px;">
-    <div class="btn" onclick="send()">Отправить</div>
-    <p id="response"></p>
-</div>
+        <h3>📋 Задачи</h3>
 
-<script>
-async function send() {
-    const input = document.getElementById("input");
-    const responseEl = document.getElementById("response");
-    const text = input.value.trim();
+        <div class="task"><input type="checkbox" onclick="update(this)"> Ознакомиться с должностной инструкцией</div>
+        <div class="task"><input type="checkbox" onclick="update(this)"> Изучить оргполитику</div>
+        <div class="task"><input type="checkbox" onclick="update(this)"> Настроить подпись</div>
+        <div class="task"><input type="checkbox" onclick="update(this)"> Пройти обучение</div>
+    </div>
 
-    if (!text) {
-        responseEl.innerText = "Введите вопрос";
-        return;
-    }
+    <div class="card">
+        <h3>🤖 HR-ассистент</h3>
+        <input
+            id="input"
+            class="chat-input"
+            placeholder="Напиши вопрос..."
+        >
+        <div class="btn" onclick="send()">Отправить</div>
+        <p id="response"></p>
+    </div>
 
-    responseEl.innerText = "Думаю...";
+    <script>
+        let count = 0;
 
-    try {
-        const res = await fetch("https://galactic-tours-demo-backend-production.up.railway.app/api/message", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                session_id: "demo",
-                text: text
-            })
-        });
-
-        if (!res.ok) {
-            responseEl.innerText = "Ошибка сервера: " + res.status;
-            return;
+        function update(el) {
+            if (el.checked) {
+                count++;
+            } else {
+                count--;
+            }
+            document.getElementById("progress").innerText = count;
         }
 
-        const data = await res.json();
-
-        if (!data.reply) {
-            responseEl.innerText = "Ответ пустой";
-            return;
+        function start() {
+            alert("🚀 Адаптация началась!");
         }
 
-        responseEl.innerText = data.reply;
+        async function send() {
+            const input = document.getElementById("input");
+            const responseEl = document.getElementById("response");
+            const text = input.value.trim();
 
-    } catch (error) {
-        responseEl.innerText = "Ошибка подключения";
-        console.error(error);
-}
-</script>
-</script>
+            if (!text) {
+                responseEl.innerText = "Введите вопрос";
+                return;
+            }
+
+            responseEl.innerText = "Думаю...";
+
+            try {
+                const res = await fetch("https://galactic-tours-demo-backend-production.up.railway.app/api/message", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        session_id: "demo",
+                        text: text
+                    })
+                });
+
+                if (!res.ok) {
+                    responseEl.innerText = "Ошибка сервера: " + res.status;
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (!data.reply) {
+                    responseEl.innerText = "Ответ пустой";
+                    return;
+                }
+
+                responseEl.innerText = data.reply;
+            } catch (error) {
+                responseEl.innerText = "Ошибка подключения: " + error.message;
+                console.error(error);
+            }
+        }
+    </script>
+
 </body>
 </html>
