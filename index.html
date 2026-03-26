@@ -39,11 +39,6 @@
             margin-top: 10px;
         }
 
-        .done {
-            text-decoration: line-through;
-            opacity: 0.5;
-        }
-
         .chat-input {
             width: 100%;
             padding: 12px;
@@ -53,10 +48,34 @@
             font-size: 16px;
         }
 
-        #response {
+        .chat-box {
             margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 10px;
             white-space: pre-line;
             line-height: 1.5;
+            max-width: 100%;
+        }
+
+        .message.user {
+            background: #4f7cff;
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            background: #222a47;
+            align-self: flex-start;
+        }
+
+        .message.system {
+            background: #3a3f57;
+            align-self: flex-start;
         }
     </style>
 </head>
@@ -66,17 +85,15 @@
         <h2>👨‍🚀 Привет, Алекс</h2>
         <p>День 1 — Добро пожаловать</p>
         <p>Прогресс: <span id="progress">0</span>/4</p>
-
-        <div class="btn" onclick="start()">Начать адаптацию</div>
+        <div class="btn" onclick="startAdaptation()">Начать адаптацию</div>
     </div>
 
     <div class="card">
         <h3>📋 Задачи</h3>
-
-        <div class="task"><input type="checkbox" onclick="update(this)"> Ознакомиться с должностной инструкцией</div>
-        <div class="task"><input type="checkbox" onclick="update(this)"> Изучить оргполитику</div>
-        <div class="task"><input type="checkbox" onclick="update(this)"> Настроить подпись</div>
-        <div class="task"><input type="checkbox" onclick="update(this)"> Пройти обучение</div>
+        <div class="task"><input type="checkbox" onclick="updateTask(this)"> Ознакомиться с должностной инструкцией</div>
+        <div class="task"><input type="checkbox" onclick="updateTask(this)"> Изучить оргполитику</div>
+        <div class="task"><input type="checkbox" onclick="updateTask(this)"> Настроить подпись</div>
+        <div class="task"><input type="checkbox" onclick="updateTask(this)"> Пройти обучение</div>
     </div>
 
     <div class="card">
@@ -86,14 +103,18 @@
             class="chat-input"
             placeholder="Напиши вопрос..."
         >
-        <div class="btn" onclick="send()">Отправить</div>
-        <p id="response"></p>
+        <div class="btn" onclick="sendMessage()">Отправить</div>
+        <div id="chat" class="chat-box"></div>
     </div>
 
     <script>
-        let count = 0;
+        const API_URL = "https://galactic-tours-demo-backend-production.up.railway.app/api/message";
+        const SESSION_ID = "demo";
 
-        function update(el) {
+        let count = 0;
+        let botStarted = false;
+
+        function updateTask(el) {
             if (el.checked) {
                 count++;
             } else {
@@ -102,52 +123,81 @@
             document.getElementById("progress").innerText = count;
         }
 
-        function start() {
+        function startAdaptation() {
             alert("🚀 Адаптация началась!");
         }
 
-        async function send() {
-            const input = document.getElementById("input");
-            const responseEl = document.getElementById("response");
-            const text = input.value.trim();
+        function addMessage(text, type) {
+            const chat = document.getElementById("chat");
+            const msg = document.createElement("div");
+            msg.className = `message ${type}`;
+            msg.innerText = text;
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
+        }
 
-            if (!text) {
-                responseEl.innerText = "Введите вопрос";
-                return;
+        async function callBot(text, showUserMessage = true) {
+            if (showUserMessage) {
+                addMessage(text, "user");
             }
 
-            responseEl.innerText = "Думаю...";
-
             try {
-                const res = await fetch("https://galactic-tours-demo-backend-production.up.railway.app/api/message", {
+                const res = await fetch(API_URL, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        session_id: "demo",
+                        session_id: SESSION_ID,
                         text: text
                     })
                 });
 
                 if (!res.ok) {
-                    responseEl.innerText = "Ошибка сервера: " + res.status;
+                    addMessage("Ошибка сервера: " + res.status, "system");
                     return;
                 }
 
                 const data = await res.json();
 
                 if (!data.reply) {
-                    responseEl.innerText = "Ответ пустой";
+                    addMessage("Ответ пустой", "system");
                     return;
                 }
 
-                responseEl.innerText = data.reply;
+                addMessage(data.reply, "bot");
             } catch (error) {
-                responseEl.innerText = "Ошибка подключения: " + error.message;
+                addMessage("Ошибка подключения: " + error.message, "system");
                 console.error(error);
             }
         }
+
+        async function startBot() {
+            if (botStarted) return;
+            botStarted = true;
+            await callBot("__start__", false);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById("input");
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            await callBot(text, true);
+            input.value = "";
+            input.focus();
+        }
+
+        document.getElementById("input").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+
+        window.addEventListener("load", function() {
+            startBot();
+        });
     </script>
 
 </body>
