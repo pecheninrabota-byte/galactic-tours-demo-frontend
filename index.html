@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Galactic Tours</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #0b0f1a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .card {
+            background: #151a2e;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: #4f7cff;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .task {
+            margin-top: 10px;
+        }
+
+        .done {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>👨‍🚀 Привет, Алекс</h2>
+    <p>День 1 — Добро пожаловать</p>
+    <p>Прогресс: <span id="progress">0</span>/4</p>
+
+    <div class="btn" onclick="start()">Начать адаптацию</div>
+</div>
+
+<div class="card">
+    <h3>📋 Задачи</h3>
+
+    <div class="task"><input type="checkbox" onclick="update(this)"> Ознакомиться с должностной инструкцией</div>
+    <div class="task"><input type="checkbox" onclick="update(this)"> Изучить оргполитику</div>
+    <div class="task"><input type="checkbox" onclick="update(this)"> Настроить подпись</div>
+    <div class="task"><input type="checkbox" onclick="update(this)"> Пройти обучение</div>
+
+</div>
+
+<script>
+let count = 0;
+
+function update(el) {
+    if (el.checked) count++;
+    else count--;
+    document.getElementById("progress").innerText = count;
+}
+
+function start() {
+    alert("🚀 Адаптация началась!");
+}
+</script>
+
+</body>
+</html>
