@@ -73,5 +73,32 @@ function start() {
 }
 </script>
 
+    <div class="card">
+    <h3>🤖 HR-ассистент</h3>
+    <input id="input" placeholder="Напиши вопрос..." style="width:100%; padding:10px;">
+    <div class="btn" onclick="send()">Отправить</div>
+    <p id="response"></p>
+</div>
+
+<script>
+async function send() {
+    const text = document.getElementById("input").value;
+
+    const res = await fetch("https://galactic-tours-demo-backend.railway.internal/api/message", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            session_id: "demo",
+            text: text
+        })
+    });
+
+    const data = await res.json();
+
+    document.getElementById("response").innerText = data.reply;
+}
+</script>
 </body>
 </html>
