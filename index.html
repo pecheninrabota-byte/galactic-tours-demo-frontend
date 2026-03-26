@@ -1,259 +1,1115 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galactic Tours</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #0b0f1a;
-            color: white;
-            margin: 0;
-            padding: 20px;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galactic Tours</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-2: #0d1b2d;
+      --panel: rgba(18, 31, 52, 0.78);
+      --panel-strong: rgba(22, 38, 63, 0.92);
+      --panel-soft: rgba(34, 52, 82, 0.68);
+      --line: rgba(170, 195, 230, 0.16);
+      --line-strong: rgba(170, 195, 230, 0.28);
+      --text: #f2f6fb;
+      --muted: #a8b9d2;
+      --accent: #88a9d6;
+      --accent-2: #658fcb;
+      --accent-3: #dce8f7;
+      --success: #a9d6b4;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --max: 1320px;
+    }
 
-        .card {
-            background: #151a2e;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        .btn {
-            background: #4f7cff;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            margin-top: 10px;
-            user-select: none;
-        }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background:
+        radial-gradient(circle at top right, rgba(118, 157, 212, 0.20), transparent 28%),
+        radial-gradient(circle at 15% 10%, rgba(126, 157, 201, 0.12), transparent 24%),
+        linear-gradient(180deg, #08111f 0%, #07111f 100%);
+      color: var(--text);
+      font-family: Inter, Arial, sans-serif;
+      min-height: 100%;
+    }
 
-        .btn:hover {
-            opacity: 0.95;
-        }
+    body {
+      padding: 28px;
+    }
 
-        .task {
-            margin-top: 10px;
-        }
+    .page {
+      max-width: var(--max);
+      margin: 0 auto;
+    }
 
-        .chat-input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
 
-        .chat-box {
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
 
-        .message {
-            padding: 12px;
-            border-radius: 10px;
-            white-space: pre-line;
-            line-height: 1.5;
-            max-width: 75%;
-        }
+    .brand-mark {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04)),
+        rgba(19, 33, 54, 0.72);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      font-size: 24px;
+    }
 
-        .message.user {
-            background: #4f7cff;
-            align-self: flex-end;
-        }
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
 
-        .message.bot {
-            background: #222a47;
-            align-self: flex-start;
-        }
+    .brand-kicker {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
 
-        .message.system {
-            background: #3a3f57;
-            align-self: flex-start;
-        }
+    .brand-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
 
-        .quick-replies {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 6px;
-            margin-bottom: 8px;
-        }
+    .topnav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-        .quick-reply-btn {
-            background: #222a47;
-            color: white;
-            border: 1px solid #4f7cff;
-            border-radius: 999px;
-            padding: 10px 14px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+    .topnav-chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(20, 34, 57, 0.72);
+      color: var(--muted);
+      border: 1px solid var(--line);
+      font-size: 14px;
+    }
 
-        .quick-reply-btn:hover {
-            background: #2d3760;
-        }
-    </style>
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 34px;
+      background:
+        linear-gradient(135deg, rgba(27, 48, 79, 0.96), rgba(18, 31, 52, 0.94)),
+        rgba(18, 31, 52, 0.95);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 34px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      margin-bottom: 24px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: auto auto -120px -60px;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(153, 190, 241, 0.16), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(192, 221, 255, 0.10), transparent 68%);
+      pointer-events: none;
+    }
+
+    .hero-left {
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(238, 244, 252, 0.08);
+      color: var(--accent-3);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 18px;
+    }
+
+    .hero-title {
+      font-size: clamp(42px, 6vw, 82px);
+      line-height: 0.95;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      max-width: 700px;
+    }
+
+    .hero-title-accent {
+      display: block;
+      font-size: clamp(28px, 3vw, 44px);
+      font-style: italic;
+      color: #a9c6ec;
+      margin-top: 8px;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    .hero-subtitle {
+      margin: 22px 0 26px;
+      max-width: 560px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 26px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 22px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #f6f9fd, #dbe8f7);
+      color: #10223b;
+      font-weight: 600;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .secondary-btn {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .meta-card {
+      min-width: 180px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .meta-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+
+    .meta-value {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .hero-right {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    .hero-visual {
+      width: 100%;
+      min-height: 380px;
+      border-radius: 28px;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(7,15,30,0.16), rgba(7,15,30,0.46)),
+        radial-gradient(circle at 62% 38%, rgba(226, 243, 255, 0.75), rgba(138, 180, 232, 0.18) 16%, transparent 36%),
+        radial-gradient(circle at 80% 30%, rgba(255,255,255,0.95) 0%, rgba(150,192,238,0.20) 10%, transparent 26%),
+        linear-gradient(180deg, #0d1e34 0%, #091425 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .hero-stars {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 14% 18%, rgba(255,255,255,0.88) 0 1px, transparent 2px),
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,0.7) 0 1px, transparent 2px),
+        radial-gradient(circle at 62% 18%, rgba(255,255,255,0.88) 0 1px, transparent 2px),
+        radial-gradient(circle at 80% 42%, rgba(255,255,255,0.68) 0 1px, transparent 2px),
+        radial-gradient(circle at 55% 58%, rgba(255,255,255,0.72) 0 1px, transparent 2px),
+        radial-gradient(circle at 18% 66%, rgba(255,255,255,0.72) 0 1px, transparent 2px),
+        radial-gradient(circle at 72% 78%, rgba(255,255,255,0.64) 0 1px, transparent 2px);
+      opacity: 0.75;
+    }
+
+    .hero-planet {
+      position: absolute;
+      left: -10%;
+      bottom: -28%;
+      width: 90%;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 35%, rgba(170, 209, 255, 0.32), rgba(64, 103, 160, 0.26) 44%, rgba(16, 32, 58, 0.2) 72%, transparent 75%);
+      box-shadow: 0 -30px 80px rgba(141, 190, 255, 0.14);
+      opacity: 0.95;
+    }
+
+    .hero-ring {
+      position: absolute;
+      right: -6%;
+      top: 14%;
+      width: 52%;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      border: 2px solid rgba(197, 228, 255, 0.24);
+      box-shadow:
+        0 0 0 14px rgba(180, 214, 255, 0.04),
+        0 0 60px rgba(190, 226, 255, 0.12);
+      filter: blur(0.2px);
+    }
+
+    .hero-glass {
+      position: absolute;
+      left: 10%;
+      top: 18%;
+      width: 55%;
+      padding: 20px;
+      border-radius: 24px;
+      background: rgba(102, 138, 181, 0.20);
+      border: 1px solid rgba(220, 235, 252, 0.14);
+      backdrop-filter: blur(14px);
+      color: var(--accent-3);
+    }
+
+    .hero-glass-title {
+      font-size: 14px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(240, 246, 255, 0.72);
+      margin-bottom: 10px;
+    }
+
+    .hero-glass-text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #edf4fc;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      backdrop-filter: blur(18px);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 26px;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .section-caption {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .mission-card {
+      border-radius: 24px;
+      padding: 20px;
+      background:
+        linear-gradient(135deg, rgba(34, 52, 82, 0.9), rgba(19, 32, 52, 0.9));
+      border: 1px solid var(--line);
+      margin-bottom: 18px;
+    }
+
+    .mission-kicker {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .mission-title {
+      font-size: 28px;
+      margin: 0 0 12px;
+      font-weight: 600;
+      line-height: 1.1;
+    }
+
+    .mission-desc {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 18px;
+      font-size: 15px;
+    }
+
+    .progress-wrap {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #7ea7dd, #c9def6);
+      transition: width 0.2s ease;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: 0.18s ease;
+    }
+
+    .task-item:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.10);
+    }
+
+    .task-checkbox {
+      appearance: none;
+      min-width: 20px;
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 1px solid rgba(210, 225, 245, 0.28);
+      background: rgba(255,255,255,0.03);
+      margin-top: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .task-checkbox:checked {
+      background: linear-gradient(135deg, #8db4e3, #d8e7f8);
+      border-color: transparent;
+    }
+
+    .task-checkbox:checked::after {
+      content: "✓";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #12253f;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .task-content {
+      display: grid;
+      gap: 6px;
+    }
+
+    .task-title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .task-desc {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .task-item.done .task-title,
+    .task-item.done .task-desc {
+      opacity: 0.58;
+      text-decoration: line-through;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .small-card {
+      border-radius: 20px;
+      padding: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .small-label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+
+    .small-value {
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .assistant-panel {
+      min-height: 100%;
+    }
+
+    .assistant-shell {
+      border-radius: 26px;
+      padding: 18px;
+      background:
+        linear-gradient(180deg, rgba(16, 28, 46, 0.98), rgba(12, 22, 38, 0.98));
+      border: 1px solid var(--line);
+    }
+
+    .assistant-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .assistant-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .assistant-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 20px;
+    }
+
+    .assistant-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .assistant-status {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .assistant-chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--accent-3);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .chat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 360px;
+      max-height: 540px;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin-bottom: 14px;
+    }
+
+    .chat-box::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.10);
+      border-radius: 999px;
+    }
+
+    .message {
+      padding: 14px 16px;
+      border-radius: 18px;
+      white-space: pre-line;
+      line-height: 1.6;
+      max-width: 78%;
+      font-size: 15px;
+      animation: fadeIn 0.18s ease;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #6c95d0, #5278bb);
+      color: #f7fbff;
+      border-bottom-right-radius: 8px;
+    }
+
+    .message.bot {
+      align-self: flex-start;
+      background: rgba(39, 56, 87, 0.96);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-bottom-left-radius: 8px;
+    }
+
+    .message.system {
+      align-self: flex-start;
+      background: rgba(80, 59, 59, 0.75);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .quick-replies {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 8px 0 16px;
+    }
+
+    .quick-reply-btn {
+      background: rgba(255,255,255,0.04);
+      color: #eff6ff;
+      border: 1px solid rgba(138, 177, 227, 0.28);
+      border-radius: 999px;
+      padding: 11px 15px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.18s ease;
+    }
+
+    .quick-reply-btn:hover {
+      background: rgba(133, 169, 216, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .input-wrap {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .chat-input {
+      width: 100%;
+      padding: 15px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      outline: none;
+      font-size: 15px;
+    }
+
+    .chat-input::placeholder {
+      color: #8fa6c5;
+    }
+
+    .send-btn {
+      border: none;
+      border-radius: 18px;
+      padding: 15px 18px;
+      min-width: 126px;
+      background: linear-gradient(135deg, #e9f2fc, #cfe0f4);
+      color: #11253f;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .send-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(3px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-visual {
+        min-height: 300px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 14px;
+      }
+
+      .hero,
+      .panel {
+        padding: 18px;
+      }
+
+      .hero-title {
+        font-size: 42px;
+      }
+
+      .message {
+        max-width: 92%;
+      }
+
+      .input-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .send-btn {
+        width: 100%;
+      }
+
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">✦</div>
+        <div class="brand-text">
+          <div class="brand-kicker">Galactic Tours</div>
+          <div class="brand-title">Employee Onboarding Platform</div>
+        </div>
+      </div>
 
-    <div class="card">
-        <h2>👨‍🚀 Привет, Алекс</h2>
-        <p>День 1 — Добро пожаловать</p>
-        <p>Прогресс: <span id="progress">0</span>/4</p>
-        <div class="btn" onclick="startAdaptation()">Начать адаптацию</div>
+      <div class="topnav">
+        <div class="topnav-chip">Главная</div>
+        <div class="topnav-chip">Маршрут</div>
+        <div class="topnav-chip">Сервисы</div>
+        <div class="topnav-chip">Ассистент</div>
+      </div>
     </div>
 
-    <div class="card">
-        <h3>📋 Задачи</h3>
-        <div class="task"><input type="checkbox" onclick="updateTask(this)"> Ознакомиться с должностной инструкцией</div>
-        <div class="task"><input type="checkbox" onclick="updateTask(this)"> Изучить оргполитику</div>
-        <div class="task"><input type="checkbox" onclick="updateTask(this)"> Настроить подпись</div>
-        <div class="task"><input type="checkbox" onclick="updateTask(this)"> Пройти обучение</div>
-    </div>
+    <section class="hero">
+      <div class="hero-left">
+        <div class="eyebrow">Onboarding · Employee Experience</div>
 
-    <div class="card">
-        <h3>🤖 HR-ассистент</h3>
-        <input
-            id="input"
-            class="chat-input"
-            placeholder="Напиши вопрос..."
-        >
-        <div class="btn" onclick="sendMessage()">Отправить</div>
-        <div id="chat" class="chat-box"></div>
-        <div id="quickReplies" class="quick-replies"></div>
-    </div>
+        <h1 class="hero-title">
+          Космос
+          <span class="hero-title-accent">стал ближе</span>
+        </h1>
 
-    <script>
-        const API_URL = "https://galactic-tours-demo-backend-production.up.railway.app/api/message";
-        const SESSION_ID = "demo";
+        <div class="hero-subtitle">
+          Премиальная onboarding-платформа Galactic Tours, которая помогает сотруднику пройти маршрут адаптации, найти ответы на внутренние вопросы и быстрее включиться в работу.
+        </div>
 
-        let count = 0;
-        let botStarted = false;
+        <div class="hero-actions">
+          <button class="primary-btn" onclick="startAdaptation()">Продолжить адаптацию</button>
+          <button class="secondary-btn" onclick="scrollToAssistant()">Открыть ассистента</button>
+        </div>
 
-        function updateTask(el) {
-            if (el.checked) {
-                count++;
-            } else {
-                count--;
-            }
-            document.getElementById("progress").innerText = count;
-        }
+        <div class="hero-meta">
+          <div class="meta-card">
+            <div class="meta-label">Текущий этап</div>
+            <div class="meta-value">День 1 — Добро пожаловать</div>
+          </div>
+          <div class="meta-card">
+            <div class="meta-label">Статус</div>
+            <div class="meta-value">Маршрут активен</div>
+          </div>
+        </div>
+      </div>
 
-        function startAdaptation() {
-            alert("🚀 Адаптация началась!");
-        }
+      <div class="hero-right">
+        <div class="hero-visual">
+          <div class="hero-stars"></div>
+          <div class="hero-planet"></div>
+          <div class="hero-ring"></div>
+          <div class="hero-glass">
+            <div class="hero-glass-title">Mission status</div>
+            <div class="hero-glass-text">
+              Добро пожаловать в Galactic Tours. Твоя задача — спокойно пройти адаптацию, освоить внутренние сервисы и встроиться в миссию команды.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        function addMessage(text, type) {
-            const chat = document.getElementById("chat");
-            const msg = document.createElement("div");
-            msg.className = `message ${type}`;
-            msg.innerText = text;
-            chat.appendChild(msg);
-            chat.scrollTop = chat.scrollHeight;
-        }
+    <section class="layout">
+      <div class="panel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Твой маршрут</h2>
+            <div class="section-caption">Структурированная адаптация без хаоса</div>
+          </div>
+        </div>
 
-        function clearQuickReplies() {
-            const container = document.getElementById("quickReplies");
-            container.innerHTML = "";
-        }
+        <div class="mission-card">
+          <div class="mission-kicker">Current mission</div>
+          <h3 class="mission-title">Привет, Алекс</h3>
+          <div class="mission-desc">
+            Сегодня твоя задача — пройти базовый этап адаптации, познакомиться с внутренней структурой и настроить всё, что нужно для старта работы.
+          </div>
 
-        function renderQuickReplies(replies) {
-            clearQuickReplies();
+          <div class="progress-wrap">
+            <div class="progress-top">
+              <span>Прогресс адаптации</span>
+              <span><span id="progressText">0</span>/4</span>
+            </div>
+            <div class="progress-bar">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
+          </div>
 
-            if (!replies || !Array.isArray(replies) || replies.length === 0) {
-                return;
-            }
+          <button class="primary-btn" onclick="startAdaptation()">Начать адаптацию</button>
+        </div>
 
-            const container = document.getElementById("quickReplies");
+        <div class="task-list">
+          <label class="task-item" id="taskItem1">
+            <input class="task-checkbox" type="checkbox" onchange="updateTask(this)">
+            <div class="task-content">
+              <div class="task-title">Ознакомиться с должностной инструкцией</div>
+              <div class="task-desc">Изучи базовые ожидания по роли и структуру первых шагов в компании.</div>
+            </div>
+          </label>
 
-            replies.forEach(reply => {
-                const btn = document.createElement("button");
-                btn.className = "quick-reply-btn";
-                btn.innerText = reply;
-                btn.onclick = () => {
-                    sendPresetMessage(reply);
-                };
-                container.appendChild(btn);
-            });
-        }
+          <label class="task-item" id="taskItem2">
+            <input class="task-checkbox" type="checkbox" onchange="updateTask(this)">
+            <div class="task-content">
+              <div class="task-title">Изучить оргполитику</div>
+              <div class="task-desc">Познакомься с ключевыми внутренними правилами и логикой взаимодействия внутри Galactic Tours.</div>
+            </div>
+          </label>
 
-        async function callBot(text, showUserMessage = true) {
-            if (showUserMessage) {
-                addMessage(text, "user");
-            }
+          <label class="task-item" id="taskItem3">
+            <input class="task-checkbox" type="checkbox" onchange="updateTask(this)">
+            <div class="task-content">
+              <div class="task-title">Настроить подпись</div>
+              <div class="task-desc">Подготовь рабочую подпись и оформи своё цифровое присутствие в корпоративной среде.</div>
+            </div>
+          </label>
 
-            clearQuickReplies();
+          <label class="task-item" id="taskItem4">
+            <input class="task-checkbox" type="checkbox" onchange="updateTask(this)">
+            <div class="task-content">
+              <div class="task-title">Пройти обучение</div>
+              <div class="task-desc">Заверши базовый обучающий блок и открой доступ к следующему этапу маршрута.</div>
+            </div>
+          </label>
+        </div>
 
-            try {
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        session_id: SESSION_ID,
-                        text: text
-                    })
-                });
+        <div class="meta-grid">
+          <div class="small-card">
+            <div class="small-label">Следующий шаг</div>
+            <div class="small-value">Познакомиться с внутренними сервисами</div>
+          </div>
+          <div class="small-card">
+            <div class="small-label">Награда этапа</div>
+            <div class="small-value">Badge: Mission Started</div>
+          </div>
+        </div>
+      </div>
 
-                if (!res.ok) {
-                    addMessage("Ошибка сервера: " + res.status, "system");
-                    return;
-                }
+      <div class="panel assistant-panel" id="assistantBlock">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Ассистент</h2>
+            <div class="section-caption">Встроенный помощник по сервисам и HR-вопросам</div>
+          </div>
+        </div>
 
-                const data = await res.json();
+        <div class="assistant-shell">
+          <div class="assistant-top">
+            <div class="assistant-title-wrap">
+              <div class="assistant-avatar">🤖</div>
+              <div>
+                <div class="assistant-name">Добрыня</div>
+                <div class="assistant-status">Galactic Tours HR Assistant</div>
+              </div>
+            </div>
+            <div class="assistant-chip">online</div>
+          </div>
 
-                if (!data.reply) {
-                    addMessage("Ответ пустой", "system");
-                    return;
-                }
+          <div id="chat" class="chat-box"></div>
+          <div id="quickReplies" class="quick-replies"></div>
 
-                addMessage(data.reply, "bot");
-                renderQuickReplies(data.quick_replies);
-            } catch (error) {
-                addMessage("Ошибка подключения: " + error.message, "system");
-                console.error(error);
-            }
-        }
+          <div class="input-wrap">
+            <input
+              id="input"
+              class="chat-input"
+              placeholder="Напиши вопрос..."
+            />
+            <button class="send-btn" onclick="sendMessage()">Отправить</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 
-        async function startBot() {
-            if (botStarted) return;
-            botStarted = true;
-            await callBot("__start__", false);
-        }
+  <script>
+    const API_URL = "https://galactic-tours-demo-backend-production.up.railway.app/api/message";
+    const SESSION_ID = "demo";
 
-        async function sendMessage() {
-            const input = document.getElementById("input");
-            const text = input.value.trim();
+    let count = 0;
+    let botStarted = false;
 
-            if (!text) return;
+    function updateProgressUI() {
+      const total = 4;
+      const percent = (count / total) * 100;
+      document.getElementById("progressText").innerText = count;
+      document.getElementById("progressFill").style.width = percent + "%";
+    }
 
-            await callBot(text, true);
-            input.value = "";
-            input.focus();
-        }
+    function updateTask(el) {
+      const taskItem = el.closest(".task-item");
 
-        async function sendPresetMessage(text) {
-            await callBot(text, true);
-        }
+      if (el.checked) {
+        count++;
+        taskItem.classList.add("done");
+      } else {
+        count--;
+        taskItem.classList.remove("done");
+      }
 
-        document.getElementById("input").addEventListener("keydown", function(event) {
-            if (event.key === "Enter") {
-                sendMessage();
-            }
+      updateProgressUI();
+    }
+
+    function startAdaptation() {
+      alert("🚀 Маршрут адаптации активирован");
+    }
+
+    function scrollToAssistant() {
+      document.getElementById("assistantBlock").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+    function addMessage(text, type) {
+      const chat = document.getElementById("chat");
+      const msg = document.createElement("div");
+      msg.className = `message ${type}`;
+      msg.innerText = text;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function clearQuickReplies() {
+      const container = document.getElementById("quickReplies");
+      container.innerHTML = "";
+    }
+
+    function renderQuickReplies(replies) {
+      clearQuickReplies();
+
+      if (!replies || !Array.isArray(replies) || replies.length === 0) {
+        return;
+      }
+
+      const container = document.getElementById("quickReplies");
+
+      replies.forEach(reply => {
+        const btn = document.createElement("button");
+        btn.className = "quick-reply-btn";
+        btn.innerText = reply;
+        btn.onclick = () => {
+          sendPresetMessage(reply);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    async function callBot(text, showUserMessage = true) {
+      if (showUserMessage) {
+        addMessage(text, "user");
+      }
+
+      clearQuickReplies();
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            session_id: SESSION_ID,
+            text: text
+          })
         });
 
-        window.addEventListener("load", function() {
-            startBot();
-        });
-    </script>
+        if (!res.ok) {
+          addMessage("Ошибка сервера: " + res.status, "system");
+          return;
+        }
 
+        const data = await res.json();
+
+        if (!data.reply) {
+          addMessage("Ответ пустой", "system");
+          return;
+        }
+
+        addMessage(data.reply, "bot");
+        renderQuickReplies(data.quick_replies);
+      } catch (error) {
+        addMessage("Ошибка подключения: " + error.message, "system");
+        console.error(error);
+      }
+    }
+
+    async function startBot() {
+      if (botStarted) return;
+      botStarted = true;
+      await callBot("__start__", false);
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("input");
+      const text = input.value.trim();
+
+      if (!text) return;
+
+      await callBot(text, true);
+      input.value = "";
+      input.focus();
+    }
+
+    async function sendPresetMessage(text) {
+      await callBot(text, true);
+    }
+
+    document.getElementById("input").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    window.addEventListener("load", function() {
+      updateProgressUI();
+      startBot();
+    });
+  </script>
 </body>
 </html>
