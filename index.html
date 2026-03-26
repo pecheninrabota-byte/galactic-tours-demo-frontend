@@ -84,7 +84,7 @@ function start() {
 async function send() {
     const text = document.getElementById("input").value;
 
-    const res = await fetch("https://galactic-tours-demo-backend.railway.internal/api/message", {
+    const res = await fetch("https://galactic-tours-demo-backend-production.up.railway.app/api/message", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
