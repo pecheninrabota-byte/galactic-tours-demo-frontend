@@ -82,23 +82,48 @@ function start() {
 
 <script>
 async function send() {
-    const text = document.getElementById("input").value;
+    const input = document.getElementById("input");
+    const responseEl = document.getElementById("response");
+    const text = input.value.trim();
 
-    const res = await fetch("https://galactic-tours-demo-backend-production.up.railway.app/api/message", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            session_id: "demo",
-            text: text
-        })
-    });
+    if (!text) {
+        responseEl.innerText = "Введите вопрос";
+        return;
+    }
 
-    const data = await res.json();
+    responseEl.innerText = "Думаю...";
 
-    document.getElementById("response").innerText = data.reply;
+    try {
+        const res = await fetch("https://galactic-tours-demo-backend-production.up.railway.app/api/message", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                session_id: "demo",
+                text: text
+            })
+        });
+
+        if (!res.ok) {
+            responseEl.innerText = "Ошибка сервера: " + res.status;
+            return;
+        }
+
+        const data = await res.json();
+
+        if (!data.reply) {
+            responseEl.innerText = "Ответ пустой";
+            return;
+        }
+
+        responseEl.innerText = data.reply;
+
+    } catch (error) {
+        responseEl.innerText = "Ошибка подключения";
+        console.error(error);
 }
+</script>
 </script>
 </body>
 </html>
