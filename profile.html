@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Профиль сотрудника</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, Arial;
+      background: #07111d;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #0f223b;
+      padding: 30px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .row {
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .danger {
+      background: #ff5c5c;
+      color: white;
+    }
+
+    .logout {
+      background: #fff;
+      color: black;
+      margin-left: 10px;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="title">Профиль сотрудника</div>
+
+    <div class="row">👤 Имя: <span id="name"></span></div>
+    <div class="row">📊 Прогресс: <span id="progress"></span>%</div>
+    <div class="row">🚀 Этап: <span id="stage"></span></div>
+  </div>
+
+  <div class="card">
+    <button class="btn danger" onclick="resetProgress()">Сбросить адаптацию</button>
+    <button class="btn logout" onclick="logout()">Выйти</button>
+  </div>
+</div>
+
+<script>
+const API = "https://galactic-tours-demo-backend-production.up.railway.app/api";
+
+const sessionId = localStorage.getItem("galactic_tours_session_id");
+const name = localStorage.getItem("galactic_tours_user_name") || "Неизвестно";
+
+document.getElementById("name").innerText = name;
+
+async function loadProfile() {
+  const res = await fetch(`${API}/tasks?session_id=${sessionId}`);
+  const data = await res.json();
+
+  document.getElementById("progress").innerText = data.progress;
+  document.getElementById("stage").innerText = data.stage;
+}
+
+async function resetProgress() {
+  await fetch(`${API}/reset/${sessionId}`, {
+    method: "POST"
+  });
+
+  alert("Прогресс сброшен");
+  location.reload();
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+
+loadProfile();
+</script>
+
+</body>
+</html>
