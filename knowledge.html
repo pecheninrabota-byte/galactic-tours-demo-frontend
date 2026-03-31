@@ -184,20 +184,19 @@
     }
 
     .profile-chip,
-    .logout-btn {
+    .logout-btn,
+    .secondary-btn {
       border-radius: 999px;
       border: 1px solid var(--line);
       background: rgba(255,255,255,0.03);
       color: var(--text);
       padding: 12px 16px;
       font-size: 14px;
-    }
-
-    .logout-btn {
       cursor: pointer;
     }
 
-    .logout-btn:hover {
+    .logout-btn:hover,
+    .secondary-btn:hover {
       background: rgba(255,255,255,0.06);
     }
 
@@ -394,7 +393,8 @@
         </a>
 
         <a class="nav-link" href="profile.html">
-          <span>👤 Профиль</span>
+          <span class="nav-icon">👤</span>
+          <span>Профиль</span>
         </a>
       </div>
 
@@ -412,6 +412,7 @@
 
         <div class="topbar-right">
           <div id="profileChip" class="profile-chip">Сотрудник</div>
+          <button class="secondary-btn" onclick="openAssistant()">Открыть ассистента</button>
           <button id="logoutBtn" class="logout-btn">Выйти</button>
         </div>
       </div>
@@ -506,6 +507,7 @@
   <script>
     const AUTH_KEY = "galactic_tours_auth";
     const USER_LOGIN_KEY = "galactic_tours_login";
+    const USER_NAME_KEY = "galactic_tours_user_name";
 
     const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
     if (!isAuthorized) {
@@ -513,7 +515,8 @@
     }
 
     const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
-    document.getElementById("profileChip").textContent = savedLogin;
+    const savedUserName = localStorage.getItem(USER_NAME_KEY) || savedLogin;
+    document.getElementById("profileChip").textContent = savedUserName;
 
     document.getElementById("logoutBtn").addEventListener("click", function() {
       localStorage.removeItem(AUTH_KEY);
@@ -551,5 +554,5 @@
   </script>
 
   <script src="assistant.js"></script>
-  </body>
-  </html>
+</body>
+</html>
