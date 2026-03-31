@@ -613,17 +613,17 @@
           <article id="contactCard" class="card">
             <h3 class="card-title">Контактная информация</h3>
 
-              <div class="field">
-                <div class="field-label">Фамилия</div>
-                <div class="field-value" data-view="lastName"></div>
-                <input class="field-input" data-input="lastName" type="text" />
-              </div>
-            
             <div class="field-grid">
               <div class="field">
                 <div class="field-label">Имя</div>
                 <div class="field-value" data-view="firstName"></div>
                 <input class="field-input" data-input="firstName" type="text" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Фамилия</div>
+                <div class="field-value" data-view="lastName"></div>
+                <input class="field-input" data-input="lastName" type="text" />
               </div>
 
               <div class="field">
@@ -747,11 +747,11 @@
     });
 
     const defaultProfile = {
-      firstName: localStorage.getItem(USER_NAME_KEY) || "",
-      middleName: ""
-      lastName: "",
+      firstName: localStorage.getItem(USER_NAME_KEY) || "Новый",
+      lastName: "сотрудник",
+      middleName: "",
       email: `${savedLogin}@galactic.local`.replace(/\s+/g, "").toLowerCase(),
-      phone: "",
+      phone: "+7 ",
       city: "Москва",
       role: "Специалист",
       department: "People Operations",
