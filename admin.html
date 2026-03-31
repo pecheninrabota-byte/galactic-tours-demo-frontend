@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galactic Tours — HR Admin</title>
+  <style>
+    :root {
+      --bg: #07111d;
+      --bg-soft: #0c1727;
+      --panel: rgba(15, 27, 44, 0.94);
+      --panel-2: rgba(19, 34, 55, 0.92);
+      --line: rgba(180, 204, 232, 0.12);
+      --line-2: rgba(180, 204, 232, 0.2);
+      --text: #f4f7fb;
+      --muted: #a9b8cd;
+      --accent: #dfeaf7;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+      --sidebar-width: 250px;
+      --success: #b7d9c0;
+      --warning: #f0d7a1;
+      --danger: #efb0b0;
+      --hero-glow: rgba(122, 164, 224, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(91, 124, 170, 0.16), transparent 28%),
+        linear-gradient(180deg, #06101b 0%, #07111d 100%);
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(8, 18, 31, 0.78);
+      backdrop-filter: blur(12px);
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 6px 8px;
+    }
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+      border: 1px solid var(--line);
+      color: #f0f5fb;
+      font-size: 20px;
+    }
+
+    .brand-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-kicker {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .nav-group {
+      display: grid;
+      gap: 10px;
+    }
+
+    .nav-label {
+      padding: 0 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      padding: 14px 14px;
+      border-radius: 18px;
+      border: 1px solid transparent;
+      transition: 0.18s ease;
+      background: transparent;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: var(--line);
+    }
+
+    .nav-link.active {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--line);
+    }
+
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .main {
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .topbar-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .page-kicker {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .page-title {
+      font-size: 34px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .profile-chip,
+    .logout-btn,
+    .secondary-btn,
+    .primary-btn,
+    .ghost-btn,
+    .chip-btn,
+    .tiny-btn,
+    .danger-btn,
+    .toggle-btn {
+      border-radius: 999px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.18s ease;
+      font-family: inherit;
+    }
+
+    .profile-chip,
+    .logout-btn,
+    .secondary-btn,
+    .ghost-btn,
+    .chip-btn,
+    .tiny-btn,
+    .toggle-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 12px 16px;
+    }
+
+    .danger-btn {
+      border: 1px solid rgba(239, 176, 176, 0.18);
+      background: rgba(239, 176, 176, 0.08);
+      color: #ffd9d9;
+      padding: 12px 16px;
+    }
+
+    .logout-btn:hover,
+    .secondary-btn:hover,
+    .ghost-btn:hover,
+    .chip-btn:hover,
+    .tiny-btn:hover,
+    .toggle-btn:hover {
+      background: rgba(255,255,255,0.06);
+    }
+
+    .danger-btn:hover {
+      background: rgba(239, 176, 176, 0.14);
+    }
+
+    .primary-btn {
+      border: none;
+      background: #edf5fc;
+      color: #10243d;
+      padding: 13px 18px;
+      font-weight: 700;
+      box-shadow: 0 12px 30px rgba(221, 236, 249, 0.12);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px rgba(221, 236, 249, 0.16);
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at top right, var(--hero-glow), transparent 24%),
+        linear-gradient(180deg, rgba(20,35,57,0.98), rgba(15,27,44,0.96));
+      box-shadow: var(--shadow);
+      padding: 30px;
+      margin-bottom: 22px;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -120px -160px auto;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 62%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 440px;
+      gap: 22px;
+      position: relative;
+      z-index: 1;
+      align-items: stretch;
+    }
+
+    .hero-left {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      width: fit-content;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(34px, 4vw, 56px);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+      font-weight: 600;
+      max-width: 840px;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 16px;
+      max-width: 760px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-side {
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .hero-side-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .hero-side-copy {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .template-meta {
+      display: grid;
+      gap: 12px;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .meta-label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .meta-value {
+      font-size: 16px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .notice {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(183, 217, 192, 0.1);
+      border: 1px solid rgba(183, 217, 192, 0.14);
+      color: var(--success);
+      font-size: 14px;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .builder-grid {
+      display: grid;
+      grid-template-columns: 340px minmax(0, 1fr) 400px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 22px;
+    }
+
+    .card {
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(14,26,43,0.96), rgba(11,22,38,0.96));
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .card-subtitle {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+      margin-top: -4px;
+      margin-bottom: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .field-input,
+    .field-textarea,
+    .field-select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px 14px;
+      outline: none;
+      font-size: 15px;
+      font-family: inherit;
+    }
+
+    .field-textarea {
+      min-height: 96px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .compact-input {
+      min-height: auto;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+    }
+
+    .section-divider {
+      height: 1px;
+      background: var(--line);
+      margin: 18px 0;
+    }
+
+    .stage-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .stage-item {
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .stage-item:hover {
+      background: rgba(255,255,255,0.045);
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .stage-item.active {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(223, 234, 247, 0.16);
+    }
+
+    .stage-item-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .stage-order {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .stage-name {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .stage-desc {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .stage-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta-badge {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .stage-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tiny-btn {
+      padding: 9px 12px;
+      font-size: 13px;
+    }
+
+    .danger-btn.tiny-btn {
+      padding: 9px 12px;
+      font-size: 13px;
+    }
+
+    .task-list,
+    .knowledge-list,
+    .preview-task-list,
+    .preview-knowledge-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .task-item,
+    .knowledge-item {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      display: grid;
+      gap: 12px;
+    }
+
+    .task-head,
+    .knowledge-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .task-title-row,
+    .knowledge-title-row {
+      display: grid;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-controls,
+    .knowledge-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .task-optional {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .task-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: #edf5fc;
+      cursor: pointer;
+    }
+
+    .empty-state {
+      border-radius: 20px;
+      border: 1px dashed rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.02);
+      padding: 18px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .preview-shell {
+      display: grid;
+      gap: 18px;
+    }
+
+    .preview-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(223, 234, 247, 0.08);
+      border: 1px solid rgba(223, 234, 247, 0.12);
+      color: #eef5fc;
+      font-size: 14px;
+    }
+
+    .preview-title {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .preview-copy {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    .preview-box {
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      display: grid;
+      gap: 14px;
+    }
+
+    .preview-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .preview-task-item,
+    .preview-knowledge-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .preview-task-item:first-child,
+    .preview-knowledge-item:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .preview-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(223, 234, 247, 0.9);
+      margin-top: 7px;
+      flex-shrink: 0;
+    }
+
+    .preview-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03);
+      margin-top: 3px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .preview-check.required::after {
+      content: "✓";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      color: var(--success);
+    }
+
+    .preview-item-copy {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .preview-item-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .preview-item-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .helper-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .helper-item {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .helper-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 6px;
+      background: rgba(223, 234, 247, 0.9);
+      box-shadow: 0 0 14px rgba(223, 234, 247, 0.2);
+    }
+
+    .helper-copy {
+      display: grid;
+      gap: 4px;
+    }
+
+    .helper-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .helper-sub {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    @media (max-width: 1440px) {
+      .builder-grid {
+        grid-template-columns: 320px minmax(0, 1fr);
+      }
+
+      .preview-column {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 1320px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 1120px) {
+      .builder-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .main {
+        padding: 16px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-card,
+      .card {
+        border-radius: 22px;
+      }
+
+      .hero-title {
+        font-size: 34px;
+      }
+
+      .topbar-right,
+      .hero-actions {
+        width: 100%;
+      }
+
+      .topbar-right > *,
+      .hero-actions > * {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .stage-actions,
+      .task-controls,
+      .knowledge-controls {
+        width: 100%;
+      }
+
+      .stage-actions > *,
+      .task-controls > *,
+      .knowledge-controls > * {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">✦</div>
+        <div class="brand-copy">
+          <div class="brand-kicker">Galactic Tours</div>
+          <div class="brand-title">Employee Platform</div>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">Навигация</div>
+
+        <a class="nav-link" href="dashboard.html">
+          <span class="nav-icon">⌂</span>
+          <span>Главная</span>
+        </a>
+
+        <a class="nav-link" href="onboarding.html">
+          <span class="nav-icon">🚀</span>
+          <span>Адаптация</span>
+        </a>
+
+        <a class="nav-link" href="knowledge.html">
+          <span class="nav-icon">📚</span>
+          <span>База знаний</span>
+        </a>
+
+        <a class="nav-link" href="profile.html">
+          <span class="nav-icon">👤</span>
+          <span>Профиль</span>
+        </a>
+
+        <a class="nav-link active" href="admin.html">
+          <span class="nav-icon">🛠️</span>
+          <span>HR Admin</span>
+        </a>
+      </div>
+
+      <div class="sidebar-footer">
+        HR-side слой платформы: здесь собирается шаблон адаптации, который потом можно связать с employee-side сценарием и knowledge layer.
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="page-kicker">Workspace · HR admin · Dynamic onboarding builder</div>
+          <h1 class="page-title">HR Admin</h1>
+        </div>
+
+        <div class="topbar-right">
+          <div id="profileChip" class="profile-chip">Сотрудник</div>
+          <button class="secondary-btn" onclick="openAssistant()">Открыть ассистента</button>
+          <button id="logoutBtn" class="logout-btn">Выйти</button>
+        </div>
+      </div>
+
+      <section class="hero-card">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-eyebrow">HR control layer · Onboarding builder</div>
+
+            <h2 class="hero-title">
+              Конструктор адаптации, где HR сам управляет маршрутом сотрудника
+            </h2>
+
+            <div class="hero-sub">
+              Здесь можно не только редактировать зашитые модули, но и добавлять новые, удалять лишние, менять порядок этапов, собирать задачи и привязывать знания. Это уже не просто витрина, а реальный продуктовый слой управления onboarding-процессом.
+            </div>
+
+            <div class="hero-actions">
+              <button id="saveTemplateBtn" class="primary-btn">Сохранить шаблон</button>
+              <button id="resetTemplateBtn" class="danger-btn">Сбросить к дефолту</button>
+              <button id="addStageHeroBtn" class="ghost-btn">Добавить этап</button>
+            </div>
+
+            <div id="saveNotice" class="notice">Шаблон адаптации сохранён.</div>
+          </div>
+
+          <div class="hero-side">
+            <h3 class="hero-side-title">Статус шаблона</h3>
+            <div class="hero-side-copy">
+              Первая версия builder хранит шаблон в localStorage, поэтому ничего не ломает в существующем backend, но уже даёт сильный HR-side интерфейс управления.
+            </div>
+
+            <div class="template-meta">
+              <div class="meta-row">
+                <div class="meta-label">Название маршрута</div>
+                <div id="templateNameMeta" class="meta-value">Базовый маршрут адаптации</div>
+              </div>
+
+              <div class="meta-row">
+                <div class="meta-label">Этапов в шаблоне</div>
+                <div id="templateStageCountMeta" class="meta-value">3</div>
+              </div>
+
+              <div class="meta-row">
+                <div class="meta-label">Всего задач</div>
+                <div id="templateTaskCountMeta" class="meta-value">0</div>
+              </div>
+
+              <div class="meta-row">
+                <div class="meta-label">Knowledge references</div>
+                <div id="templateKnowledgeCountMeta" class="meta-value">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="builder-grid">
+        <div class="stack">
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Шаблон адаптации</h3>
+            </div>
+
+            <div class="card-subtitle">
+              Общая информация о маршруте. Здесь HR понимает, для кого и под какой сценарий собирается адаптация.
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label class="field-label" for="templateNameInput">Название маршрута</label>
+                <input id="templateNameInput" class="field-input" type="text" />
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="templateAudienceInput">Аудитория</label>
+                <input id="templateAudienceInput" class="field-input" type="text" />
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="templateDescriptionInput">Описание</label>
+                <textarea id="templateDescriptionInput" class="field-textarea"></textarea>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Этапы маршрута</h3>
+              <button id="addStageSideBtn" class="secondary-btn">Добавить этап</button>
+            </div>
+
+            <div class="card-subtitle">
+              Список полностью динамический: можно оставить 2 этапа, сделать 3, 6 или любую другую конфигурацию без жёсткой привязки к fixed stage layout.
+            </div>
+
+            <div id="stageList" class="stage-list"></div>
+          </article>
+        </div>
+
+        <div class="stack">
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Редактор этапа</h3>
+            </div>
+
+            <div class="card-subtitle">
+              Центральная зона редактирования выбранного модуля адаптации. Здесь HR настраивает, что именно увидит сотрудник на конкретном этапе.
+            </div>
+
+            <div id="stageEditorContent"></div>
+          </article>
+        </div>
+
+        <div class="stack preview-column">
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Employee preview</h3>
+            </div>
+
+            <div class="card-subtitle">
+              Превью помогает HR сразу видеть, как собранный этап будет ощущаться для сотрудника: сообщение, задачи, рекомендуемые материалы и общая логика модуля.
+            </div>
+
+            <div id="previewContent" class="preview-shell"></div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Как пользоваться builder</h3>
+            </div>
+
+            <div class="helper-list">
+              <div class="helper-item">
+                <div class="helper-dot"></div>
+                <div class="helper-copy">
+                  <div class="helper-title">Этапы можно добавлять и убирать без ограничений</div>
+                  <div class="helper-sub">Логика builder не зашита на три стадии. Это именно динамический список модулей маршрута.</div>
+                </div>
+              </div>
+
+              <div class="helper-item">
+                <div class="helper-dot"></div>
+                <div class="helper-copy">
+                  <div class="helper-title">Задачи управляются внутри этапа</div>
+                  <div class="helper-sub">Для каждого модуля можно собрать собственный набор действий, менять порядок и обязательность.</div>
+                </div>
+              </div>
+
+              <div class="helper-item">
+                <div class="helper-dot"></div>
+                <div class="helper-copy">
+                  <div class="helper-title">Knowledge layer привязывается к этапу</div>
+                  <div class="helper-sub">Это связывает builder с базой знаний и делает employee-side сценарий более умным и контекстным.</div>
+                </div>
+              </div>
+
+              <div class="helper-item">
+                <div class="helper-dot"></div>
+                <div class="helper-copy">
+                  <div class="helper-title">Сейчас всё хранится локально</div>
+                  <div class="helper-sub">Это безопасный MVP-слой. Следующим шагом можно будет связать шаблон с backend и employee pages.</div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const AUTH_KEY = "galactic_tours_auth";
+    const USER_LOGIN_KEY = "galactic_tours_login";
+    const USER_NAME_KEY = "galactic_tours_user_name";
+    const SESSION_KEY = "galactic_tours_session_id";
+    const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
+    const ONBOARDING_TEMPLATE_KEY = "galactic_tours_onboarding_template";
+
+    const KNOWLEDGE_LIBRARY = [
+      { id: "welcome-start", title: "Первые шаги нового сотрудника" },
+      { id: "company-navigation", title: "Навигация по рабочему контуру" },
+      { id: "probation-overview", title: "Что важно знать про испытательный срок" },
+      { id: "role-expectations", title: "Как понять свою роль и ожидания" },
+      { id: "communication-process", title: "Как устроены рабочие взаимодействия" },
+      { id: "knowledge-usage", title: "Как пользоваться базой знаний" },
+      { id: "support-entry", title: "Когда лучше идти к ассистенту" },
+      { id: "self-sufficiency", title: "Переход к самостоятельной работе" }
+    ];
+
+    function createDefaultTemplate() {
+      return {
+        id: "base-template",
+        name: "Базовый маршрут адаптации",
+        audience: "New hires · office employees",
+        description: "Универсальный маршрут адаптации для новых сотрудников Galactic Tours. Подходит как стартовая демо-конфигурация HR-first платформы.",
+        stages: [
+          {
+            id: generateId("stage"),
+            title: "Добро пожаловать",
+            description: "Первый модуль знакомства с компанией, системой и логикой старта.",
+            message: "Начните с базовых шагов адаптации, чтобы быстро войти в рабочий контур и понять, где что находится.",
+            tasks: [
+              { id: generateId("task"), title: "Открыть стартовые материалы", required: true },
+              { id: generateId("task"), title: "Познакомиться с базовой навигацией по системе", required: true },
+              { id: generateId("task"), title: "Прочитать вводный onboarding-блок", required: false }
+            ],
+            knowledgeItems: ["welcome-start", "company-navigation", "knowledge-usage"]
+          },
+          {
+            id: generateId("stage"),
+            title: "Закрепление роли",
+            description: "Этап, где сотрудник начинает понимать ожидания по роли и рабочие процессы.",
+            message: "Сейчас важно закрепить понимание роли, формата взаимодействия и ожиданий по испытательному сроку.",
+            tasks: [
+              { id: generateId("task"), title: "Изучить ожидания по роли", required: true },
+              { id: generateId("task"), title: "Разобраться в рабочих взаимодействиях", required: true },
+              { id: generateId("task"), title: "Уточнить ключевые точки координации с руководителем", required: false }
+            ],
+            knowledgeItems: ["probation-overview", "role-expectations", "communication-process"]
+          },
+          {
+            id: generateId("stage"),
+            title: "Выход в самостоятельный ритм",
+            description: "Финальный стартовый модуль с фокусом на самостоятельности и завершении базового онбординга.",
+            message: "Финальный этап базовой адаптации: завершите ключевые задачи и перейдите в устойчивый рабочий ритм.",
+            tasks: [
+              { id: generateId("task"), title: "Проверить закрытие ключевых onboarding-задач", required: true },
+              { id: generateId("task"), title: "Подготовиться к самостоятельной работе", required: true }
+            ],
+            knowledgeItems: ["self-sufficiency", "support-entry"]
+          }
+        ]
+      };
+    }
+
+    function generateId(prefix) {
+      return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function loadTemplate() {
+      try {
+        const raw = localStorage.getItem(ONBOARDING_TEMPLATE_KEY);
+        if (!raw) return createDefaultTemplate();
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return createDefaultTemplate();
+        if (!Array.isArray(parsed.stages)) parsed.stages = [];
+
+        parsed.stages = parsed.stages.map(stage => ({
+          id: stage.id || generateId("stage"),
+          title: stage.title || "Новый этап",
+          description: stage.description || "",
+          message: stage.message || "",
+          tasks: Array.isArray(stage.tasks)
+            ? stage.tasks.map(task => ({
+                id: task.id || generateId("task"),
+                title: task.title || "",
+                required: Boolean(task.required)
+              }))
+            : [],
+          knowledgeItems: Array.isArray(stage.knowledgeItems) ? stage.knowledgeItems : []
+        }));
+
+        return {
+          id: parsed.id || "base-template",
+          name: parsed.name || "Базовый маршрут адаптации",
+          audience: parsed.audience || "New hires · office employees",
+          description: parsed.description || "",
+          stages: parsed.stages
+        };
+      } catch (error) {
+        console.error(error);
+        return createDefaultTemplate();
+      }
+    }
+
+    function saveTemplate() {
+      localStorage.setItem(ONBOARDING_TEMPLATE_KEY, JSON.stringify(template));
+    }
+
+    const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
+    if (!isAuthorized) {
+      window.location.href = "login.html";
+    }
+
+    const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
+    const savedName = localStorage.getItem(USER_NAME_KEY) || "";
+
+    function getDisplayName() {
+      const rawProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
+
+      if (rawProfile) {
+        try {
+          const profile = JSON.parse(rawProfile);
+          const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
+          if (fullName) return fullName;
+          if (profile.firstName) return profile.firstName;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      return savedName || savedLogin || "Сотрудник";
+    }
+
+    document.getElementById("profileChip").textContent = getDisplayName();
+
+    document.getElementById("logoutBtn").addEventListener("click", function () {
+      localStorage.removeItem(AUTH_KEY);
+      localStorage.removeItem(USER_LOGIN_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(USER_NAME_KEY);
+      window.location.href = "login.html";
+    });
+
+    let template = loadTemplate();
+    let selectedStageId = template.stages[0]?.id || null;
+
+    const templateNameInput = document.getElementById("templateNameInput");
+    const templateAudienceInput = document.getElementById("templateAudienceInput");
+    const templateDescriptionInput = document.getElementById("templateDescriptionInput");
+
+    templateNameInput.addEventListener("input", function () {
+      template.name = this.value;
+      renderMeta();
+    });
+
+    templateAudienceInput.addEventListener("input", function () {
+      template.audience = this.value;
+    });
+
+    templateDescriptionInput.addEventListener("input", function () {
+      template.description = this.value;
+    });
+
+    function renderMeta() {
+      const stageCount = template.stages.length;
+      const taskCount = template.stages.reduce((sum, stage) => sum + stage.tasks.length, 0);
+      const knowledgeCount = template.stages.reduce((sum, stage) => sum + stage.knowledgeItems.length, 0);
+
+      document.getElementById("templateNameMeta").textContent = template.name || "Без названия";
+      document.getElementById("templateStageCountMeta").textContent = stageCount;
+      document.getElementById("templateTaskCountMeta").textContent = taskCount;
+      document.getElementById("templateKnowledgeCountMeta").textContent = knowledgeCount;
+    }
+
+    function fillTemplateFields() {
+      templateNameInput.value = template.name || "";
+      templateAudienceInput.value = template.audience || "";
+      templateDescriptionInput.value = template.description || "";
+    }
+
+    function getSelectedStage() {
+      return template.stages.find(stage => stage.id === selectedStageId) || null;
+    }
+
+    function selectStage(stageId) {
+      selectedStageId = stageId;
+      renderStageList();
+      renderStageEditor();
+      renderPreview();
+    }
+
+    function addStage() {
+      const newStage = {
+        id: generateId("stage"),
+        title: `Новый этап ${template.stages.length + 1}`,
+        description: "Кратко опишите цель этого этапа адаптации.",
+        message: "Сформулируйте, что именно сотрудник должен понять или сделать на этом этапе.",
+        tasks: [
+          {
+            id: generateId("task"),
+            title: "Новая задача этапа",
+            required: true
+          }
+        ],
+        knowledgeItems: []
+      };
+
+      template.stages.push(newStage);
+      selectedStageId = newStage.id;
+      renderAll();
+    }
+
+    function deleteStage(stageId) {
+      if (template.stages.length === 1) {
+        alert("В шаблоне должен остаться хотя бы один этап.");
+        return;
+      }
+
+      const index = template.stages.findIndex(stage => stage.id === stageId);
+      if (index === -1) return;
+
+      template.stages.splice(index, 1);
+
+      if (selectedStageId === stageId) {
+        const nextStage = template.stages[index] || template.stages[index - 1] || template.stages[0] || null;
+        selectedStageId = nextStage ? nextStage.id : null;
+      }
+
+      renderAll();
+    }
+
+    function duplicateStage(stageId) {
+      const source = template.stages.find(stage => stage.id === stageId);
+      if (!source) return;
+
+      const copy = {
+        id: generateId("stage"),
+        title: `${source.title} (копия)`,
+        description: source.description,
+        message: source.message,
+        tasks: source.tasks.map(task => ({
+          id: generateId("task"),
+          title: task.title,
+          required: task.required
+        })),
+        knowledgeItems: [...source.knowledgeItems]
+      };
+
+      const index = template.stages.findIndex(stage => stage.id === stageId);
+      template.stages.splice(index + 1, 0, copy);
+      selectedStageId = copy.id;
+      renderAll();
+    }
+
+    function moveStage(stageId, direction) {
+      const index = template.stages.findIndex(stage => stage.id === stageId);
+      if (index === -1) return;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= template.stages.length) return;
+
+      const [stage] = template.stages.splice(index, 1);
+      template.stages.splice(targetIndex, 0, stage);
+
+      renderAll();
+    }
+
+    function renderStageList() {
+      const stageList = document.getElementById("stageList");
+
+      if (!template.stages.length) {
+        stageList.innerHTML = `
+          <div class="empty-state">
+            В маршруте пока нет этапов. Добавьте первый модуль, чтобы начать собирать адаптацию.
+          </div>
+        `;
+        return;
+      }
+
+      stageList.innerHTML = template.stages.map((stage, index) => {
+        const isActive = stage.id === selectedStageId;
+        const taskCount = stage.tasks.length;
+        const knowledgeCount = stage.knowledgeItems.length;
+
+        return `
+          <div class="stage-item ${isActive ? "active" : ""}" onclick="selectStage('${stage.id}')">
+            <div class="stage-item-top">
+              <div>
+                <div class="stage-name">${escapeHtml(stage.title || "Без названия")}</div>
+              </div>
+              <div class="stage-order">Этап ${index + 1}</div>
+            </div>
+
+            <div class="stage-desc">${escapeHtml(stage.description || "Описание этапа пока не заполнено.")}</div>
+
+            <div class="stage-meta">
+              <span class="meta-badge">${taskCount} ${pluralize(taskCount, ["задача", "задачи", "задач"])}</span>
+              <span class="meta-badge">${knowledgeCount} knowledge refs</span>
+            </div>
+
+            <div class="stage-actions" onclick="event.stopPropagation()">
+              <button class="tiny-btn" onclick="moveStage('${stage.id}', 'up')">↑ Вверх</button>
+              <button class="tiny-btn" onclick="moveStage('${stage.id}', 'down')">↓ Вниз</button>
+              <button class="tiny-btn" onclick="duplicateStage('${stage.id}')">Дублировать</button>
+              <button class="danger-btn tiny-btn" onclick="deleteStage('${stage.id}')">Удалить</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderStageEditor() {
+      const container = document.getElementById("stageEditorContent");
+      const stage = getSelectedStage();
+
+      if (!stage) {
+        container.innerHTML = `
+          <div class="empty-state">
+            Нет выбранного этапа. Добавьте модуль или выберите существующий, чтобы открыть редактор.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="stageTitleInput">Название этапа</label>
+            <input id="stageTitleInput" class="field-input" type="text" value="${escapeAttr(stage.title)}" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="stageDescriptionInput">Краткое описание этапа</label>
+            <textarea id="stageDescriptionInput" class="field-textarea">${escapeHtml(stage.description)}</textarea>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="stageMessageInput">Stage message для сотрудника</label>
+            <textarea id="stageMessageInput" class="field-textarea">${escapeHtml(stage.message)}</textarea>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="card-title-row" style="margin-bottom: 12px;">
+          <h3 class="card-title" style="font-size:20px;">Задачи этапа</h3>
+          <button class="secondary-btn" onclick="addTask('${stage.id}')">Добавить задачу</button>
+        </div>
+
+        <div class="card-subtitle">
+          Задачи собираются внутри этапа. Можно менять порядок, удалять и отмечать обязательность без ограничений по количеству.
+        </div>
+
+        <div id="taskListEditor" class="task-list">
+          ${renderTaskEditorList(stage)}
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="card-title-row" style="margin-bottom: 12px;">
+          <h3 class="card-title" style="font-size:20px;">Knowledge recommendations</h3>
+        </div>
+
+        <div class="card-subtitle">
+          Привязывайте материалы из knowledge layer к этапу, чтобы рекомендации на employee-side были контекстными.
+        </div>
+
+        <div class="field" style="margin-bottom:14px;">
+          <label class="field-label" for="knowledgeSelect">Добавить материал из библиотеки</label>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <select id="knowledgeSelect" class="field-select" style="display:block; flex:1 1 260px;">
+              ${renderKnowledgeOptions(stage)}
+            </select>
+            <button class="secondary-btn" onclick="addKnowledgeToStage('${stage.id}')">Добавить материал</button>
+          </div>
+        </div>
+
+        <div class="knowledge-list">
+          ${renderKnowledgeEditorList(stage)}
+        </div>
+      `;
+
+      document.getElementById("stageTitleInput").addEventListener("input", function () {
+        stage.title = this.value;
+        renderStageList();
+        renderPreview();
+      });
+
+      document.getElementById("stageDescriptionInput").addEventListener("input", function () {
+        stage.description = this.value;
+        renderStageList();
+        renderPreview();
+      });
+
+      document.getElementById("stageMessageInput").addEventListener("input", function () {
+        stage.message = this.value;
+        renderPreview();
+      });
+    }
+
+    function renderTaskEditorList(stage) {
+      if (!stage.tasks.length) {
+        return `
+          <div class="empty-state">
+            В этом этапе пока нет задач. Добавьте первую, чтобы сформировать employee-side сценарий.
+          </div>
+        `;
+      }
+
+      return stage.tasks.map((task, index) => `
+        <div class="task-item">
+          <div class="task-head">
+            <div class="task-title-row">
+              <input
+                class="field-input compact-input"
+                type="text"
+                value="${escapeAttr(task.title)}"
+                onchange="updateTaskTitle('${stage.id}', '${task.id}', this.value)"
+                oninput="updateTaskTitle('${stage.id}', '${task.id}', this.value, true)"
+              />
+            </div>
+
+            <div class="task-controls">
+              <label class="task-optional">
+                <input
+                  class="task-checkbox"
+                  type="checkbox"
+                  ${task.required ? "checked" : ""}
+                  onchange="toggleTaskRequired('${stage.id}', '${task.id}', this.checked)"
+                />
+                обязательная
+              </label>
+
+              <button class="tiny-btn" onclick="moveTask('${stage.id}', '${task.id}', 'up')">↑</button>
+              <button class="tiny-btn" onclick="moveTask('${stage.id}', '${task.id}', 'down')">↓</button>
+              <button class="danger-btn tiny-btn" onclick="deleteTask('${stage.id}', '${task.id}')">Удалить</button>
+            </div>
+          </div>
+
+          <div class="meta-badge">Позиция: ${index + 1}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderKnowledgeOptions(stage) {
+      const selectedIds = new Set(stage.knowledgeItems);
+      const available = KNOWLEDGE_LIBRARY.filter(item => !selectedIds.has(item.id));
+
+      if (!available.length) {
+        return `<option value="">Все материалы из библиотеки уже добавлены</option>`;
+      }
+
+      return [
+        `<option value="">Выберите материал</option>`,
+        ...available.map(item => `<option value="${item.id}">${escapeHtml(item.title)}</option>`)
+      ].join("");
+    }
+
+    function renderKnowledgeEditorList(stage) {
+      if (!stage.knowledgeItems.length) {
+        return `
+          <div class="empty-state">
+            Для этого этапа пока не выбраны материалы. Добавьте knowledge references из библиотеки выше.
+          </div>
+        `;
+      }
+
+      return stage.knowledgeItems.map((knowledgeId, index) => {
+        const item = KNOWLEDGE_LIBRARY.find(entry => entry.id === knowledgeId);
+        const title = item ? item.title : knowledgeId;
+
+        return `
+          <div class="knowledge-item">
+            <div class="knowledge-head">
+              <div class="knowledge-title-row">
+                <div class="field-label">Материал</div>
+                <div style="font-size:15px; font-weight:600; line-height:1.5;">${escapeHtml(title)}</div>
+                <div class="meta-badge">ID: ${escapeHtml(knowledgeId)}</div>
+              </div>
+
+              <div class="knowledge-controls">
+                <button class="tiny-btn" onclick="moveKnowledge('${stage.id}', '${knowledgeId}', 'up')">↑</button>
+                <button class="tiny-btn" onclick="moveKnowledge('${stage.id}', '${knowledgeId}', 'down')">↓</button>
+                <button class="danger-btn tiny-btn" onclick="removeKnowledge('${stage.id}', '${knowledgeId}')">Удалить</button>
+              </div>
+            </div>
+
+            <div class="meta-badge">Позиция: ${index + 1}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function addTask(stageId) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      stage.tasks.push({
+        id: generateId("task"),
+        title: "Новая задача",
+        required: true
+      });
+
+      renderAll();
+    }
+
+    function deleteTask(stageId, taskId) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      stage.tasks = stage.tasks.filter(task => task.id !== taskId);
+      renderAll();
+    }
+
+    function updateTaskTitle(stageId, taskId, value, silent = false) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      const task = stage.tasks.find(item => item.id === taskId);
+      if (!task) return;
+
+      task.title = value;
+      if (!silent) renderPreview();
+      else renderPreview();
+      renderStageList();
+    }
+
+    function toggleTaskRequired(stageId, taskId, checked) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      const task = stage.tasks.find(item => item.id === taskId);
+      if (!task) return;
+
+      task.required = checked;
+      renderPreview();
+    }
+
+    function moveTask(stageId, taskId, direction) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      const index = stage.tasks.findIndex(task => task.id === taskId);
+      if (index === -1) return;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= stage.tasks.length) return;
+
+      const [task] = stage.tasks.splice(index, 1);
+      stage.tasks.splice(targetIndex, 0, task);
+      renderAll();
+    }
+
+    function addKnowledgeToStage(stageId) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      const select = document.getElementById("knowledgeSelect");
+      if (!select || !select.value) return;
+
+      if (!stage.knowledgeItems.includes(select.value)) {
+        stage.knowledgeItems.push(select.value);
+      }
+
+      renderAll();
+    }
+
+    function removeKnowledge(stageId, knowledgeId) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      stage.knowledgeItems = stage.knowledgeItems.filter(id => id !== knowledgeId);
+      renderAll();
+    }
+
+    function moveKnowledge(stageId, knowledgeId, direction) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      const index = stage.knowledgeItems.findIndex(id => id === knowledgeId);
+      if (index === -1) return;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= stage.knowledgeItems.length) return;
+
+      const [item] = stage.knowledgeItems.splice(index, 1);
+      stage.knowledgeItems.splice(targetIndex, 0, item);
+      renderAll();
+    }
+
+    function renderPreview() {
+      const container = document.getElementById("previewContent");
+      const stage = getSelectedStage();
+
+      if (!stage) {
+        container.innerHTML = `
+          <div class="empty-state">
+            Выберите этап, чтобы увидеть, как этот модуль будет выглядеть для сотрудника.
+          </div>
+        `;
+        return;
+      }
+
+      const stageIndex = template.stages.findIndex(item => item.id === stage.id);
+
+      container.innerHTML = `
+        <div class="preview-badge">Этап ${stageIndex + 1} · Employee view</div>
+
+        <h3 class="preview-title">${escapeHtml(stage.title || "Без названия")}</h3>
+
+        <div class="preview-copy">
+          ${escapeHtml(stage.message || "Сообщение этапа пока не заполнено.")}
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-label">Описание этапа</div>
+          <div class="preview-copy" style="font-size:14px;">
+            ${escapeHtml(stage.description || "Описание этапа пока не заполнено.")}
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-label">Задачи этапа</div>
+          <div class="preview-task-list">
+            ${renderPreviewTasks(stage)}
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-label">Рекомендованные материалы</div>
+          <div class="preview-knowledge-list">
+            ${renderPreviewKnowledge(stage)}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPreviewTasks(stage) {
+      if (!stage.tasks.length) {
+        return `
+          <div class="empty-state">
+            На employee-side здесь появится список задач, когда HR добавит хотя бы одну задачу в модуль.
+          </div>
+        `;
+      }
+
+      return stage.tasks.map(task => `
+        <div class="preview-task-item">
+          <div class="preview-check ${task.required ? "required" : ""}"></div>
+          <div class="preview-item-copy">
+            <div class="preview-item-title">${escapeHtml(task.title || "Задача без названия")}</div>
+            <div class="preview-item-sub">${task.required ? "Обязательная задача этапа" : "Необязательная задача этапа"}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderPreviewKnowledge(stage) {
+      if (!stage.knowledgeItems.length) {
+        return `
+          <div class="empty-state">
+            На этом этапе пока нет привязанных материалов базы знаний.
+          </div>
+        `;
+      }
+
+      return stage.knowledgeItems.map(knowledgeId => {
+        const item = KNOWLEDGE_LIBRARY.find(entry => entry.id === knowledgeId);
+        const title = item ? item.title : knowledgeId;
+
+        return `
+          <div class="preview-knowledge-item">
+            <div class="preview-dot"></div>
+            <div class="preview-item-copy">
+              <div class="preview-item-title">${escapeHtml(title)}</div>
+              <div class="preview-item-sub">Будет рекомендовано сотруднику как материал текущего этапа</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function showNotice(message) {
+      const notice = document.getElementById("saveNotice");
+      notice.textContent = message;
+      notice.classList.add("show");
+
+      setTimeout(() => {
+        notice.classList.remove("show");
+      }, 2200);
+    }
+
+    function renderAll() {
+      fillTemplateFields();
+      renderMeta();
+      renderStageList();
+      renderStageEditor();
+      renderPreview();
+    }
+
+    function resetTemplate() {
+      template = createDefaultTemplate();
+      selectedStageId = template.stages[0]?.id || null;
+      saveTemplate();
+      renderAll();
+      showNotice("Шаблон сброшен к дефолтной версии.");
+    }
+
+    function pluralize(number, words) {
+      const n = Math.abs(number) % 100;
+      const n1 = n % 10;
+      if (n > 10 && n < 20) return words[2];
+      if (n1 > 1 && n1 < 5) return words[1];
+      if (n1 === 1) return words[0];
+      return words[2];
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function escapeAttr(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    document.getElementById("saveTemplateBtn").addEventListener("click", function () {
+      saveTemplate();
+      renderMeta();
+      showNotice("Шаблон адаптации сохранён.");
+    });
+
+    document.getElementById("resetTemplateBtn").addEventListener("click", function () {
+      const confirmed = window.confirm("Сбросить текущий шаблон к дефолтной версии?");
+      if (!confirmed) return;
+      resetTemplate();
+    });
+
+    document.getElementById("addStageHeroBtn").addEventListener("click", addStage);
+    document.getElementById("addStageSideBtn").addEventListener("click", addStage);
+
+    window.selectStage = selectStage;
+    window.moveStage = moveStage;
+    window.deleteStage = deleteStage;
+    window.duplicateStage = duplicateStage;
+    window.addTask = addTask;
+    window.deleteTask = deleteTask;
+    window.updateTaskTitle = updateTaskTitle;
+    window.toggleTaskRequired = toggleTaskRequired;
+    window.moveTask = moveTask;
+    window.addKnowledgeToStage = addKnowledgeToStage;
+    window.removeKnowledge = removeKnowledge;
+    window.moveKnowledge = moveKnowledge;
+
+    renderAll();
+  </script>
+
+  <script src="assistant.js"></script>
+</body>
+</html>
