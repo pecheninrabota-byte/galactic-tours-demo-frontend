@@ -372,6 +372,7 @@ async function sendAssistantMessage() {
 window.addEventListener("load", function() {
   ensureAssistantRoot();
 });
+
 window.openAssistant = openAssistant;
 window.closeAssistant = closeAssistant;
 window.callAssistant = callAssistant;
