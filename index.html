@@ -212,6 +212,12 @@
       transform: translateY(-1px);
     }
 
+    .primary-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .secondary-btn {
       background: transparent;
       color: var(--text);
@@ -385,6 +391,7 @@
       line-height: 1.65;
       font-size: 15px;
       margin-bottom: 18px;
+      white-space: pre-line;
     }
 
     .progress-box {
@@ -468,9 +475,15 @@
       color: #10233c;
     }
 
+    .task-checkbox:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
     .task-content {
       display: grid;
       gap: 6px;
+      width: 100%;
     }
 
     .task-title {
@@ -485,10 +498,28 @@
       line-height: 1.55;
     }
 
+    .task-stage {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #cfe0f5;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
     .task-item.done .task-title,
     .task-item.done .task-desc {
       text-decoration: line-through;
       opacity: 0.56;
+    }
+
+    .empty-state {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      color: var(--muted);
+      line-height: 1.6;
     }
 
     .mini-grid {
@@ -795,11 +826,11 @@
         <div class="hero-stats">
           <div class="stat-card">
             <div class="stat-label">Текущий этап</div>
-            <div class="stat-value">День 1 — Добро пожаловать</div>
+            <div id="heroStageText" class="stat-value">Этап 1</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Статус</div>
-            <div class="stat-value">Маршрут активен</div>
+            <div id="heroStatusText" class="stat-value">Маршрут активен</div>
           </div>
         </div>
       </div>
@@ -808,7 +839,7 @@
         <div class="stars"></div>
         <div class="glass-note">
           <div class="glass-label">Mission status</div>
-          <div class="glass-text">
+          <div id="heroMissionText" class="glass-text">
             Добро пожаловать в Galactic Tours. Твоя задача — спокойно пройти адаптацию, освоить внутренние сервисы и встроиться в миссию команды.
           </div>
         </div>
@@ -824,15 +855,15 @@
 
         <div class="mission">
           <div class="mission-label">Current mission</div>
-          <h3 class="mission-title">Привет, Алекс</h3>
-          <div class="mission-text">
-            Сегодня твоя задача — пройти базовый этап адаптации, познакомиться с внутренней структурой компании и настроить всё, что нужно для старта работы.
+          <h3 id="missionTitle" class="mission-title">Привет</h3>
+          <div id="missionText" class="mission-text">
+            Сегодня твоя задача — пройти базовый этап адаптации и познакомиться с внутренней структурой компании.
           </div>
 
           <div class="progress-box">
             <div class="progress-top">
               <span>Прогресс адаптации</span>
-              <span><span id="progressText">0</span>/4</span>
+              <span id="progressText">0%</span>
             </div>
             <div class="progress-bar">
               <div id="progressFill" class="progress-fill"></div>
@@ -842,48 +873,18 @@
           <button class="primary-btn" onclick="startAdaptation()">Начать адаптацию</button>
         </div>
 
-        <div class="task-list">
-          <label class="task-item" id="taskItem1">
-            <input class="task-checkbox" type="checkbox" onchange="updateTask(this)">
-            <div class="task-content">
-              <div class="task-title">Ознакомиться с должностной инструкцией</div>
-              <div class="task-desc">Изучи базовые ожидания по роли и структуру первых шагов внутри компании.</div>
-            </div>
-          </label>
-
-          <label class="task-item" id="taskItem2">
-            <input class="task-checkbox" type="checkbox" onchange="updateTask(this)">
-            <div class="task-content">
-              <div class="task-title">Изучить оргполитику</div>
-              <div class="task-desc">Познакомься с внутренними правилами, логикой процессов и принципами взаимодействия.</div>
-            </div>
-          </label>
-
-          <label class="task-item" id="taskItem3">
-            <input class="task-checkbox" type="checkbox" onchange="updateTask(this)">
-            <div class="task-content">
-              <div class="task-title">Настроить подпись</div>
-              <div class="task-desc">Подготовь цифровую подпись и оформи рабочее присутствие в корпоративной среде.</div>
-            </div>
-          </label>
-
-          <label class="task-item" id="taskItem4">
-            <input class="task-checkbox" type="checkbox" onchange="updateTask(this)">
-            <div class="task-content">
-              <div class="task-title">Пройти обучение</div>
-              <div class="task-desc">Заверши вводный обучающий блок и открой доступ к следующему этапу маршрута.</div>
-            </div>
-          </label>
+        <div id="taskList" class="task-list">
+          <div class="empty-state">Задачи загружаются...</div>
         </div>
 
         <div class="mini-grid">
           <div class="mini-card">
             <div class="mini-label">Следующий шаг</div>
-            <div class="mini-value">Познакомиться с внутренними сервисами</div>
+            <div id="nextStepText" class="mini-value">Загрузка...</div>
           </div>
           <div class="mini-card">
             <div class="mini-label">Награда этапа</div>
-            <div class="mini-value">Badge: Mission Started</div>
+            <div id="rewardText" class="mini-value">Badge: Mission Started</div>
           </div>
         </div>
       </div>
@@ -923,35 +924,41 @@
   </div>
 
   <script>
-    const API_URL = "https://galactic-tours-demo-backend-production.up.railway.app/api/message";
-    const SESSION_ID = "demo";
+    const API_BASE = "https://galactic-tours-demo-backend-production.up.railway.app/api";
+    const MESSAGE_API_URL = `${API_BASE}/message`;
+    const TASKS_API_URL = `${API_BASE}/tasks`;
+    const COMPLETE_TASK_API_URL = `${API_BASE}/tasks/complete`;
 
-    let count = 0;
+    const SESSION_KEY = "galactic_tours_session_id";
+    const USER_NAME_KEY = "galactic_tours_user_name";
+
+    const SESSION_ID = localStorage.getItem(SESSION_KEY) || `demo_${Date.now()}`;
+    localStorage.setItem(SESSION_KEY, SESSION_ID);
+
     let botStarted = false;
+    let currentTasks = [];
+    let currentStage = 1;
+    let currentStageMessage = "";
+    let currentProgress = 0;
+    let isCompletingTask = false;
 
-    function updateProgressUI() {
-      const total = 4;
-      const percent = (count / total) * 100;
-      document.getElementById("progressText").innerText = count;
-      document.getElementById("progressFill").style.width = percent + "%";
+    function getStoredUserName() {
+      return localStorage.getItem(USER_NAME_KEY) || "";
     }
 
-    function updateTask(el) {
-      const taskItem = el.closest(".task-item");
-
-      if (el.checked) {
-        count++;
-        taskItem.classList.add("done");
-      } else {
-        count--;
-        taskItem.classList.remove("done");
+    function setStoredUserName(name) {
+      if (name && name.trim()) {
+        localStorage.setItem(USER_NAME_KEY, name.trim());
       }
-
-      updateProgressUI();
     }
 
-    function startAdaptation() {
-      alert("🚀 Маршрут адаптации активирован");
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
     function scrollToAssistant() {
@@ -990,6 +997,183 @@
       });
     }
 
+    function getStageLabel(stage) {
+      return `Этап ${stage}`;
+    }
+
+    function getRewardLabel(stage, progress) {
+      if (progress >= 100) {
+        return "Badge: Onboarding Completed";
+      }
+
+      if (stage === 1) {
+        return "Badge: Mission Started";
+      }
+
+      if (stage === 2) {
+        return "Badge: System Ready";
+      }
+
+      return "Badge: Progress Unlocked";
+    }
+
+    function updateMissionBlock() {
+      const userName = getStoredUserName();
+
+      document.getElementById("missionTitle").innerText = userName
+        ? `Привет, ${userName}`
+        : "Привет";
+
+      document.getElementById("missionText").innerText = currentStageMessage
+        ? currentStageMessage
+        : "Сегодня твоя задача — пройти текущий этап адаптации и спокойно встроиться в процессы компании.";
+
+      document.getElementById("heroStageText").innerText = getStageLabel(currentStage);
+      document.getElementById("heroStatusText").innerText = currentProgress >= 100 ? "Маршрут завершён" : "Маршрут активен";
+      document.getElementById("heroMissionText").innerText = currentStageMessage
+        ? currentStageMessage
+        : "Добро пожаловать в Galactic Tours. Твоя задача — спокойно пройти адаптацию, освоить внутренние сервисы и встроиться в миссию команды.";
+
+      const nextUndoneTask = currentTasks.find(task => !task.done);
+      document.getElementById("nextStepText").innerText = nextUndoneTask
+        ? nextUndoneTask.title
+        : currentProgress >= 100
+          ? "Все задачи завершены"
+          : "Новый этап скоро доступен";
+
+      document.getElementById("rewardText").innerText = getRewardLabel(currentStage, currentProgress);
+    }
+
+    function updateProgressUI(progress) {
+      currentProgress = Number(progress) || 0;
+      document.getElementById("progressText").innerText = `${currentProgress}%`;
+      document.getElementById("progressFill").style.width = `${currentProgress}%`;
+      updateMissionBlock();
+    }
+
+    function renderTasks(tasks) {
+      currentTasks = Array.isArray(tasks) ? tasks : [];
+      const taskList = document.getElementById("taskList");
+
+      if (!currentTasks.length) {
+        taskList.innerHTML = `
+          <div class="empty-state">
+            На текущем этапе задач нет. Возможно, маршрут уже завершён или данные ещё не загружены.
+          </div>
+        `;
+        updateMissionBlock();
+        return;
+      }
+
+      taskList.innerHTML = currentTasks.map(task => `
+        <label class="task-item ${task.done ? "done" : ""}" data-task-id="${escapeHtml(task.id)}">
+          <input
+            class="task-checkbox"
+            type="checkbox"
+            ${task.done ? "checked disabled" : ""}
+            onchange="handleTaskToggle('${escapeHtml(task.id)}', this)"
+          >
+          <div class="task-content">
+            <div class="task-title">${escapeHtml(task.title)}</div>
+            <div class="task-desc">
+              Задача текущего этапа адаптации. Заверши её, чтобы продвинуться по маршруту и открыть следующий шаг.
+            </div>
+            <div class="task-stage">${escapeHtml(getStageLabel(task.stage))}</div>
+          </div>
+        </label>
+      `).join("");
+
+      updateMissionBlock();
+    }
+
+    function applyBackendState(data) {
+      if (!data || typeof data !== "object") return;
+
+      if (typeof data.stage === "number") {
+        currentStage = data.stage;
+      }
+
+      if (typeof data.stage_message === "string") {
+        currentStageMessage = data.stage_message;
+      }
+
+      if (Array.isArray(data.tasks)) {
+        renderTasks(data.tasks);
+      }
+
+      if (typeof data.progress !== "undefined") {
+        updateProgressUI(data.progress);
+      } else {
+        updateMissionBlock();
+      }
+    }
+
+    async function loadTasks() {
+      try {
+        const res = await fetch(`${TASKS_API_URL}?session_id=${encodeURIComponent(SESSION_ID)}`);
+
+        if (!res.ok) {
+          throw new Error(`Ошибка загрузки задач: ${res.status}`);
+        }
+
+        const data = await res.json();
+        applyBackendState(data);
+      } catch (error) {
+        console.error(error);
+        document.getElementById("taskList").innerHTML = `
+          <div class="empty-state">
+            Не удалось загрузить маршрут адаптации. Проверь подключение к backend.
+          </div>
+        `;
+      }
+    }
+
+    async function handleTaskToggle(taskId, checkbox) {
+      if (isCompletingTask) {
+        checkbox.checked = false;
+        return;
+      }
+
+      if (!checkbox.checked) {
+        checkbox.checked = true;
+        return;
+      }
+
+      isCompletingTask = true;
+      checkbox.disabled = true;
+
+      try {
+        const res = await fetch(COMPLETE_TASK_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            session_id: SESSION_ID,
+            task_id: taskId
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error(`Ошибка выполнения задачи: ${res.status}`);
+        }
+
+        const data = await res.json();
+        applyBackendState(data);
+
+        if (data.message) {
+          addMessage(data.message, "bot");
+        }
+      } catch (error) {
+        checkbox.checked = false;
+        checkbox.disabled = false;
+        addMessage("Не удалось отметить задачу выполненной. Попробуй ещё раз.", "system");
+        console.error(error);
+      } finally {
+        isCompletingTask = false;
+      }
+    }
+
     async function callBot(text, showUserMessage = true) {
       if (showUserMessage) {
         addMessage(text, "user");
@@ -998,7 +1182,7 @@
       clearQuickReplies();
 
       try {
-        const res = await fetch(API_URL, {
+        const res = await fetch(MESSAGE_API_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -1021,8 +1205,16 @@
           return;
         }
 
+        const waitNameState = data.state === "wait_name";
+        const savedName = getStoredUserName();
+
+        if (!waitNameState && showUserMessage && !savedName && text !== "__start__") {
+          setStoredUserName(text);
+        }
+
         addMessage(data.reply, "bot");
         renderQuickReplies(data.quick_replies);
+        applyBackendState(data);
       } catch (error) {
         addMessage("Ошибка подключения: " + error.message, "system");
         console.error(error);
@@ -1033,6 +1225,7 @@
       if (botStarted) return;
       botStarted = true;
       await callBot("__start__", false);
+      await loadTasks();
     }
 
     async function sendMessage() {
@@ -1050,15 +1243,22 @@
       await callBot(text, true);
     }
 
+    async function startAdaptation() {
+      await loadTasks();
+      scrollToAssistant();
+    }
+
     document.getElementById("input").addEventListener("keydown", function(event) {
       if (event.key === "Enter") {
         sendMessage();
       }
     });
 
-    window.addEventListener("load", function() {
-      updateProgressUI();
-      startBot();
+    window.handleTaskToggle = handleTaskToggle;
+
+    window.addEventListener("load", async function() {
+      updateProgressUI(0);
+      await startBot();
     });
   </script>
 </body>
