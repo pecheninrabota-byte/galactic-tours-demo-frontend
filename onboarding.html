@@ -20,6 +20,7 @@
       --blue: #6f93c8;
       --blue-dark: #4d6fa6;
       --success: #b7d9c0;
+      --warning: #f0d7a1;
       --radius-xl: 32px;
       --radius-lg: 24px;
       --radius-md: 18px;
@@ -270,6 +271,7 @@
       color: var(--muted);
       font-size: 17px;
       line-height: 1.7;
+      white-space: pre-line;
     }
 
     .hero-actions {
@@ -331,6 +333,7 @@
       font-size: 20px;
       font-weight: 700;
       line-height: 1.35;
+      white-space: pre-line;
     }
 
     .hero-right {
@@ -406,6 +409,7 @@
       line-height: 1.65;
       font-size: 15px;
       color: #f2f7fc;
+      white-space: pre-line;
     }
 
     .layout {
@@ -458,6 +462,7 @@
       margin: 0 0 12px;
       font-size: 26px;
       font-weight: 700;
+      white-space: pre-line;
     }
 
     .mission-text {
@@ -466,6 +471,18 @@
       font-size: 15px;
       margin-bottom: 18px;
       white-space: pre-line;
+    }
+
+    .template-note {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(240, 215, 161, 0.08);
+      border: 1px solid rgba(240, 215, 161, 0.12);
+      color: var(--warning);
+      font-size: 13px;
+      line-height: 1.7;
+      margin-bottom: 18px;
+      display: none;
     }
 
     .progress-box {
@@ -622,6 +639,7 @@
       font-size: 17px;
       font-weight: 600;
       line-height: 1.45;
+      white-space: pre-line;
     }
 
     @media (max-width: 1200px) {
@@ -709,10 +727,15 @@
           <span class="nav-icon">👤</span>
           <span>Профиль</span>
         </a>
+
+        <a class="nav-link" href="admin.html">
+          <span class="nav-icon">🛠️</span>
+          <span>HR Admin</span>
+        </a>
       </div>
 
       <div class="sidebar-footer">
-        Здесь будет внутренняя навигация сотрудника: адаптация, знания, сервисы и поддержка.
+        Маршрут адаптации теперь использует dynamic onboarding model: backend отдаёт текущий этап, его название, описание, message и задачи.
       </div>
     </aside>
 
@@ -735,12 +758,12 @@
           <div>
             <div class="eyebrow">Onboarding · Employee Experience</div>
 
-            <h1 class="hero-title">
+            <h1 id="heroMainTitle" class="hero-title">
               Космос
               <span class="hero-accent">стал ближе</span>
             </h1>
 
-            <p class="hero-sub">
+            <p id="heroSubText" class="hero-sub">
               Премиальная onboarding-платформа Galactic Tours, которая помогает сотруднику пройти маршрут адаптации, найти ответы на внутренние вопросы и быстрее встроиться в рабочую среду.
             </p>
 
@@ -787,6 +810,10 @@
               Сегодня твоя задача — пройти базовый этап адаптации и познакомиться с внутренней структурой компании.
             </div>
 
+            <div id="templateNote" class="template-note">
+              Этот этап сейчас подгружается из dynamic template model. HR может менять название, описание и наполнение маршрута через HR Admin.
+            </div>
+
             <div class="progress-box">
               <div class="progress-top">
                 <span>Прогресс адаптации</span>
@@ -797,7 +824,7 @@
               </div>
             </div>
 
-            <button class="primary-btn" onclick="startAdaptation()">Начать адаптацию</button>
+            <button class="primary-btn" onclick="startAdaptation()">Обновить маршрут</button>
           </div>
 
           <div id="taskList" class="task-list">
@@ -823,6 +850,7 @@
     const AUTH_KEY = "galactic_tours_auth";
     const USER_LOGIN_KEY = "galactic_tours_login";
     const USER_NAME_KEY = "galactic_tours_user_name";
+    const SESSION_KEY = "galactic_tours_session_id";
 
     const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
     if (!isAuthorized) {
@@ -836,8 +864,8 @@
     document.getElementById("logoutBtn").addEventListener("click", function() {
       localStorage.removeItem(AUTH_KEY);
       localStorage.removeItem(USER_LOGIN_KEY);
-      localStorage.removeItem("galactic_tours_session_id");
-      localStorage.removeItem("galactic_tours_user_name");
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(USER_NAME_KEY);
       window.location.href = "login.html";
     });
 
@@ -845,12 +873,13 @@
     const TASKS_API_URL = `${API_BASE}/tasks`;
     const COMPLETE_TASK_API_URL = `${API_BASE}/tasks/complete`;
 
-    const SESSION_KEY = "galactic_tours_session_id";
     const SESSION_ID = localStorage.getItem(SESSION_KEY) || `demo_${Date.now()}`;
     localStorage.setItem(SESSION_KEY, SESSION_ID);
 
     let currentTasks = [];
     let currentStage = 1;
+    let currentStageTitle = "Этап 1";
+    let currentStageDescription = "";
     let currentStageMessage = "";
     let currentProgress = 0;
     let isCompletingTask = false;
@@ -868,7 +897,10 @@
         .replaceAll("'", "&#039;");
     }
 
-    function getStageLabel(stage) {
+    function getStageLabel(stage, stageTitle) {
+      if (stageTitle && stageTitle.trim()) {
+        return `Этап ${stage}\n${stageTitle}`;
+      }
       return `Этап ${stage}`;
     }
 
@@ -890,29 +922,68 @@
 
     function updateMissionBlock() {
       const userName = getStoredUserName();
+      const displayName = userName ? `Привет, ${userName}` : "Привет";
 
-      document.getElementById("missionTitle").innerText = userName
-        ? `Привет, ${userName}`
-        : "Привет";
+      document.getElementById("missionTitle").innerText = currentStageTitle
+        ? `${displayName}\n${currentStageTitle}`
+        : displayName;
 
-      document.getElementById("missionText").innerText = currentStageMessage
-        ? currentStageMessage
+      const missionBodyParts = [];
+      if (currentStageDescription) {
+        missionBodyParts.push(currentStageDescription);
+      }
+      if (currentStageMessage) {
+        missionBodyParts.push(currentStageMessage);
+      }
+
+      document.getElementById("missionText").innerText = missionBodyParts.length
+        ? missionBodyParts.join("\n\n")
         : "Сегодня твоя задача — пройти текущий этап адаптации и спокойно встроиться в процессы компании.";
 
-      document.getElementById("heroStageText").innerText = getStageLabel(currentStage);
+      document.getElementById("heroStageText").innerText = getStageLabel(currentStage, currentStageTitle);
       document.getElementById("heroStatusText").innerText = currentProgress >= 100 ? "Маршрут завершён" : "Маршрут активен";
-      document.getElementById("heroMissionText").innerText = currentStageMessage
-        ? currentStageMessage
+
+      const heroMissionParts = [];
+      if (currentStageTitle) {
+        heroMissionParts.push(currentStageTitle);
+      }
+      if (currentStageMessage) {
+        heroMissionParts.push(currentStageMessage);
+      } else if (currentStageDescription) {
+        heroMissionParts.push(currentStageDescription);
+      }
+
+      document.getElementById("heroMissionText").innerText = heroMissionParts.length
+        ? heroMissionParts.join("\n\n")
         : "Добро пожаловать в Galactic Tours. Твоя задача — спокойно пройти адаптацию, освоить внутренние сервисы и встроиться в миссию команды.";
+
+      const heroSubParts = [];
+      if (currentStageDescription) {
+        heroSubParts.push(currentStageDescription);
+      }
+      if (currentStageMessage) {
+        heroSubParts.push(currentStageMessage);
+      }
+
+      document.getElementById("heroSubText").innerText = heroSubParts.length
+        ? heroSubParts.join("\n\n")
+        : "Премиальная onboarding-платформа Galactic Tours, которая помогает сотруднику пройти маршрут адаптации, найти ответы на внутренние вопросы и быстрее встроиться в рабочую среду.";
+
+      document.getElementById("heroMainTitle").innerHTML = `
+        ${escapeHtml(currentStageTitle || "Космос")}
+        <span class="hero-accent">маршрут активен</span>
+      `;
 
       const nextUndoneTask = currentTasks.find(task => !task.done);
       document.getElementById("nextStepText").innerText = nextUndoneTask
         ? nextUndoneTask.title
         : currentProgress >= 100
-          ? "Все задачи завершены"
+          ? "Все задачи текущего этапа завершены"
           : "Новый этап скоро доступен";
 
       document.getElementById("rewardText").innerText = getRewardLabel(currentStage, currentProgress);
+
+      document.getElementById("templateNote").style.display = currentStageTitle || currentStageDescription ? "block" : "none";
     }
 
     function updateProgressUI(progress) {
@@ -929,7 +1000,7 @@
       if (!currentTasks.length) {
         taskList.innerHTML = `
           <div class="empty-state">
-            На текущем этапе задач нет. Возможно, маршрут уже завершён или данные ещё не загружены.
+            На текущем этапе задач нет. Возможно, маршрут уже завершён или этот модуль пока не содержит checklist-блок.
           </div>
         `;
         updateMissionBlock();
@@ -949,7 +1020,7 @@
             <div class="task-desc">
               Задача текущего этапа адаптации. Заверши её, чтобы продвинуться по маршруту и открыть следующий шаг.
             </div>
-            <div class="task-stage">${escapeHtml(getStageLabel(task.stage))}</div>
+            <div class="task-stage">${escapeHtml(currentStageTitle || `Этап ${task.stage}`)}</div>
           </div>
         </label>
       `).join("");
@@ -962,6 +1033,16 @@
 
       if (typeof data.stage === "number") {
         currentStage = data.stage;
+      }
+
+      if (typeof data.stage_title === "string" && data.stage_title.trim()) {
+        currentStageTitle = data.stage_title;
+      } else {
+        currentStageTitle = `Этап ${currentStage}`;
+      }
+
+      if (typeof data.stage_description === "string") {
+        currentStageDescription = data.stage_description;
       }
 
       if (typeof data.stage_message === "string") {
