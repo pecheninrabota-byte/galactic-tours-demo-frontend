@@ -747,11 +747,11 @@
     });
 
     const defaultProfile = {
-      firstName: localStorage.getItem(USER_NAME_KEY) || "Иванов",
-      middleName: "Иван"
-      lastName: "Иванович",
+      firstName: localStorage.getItem(USER_NAME_KEY) || "",
+      middleName: ""
+      lastName: "",
       email: `${savedLogin}@galactic.local`.replace(/\s+/g, "").toLowerCase(),
-      phone: "+7-999-000-00-00 ",
+      phone: "",
       city: "Москва",
       role: "Специалист",
       department: "People Operations",
