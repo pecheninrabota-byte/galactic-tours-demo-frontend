@@ -424,10 +424,7 @@
     }
 
     .layout {
-      display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
-      gap: 24px;
-      align-items: start;
+      display: block;
     }
 
     .panel {
@@ -642,189 +639,8 @@
       line-height: 1.45;
     }
 
-    .assistant-shell {
-      border-radius: 24px;
-      background: rgba(10, 20, 35, 0.84);
-      border: 1px solid rgba(255,255,255,0.06);
-      overflow: hidden;
-    }
-
-    .assistant-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 18px 18px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .assistant-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .assistant-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
-      border: 1px solid rgba(255,255,255,0.08);
-      font-size: 21px;
-    }
-
-    .assistant-name {
-      font-size: 17px;
-      font-weight: 700;
-    }
-
-    .assistant-sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .assistant-chip {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--accent-2);
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-    }
-
-    .chat-box {
-      min-height: 430px;
-      max-height: 600px;
-      overflow-y: auto;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      scroll-behavior: smooth;
-    }
-
-    .chat-box::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .chat-box::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.1);
-      border-radius: 999px;
-    }
-
-    .message {
-      max-width: 78%;
-      padding: 14px 16px;
-      border-radius: 18px;
-      line-height: 1.6;
-      white-space: pre-line;
-      font-size: 15px;
-      animation: fadeIn 0.16s ease;
-    }
-
-    .message.user {
-      align-self: flex-end;
-      background: linear-gradient(135deg, #6f93c8, #5a7eb7);
-      color: #f9fcff;
-      border-bottom-right-radius: 8px;
-    }
-
-    .message.bot {
-      align-self: flex-start;
-      background: rgba(35, 51, 80, 0.95);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-bottom-left-radius: 8px;
-    }
-
-    .message.system {
-      align-self: flex-start;
-      background: rgba(77, 53, 53, 0.78);
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .quick-replies {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 0 18px 16px;
-    }
-
-    .quick-reply-btn {
-      padding: 11px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(145, 177, 220, 0.24);
-      color: var(--text);
-      cursor: pointer;
-      font-size: 14px;
-      transition: 0.18s ease;
-    }
-
-    .quick-reply-btn:hover {
-      background: rgba(255,255,255,0.06);
-      transform: translateY(-1px);
-    }
-
-    .input-wrap {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      padding: 0 18px 18px;
-    }
-
-    .chat-input {
-      width: 100%;
-      border: 1px solid rgba(255,255,255,0.07);
-      background: rgba(255,255,255,0.03);
-      color: var(--text);
-      border-radius: 18px;
-      padding: 15px 16px;
-      outline: none;
-      font-size: 15px;
-    }
-
-    .chat-input::placeholder {
-      color: #8da5c5;
-    }
-
-    .send-btn {
-      border: none;
-      border-radius: 18px;
-      padding: 15px 18px;
-      min-width: 126px;
-      cursor: pointer;
-      background: #edf5fc;
-      color: #10243d;
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .send-btn:hover {
-      transform: translateY(-1px);
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(4px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
     @media (max-width: 1200px) {
       .hero {
-        grid-template-columns: 1fr;
-      }
-
-      .layout {
         grid-template-columns: 1fr;
       }
 
@@ -871,18 +687,6 @@
 
       .hero-title {
         font-size: 46px;
-      }
-
-      .message {
-        max-width: 92%;
-      }
-
-      .input-wrap {
-        grid-template-columns: 1fr;
-      }
-
-      .send-btn {
-        width: 100%;
       }
     }
   </style>
@@ -951,7 +755,7 @@
 
             <div class="hero-actions">
               <button class="primary-btn" onclick="startAdaptation()">Продолжить адаптацию</button>
-              <button class="secondary-btn" onclick="scrollToAssistant()">Открыть ассистента</button>
+              <button class="secondary-btn" onclick="openAssistant()">Открыть ассистента</button>
             </div>
           </div>
 
@@ -1020,38 +824,6 @@
             </div>
           </div>
         </div>
-
-        <div class="panel" id="assistantBlock">
-          <div class="section-head">
-            <h2 class="section-title">Ассистент</h2>
-            <div class="section-sub">Встроенный помощник по сервисам и HR-вопросам</div>
-          </div>
-
-          <div class="assistant-shell">
-            <div class="assistant-top">
-              <div class="assistant-left">
-                <div class="assistant-avatar">🤖</div>
-                <div>
-                  <div class="assistant-name">Добрыня</div>
-                  <div class="assistant-sub">Galactic Tours HR Assistant</div>
-                </div>
-              </div>
-              <div class="assistant-chip">Online</div>
-            </div>
-
-            <div id="chat" class="chat-box"></div>
-            <div id="quickReplies" class="quick-replies"></div>
-
-            <div class="input-wrap">
-              <input
-                id="input"
-                class="chat-input"
-                placeholder="Напиши вопрос..."
-              />
-              <button class="send-btn" onclick="sendMessage()">Отправить</button>
-            </div>
-          </div>
-        </div>
       </section>
     </main>
   </div>
@@ -1077,7 +849,6 @@
     });
 
     const API_BASE = "https://galactic-tours-demo-backend-production.up.railway.app/api";
-    const MESSAGE_API_URL = `${API_BASE}/message`;
     const TASKS_API_URL = `${API_BASE}/tasks`;
     const COMPLETE_TASK_API_URL = `${API_BASE}/tasks/complete`;
 
@@ -1087,7 +858,6 @@
     const SESSION_ID = localStorage.getItem(SESSION_KEY) || `demo_${Date.now()}`;
     localStorage.setItem(SESSION_KEY, SESSION_ID);
 
-    let botStarted = false;
     let currentTasks = [];
     let currentStage = 1;
     let currentStageMessage = "";
@@ -1098,12 +868,6 @@
       return localStorage.getItem(USER_NAME_KEY) || "";
     }
 
-    function setStoredUserName(name) {
-      if (name && name.trim()) {
-        localStorage.setItem(USER_NAME_KEY, name.trim());
-      }
-    }
-
     function escapeHtml(text) {
       return String(text)
         .replaceAll("&", "&amp;")
@@ -1111,42 +875,6 @@
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
-    }
-
-    function scrollToAssistant() {
-      document.getElementById("assistantBlock").scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    }
-
-    function addMessage(text, type) {
-      const chat = document.getElementById("chat");
-      const msg = document.createElement("div");
-      msg.className = `message ${type}`;
-      msg.innerText = text;
-      chat.appendChild(msg);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    function clearQuickReplies() {
-      document.getElementById("quickReplies").innerHTML = "";
-    }
-
-    function renderQuickReplies(replies) {
-      clearQuickReplies();
-
-      if (!replies || !Array.isArray(replies) || replies.length === 0) return;
-
-      const container = document.getElementById("quickReplies");
-
-      replies.forEach(reply => {
-        const btn = document.createElement("button");
-        btn.className = "quick-reply-btn";
-        btn.innerText = reply;
-        btn.onclick = () => sendPresetMessage(reply);
-        container.appendChild(btn);
-      });
     }
 
     function getStageLabel(stage) {
@@ -1313,105 +1041,41 @@
         const data = await res.json();
         applyBackendState(data);
 
-        if (data.message) {
-          addMessage(data.message, "bot");
+        if (data.message && typeof openAssistant === "function") {
+          openAssistant();
+          if (typeof addAssistantMessage === "function") {
+            addAssistantMessage(data.message, "bot");
+          }
         }
       } catch (error) {
         checkbox.checked = false;
         checkbox.disabled = false;
-        addMessage("Не удалось отметить задачу выполненной. Попробуй ещё раз.", "system");
+
+        if (typeof openAssistant === "function") {
+          openAssistant();
+          if (typeof addAssistantMessage === "function") {
+            addAssistantMessage("Не удалось отметить задачу выполненной. Попробуй ещё раз.", "system");
+          }
+        }
+
         console.error(error);
       } finally {
         isCompletingTask = false;
       }
     }
 
-    async function callBot(text, showUserMessage = true) {
-      if (showUserMessage) {
-        addMessage(text, "user");
-      }
-
-      clearQuickReplies();
-
-      try {
-        const res = await fetch(MESSAGE_API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            session_id: SESSION_ID,
-            text: text
-          })
-        });
-
-        if (!res.ok) {
-          addMessage("Ошибка сервера: " + res.status, "system");
-          return;
-        }
-
-        const data = await res.json();
-
-        if (!data.reply) {
-          addMessage("Ответ пустой", "system");
-          return;
-        }
-
-        const waitNameState = data.state === "wait_name";
-        const savedName = getStoredUserName();
-
-        if (!waitNameState && showUserMessage && !savedName && text !== "__start__") {
-          setStoredUserName(text);
-        }
-
-        addMessage(data.reply, "bot");
-        renderQuickReplies(data.quick_replies);
-        applyBackendState(data);
-      } catch (error) {
-        addMessage("Ошибка подключения: " + error.message, "system");
-        console.error(error);
-      }
-    }
-
-    async function startBot() {
-      if (botStarted) return;
-      botStarted = true;
-      await callBot("__start__", false);
-      await loadTasks();
-    }
-
-    async function sendMessage() {
-      const input = document.getElementById("input");
-      const text = input.value.trim();
-
-      if (!text) return;
-
-      await callBot(text, true);
-      input.value = "";
-      input.focus();
-    }
-
-    async function sendPresetMessage(text) {
-      await callBot(text, true);
-    }
-
     async function startAdaptation() {
       await loadTasks();
-      scrollToAssistant();
     }
-
-    document.getElementById("input").addEventListener("keydown", function(event) {
-      if (event.key === "Enter") {
-        sendMessage();
-      }
-    });
 
     window.handleTaskToggle = handleTaskToggle;
 
     window.addEventListener("load", async function() {
       updateProgressUI(0);
-      await startBot();
+      await loadTasks();
     });
   </script>
+
+  <script src="assistant.js"></script>
 </body>
 </html>
