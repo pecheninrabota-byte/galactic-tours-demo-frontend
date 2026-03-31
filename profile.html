@@ -388,7 +388,14 @@
     .field-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
+      gap: 16px 28px;
+      align-items: start;
+    }
+
+    .field-column {
+      display: grid;
       gap: 16px;
+      align-content: start;
     }
 
     .field {
@@ -614,40 +621,44 @@
             <h3 class="card-title">Контактная информация</h3>
 
             <div class="field-grid">
-              <div class="field">
-                <div class="field-label">Имя</div>
-                <div class="field-value" data-view="firstName"></div>
-                <input class="field-input" data-input="firstName" type="text" />
+              <div class="field-column">
+                <div class="field">
+                  <div class="field-label">Имя</div>
+                  <div class="field-value" data-view="firstName"></div>
+                  <input class="field-input" data-input="firstName" type="text" />
+                </div>
+
+                <div class="field">
+                  <div class="field-label">Фамилия</div>
+                  <div class="field-value" data-view="lastName"></div>
+                  <input class="field-input" data-input="lastName" type="text" />
+                </div>
+
+                <div class="field">
+                  <div class="field-label">Отчество</div>
+                  <div class="field-value" data-view="middleName"></div>
+                  <input class="field-input" data-input="middleName" type="text" />
+                </div>
               </div>
 
-              <div class="field">
-                <div class="field-label">Фамилия</div>
-                <div class="field-value" data-view="lastName"></div>
-                <input class="field-input" data-input="lastName" type="text" />
-              </div>
+              <div class="field-column">
+                <div class="field">
+                  <div class="field-label">Мобильный телефон</div>
+                  <div class="field-value" data-view="phone"></div>
+                  <input class="field-input" data-input="phone" type="text" />
+                </div>
 
-      <div class="field">
-        <div class="field-label">Мобильный телефон</div>
-        <div class="field-value" data-view="phone"></div>
-        <input class="field-input" data-input="phone" type="text" />
-      </div>
+                <div class="field">
+                  <div class="field-label">Электронная почта</div>
+                  <div class="field-value" data-view="email"></div>
+                  <input class="field-input" data-input="email" type="text" />
+                </div>
 
-           <div class="field">
-              <div class="field-label">Отчество</div>
-              <div class="field-value" data-view="middleName"></div>
-              <input class="field-input" data-input="middleName" type="text" />
-            </div>
-
-             <div class="field">
-               <div class="field-label">Электронная почта</div>
-               <div class="field-value" data-view="email"></div>
-               <input class="field-input" data-input="email" type="text" />
-             </div>
-
-              <div class="field">
-                <div class="field-label">Город</div>
-                <div class="field-value" data-view="city"></div>
-                <input class="field-input" data-input="city" type="text" />
+                <div class="field">
+                  <div class="field-label">Город</div>
+                  <div class="field-value" data-view="city"></div>
+                  <input class="field-input" data-input="city" type="text" />
+                </div>
               </div>
             </div>
           </article>
@@ -736,7 +747,7 @@
     }
 
     const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
-    document.getElementById("profileChip").textContent = savedLogin;
+    document.getElementById("profileChip").textContent = localStorage.getItem(USER_NAME_KEY) || savedLogin;
 
     document.getElementById("logoutBtn").addEventListener("click", function() {
       localStorage.removeItem(AUTH_KEY);
