@@ -184,20 +184,19 @@
     }
 
     .profile-chip,
-    .logout-btn {
+    .logout-btn,
+    .secondary-btn {
       border-radius: 999px;
       border: 1px solid var(--line);
       background: rgba(255,255,255,0.03);
       color: var(--text);
       padding: 12px 16px;
       font-size: 14px;
-    }
-
-    .logout-btn {
       cursor: pointer;
     }
 
-    .logout-btn:hover {
+    .logout-btn:hover,
+    .secondary-btn:hover {
       background: rgba(255,255,255,0.06);
     }
 
@@ -266,7 +265,7 @@
     }
 
     .primary-btn,
-    .secondary-btn {
+    .secondary-link {
       border: none;
       border-radius: 999px;
       padding: 14px 20px;
@@ -289,13 +288,13 @@
       transform: translateY(-1px);
     }
 
-    .secondary-btn {
+    .secondary-link {
       background: transparent;
       color: var(--text);
       border: 1px solid var(--line-2);
     }
 
-    .secondary-btn:hover {
+    .secondary-link:hover {
       background: rgba(255,255,255,0.04);
     }
 
@@ -449,7 +448,8 @@
         </a>
 
         <a class="nav-link" href="profile.html">
-          <span>👤 Профиль</span>
+          <span class="nav-icon">👤</span>
+          <span>Профиль</span>
         </a>
       </div>
 
@@ -467,6 +467,7 @@
 
         <div class="topbar-right">
           <div id="profileChip" class="profile-chip">Сотрудник</div>
+          <button class="secondary-btn" onclick="openAssistant()">Открыть ассистента</button>
           <button id="logoutBtn" class="logout-btn">Выйти</button>
         </div>
       </div>
@@ -483,7 +484,7 @@
 
           <div class="hero-actions">
             <a class="primary-btn" href="onboarding.html">Продолжить адаптацию</a>
-            <a class="secondary-btn" href="#">Открыть базу знаний</a>
+            <a class="secondary-link" href="knowledge.html">Открыть базу знаний</a>
             <button class="secondary-btn" onclick="openAssistant()">Открыть ассистента</button>
           </div>
         </div>
@@ -524,11 +525,11 @@
             <div class="action-icon">📚</div>
             <h3 class="action-title">База знаний</h3>
             <div class="action-text">
-              Здесь позже будет собран быстрый доступ к внутренним материалам, FAQ, инструкциям и сервисам сотрудника.
+              Здесь собран быстрый доступ к внутренним материалам, FAQ, инструкциям и сервисам сотрудника.
             </div>
           </div>
 
-          <a class="card-link" href="#">Раздел в работе →</a>
+          <a class="card-link" href="knowledge.html">Открыть базу знаний →</a>
         </article>
       </section>
     </main>
@@ -537,24 +538,38 @@
   <script>
     const AUTH_KEY = "galactic_tours_auth";
     const USER_LOGIN_KEY = "galactic_tours_login";
+    const USER_NAME_KEY = "galactic_tours_user_name";
 
     const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
-
     if (!isAuthorized) {
       window.location.href = "login.html";
     }
 
     const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
+    const savedUserName = localStorage.getItem(USER_NAME_KEY) || savedLogin;
 
-    document.getElementById("profileChip").textContent = savedLogin;
-    document.getElementById("profileStatus").textContent = savedLogin;
+    const profileChip = document.getElementById("profileChip");
+    if (profileChip) {
+      profileChip.textContent = savedUserName;
+    }
 
-    document.getElementById("logoutBtn").addEventListener("click", function() {
-      localStorage.removeItem(AUTH_KEY);
-      localStorage.removeItem(USER_LOGIN_KEY);
-      window.location.href = "login.html";
-    });
+    const profileStatus = document.getElementById("profileStatus");
+    if (profileStatus) {
+      profileStatus.textContent = savedUserName;
+    }
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function() {
+        localStorage.removeItem(AUTH_KEY);
+        localStorage.removeItem(USER_LOGIN_KEY);
+        localStorage.removeItem("galactic_tours_session_id");
+        localStorage.removeItem("galactic_tours_user_name");
+        window.location.href = "login.html";
+      });
+    }
   </script>
+
   <script src="assistant.js"></script>
-  </body>
-  </html>
+</body>
+</html>
