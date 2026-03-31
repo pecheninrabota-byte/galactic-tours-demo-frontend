@@ -17,6 +17,9 @@
       --accent: #dfeaf7;
       --shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
       --sidebar-width: 250px;
+      --success: #b7d9c0;
+      --warning: #f0d7a1;
+      --hero-glow: rgba(122, 164, 224, 0.18);
     }
 
     * {
@@ -36,6 +39,11 @@
 
     body {
       min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
     .app-shell {
@@ -185,28 +193,89 @@
 
     .profile-chip,
     .logout-btn,
-    .secondary-btn {
+    .secondary-btn,
+    .primary-btn,
+    .ghost-btn,
+    .chip-btn,
+    .filter-chip {
       border-radius: 999px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.18s ease;
+      font-family: inherit;
+    }
+
+    .profile-chip,
+    .logout-btn,
+    .secondary-btn,
+    .ghost-btn,
+    .chip-btn,
+    .filter-chip {
       border: 1px solid var(--line);
       background: rgba(255,255,255,0.03);
       color: var(--text);
       padding: 12px 16px;
-      font-size: 14px;
-      cursor: pointer;
     }
 
     .logout-btn:hover,
-    .secondary-btn:hover {
+    .secondary-btn:hover,
+    .ghost-btn:hover,
+    .chip-btn:hover,
+    .filter-chip:hover {
       background: rgba(255,255,255,0.06);
     }
 
+    .primary-btn {
+      border: none;
+      background: #edf5fc;
+      color: #10243d;
+      padding: 13px 18px;
+      font-weight: 700;
+      box-shadow: 0 12px 30px rgba(221, 236, 249, 0.12);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px rgba(221, 236, 249, 0.16);
+    }
+
     .hero-card {
-      border-radius: 28px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(20,35,57,0.96), rgba(15,27,44,0.96));
+      background:
+        radial-gradient(circle at top right, var(--hero-glow), transparent 24%),
+        linear-gradient(180deg, rgba(20,35,57,0.98), rgba(15,27,44,0.96));
       box-shadow: var(--shadow);
-      padding: 28px;
+      padding: 30px;
       margin-bottom: 22px;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -120px -160px auto;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 62%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 420px;
+      gap: 22px;
+      align-items: stretch;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-left {
+      display: grid;
+      gap: 18px;
+      align-content: start;
     }
 
     .hero-eyebrow {
@@ -222,32 +291,135 @@
       background: rgba(255,255,255,0.04);
       border: 1px solid var(--line);
       width: fit-content;
-      margin-bottom: 18px;
     }
 
     .hero-title {
       margin: 0;
       font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(34px, 4vw, 54px);
+      font-size: clamp(34px, 4vw, 56px);
       line-height: 1.02;
       letter-spacing: -0.03em;
       font-weight: 600;
+      max-width: 760px;
     }
 
     .hero-sub {
       color: var(--muted);
-      line-height: 1.75;
+      line-height: 1.8;
       font-size: 16px;
-      margin-top: 20px;
-      max-width: 780px;
+      max-width: 760px;
     }
 
-    .search-card {
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .hero-side {
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .hero-side-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .hero-side-copy {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .stage-box {
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(12,24,40,0.95), rgba(9,19,33,0.95));
+      display: grid;
+      gap: 12px;
+    }
+
+    .stage-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stage-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(223, 234, 247, 0.08);
+      border: 1px solid rgba(223, 234, 247, 0.12);
+      color: #eef5fc;
+      font-size: 14px;
+      width: fit-content;
+    }
+
+    .stage-message {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 22px;
+    }
+
+    .card {
       border-radius: 24px;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      padding: 18px;
-      margin-top: 22px;
+      background: linear-gradient(180deg, rgba(14,26,43,0.96), rgba(11,22,38,0.96));
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .card-subtitle {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+      margin-top: -4px;
+      margin-bottom: 18px;
+    }
+
+    .search-panel {
+      display: grid;
+      gap: 16px;
     }
 
     .search-input {
@@ -256,78 +428,189 @@
       background: rgba(255,255,255,0.03);
       color: var(--text);
       border-radius: 18px;
-      padding: 16px 18px;
+      padding: 15px 16px;
       outline: none;
       font-size: 15px;
+      font-family: inherit;
     }
 
     .search-input::placeholder {
-      color: #8da5c5;
+      color: rgba(169, 184, 205, 0.9);
     }
 
-    .grid {
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .filter-chip.active {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    .recommended-grid,
+    .knowledge-grid,
+    .quick-grid,
+    .helper-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .knowledge-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .item-card {
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+      min-height: 180px;
+    }
+
+    .item-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      font-size: 20px;
+    }
+
+    .item-title {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .item-copy {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .meta-badge {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .stats-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 20px;
+      gap: 14px;
     }
 
-    .knowledge-card {
-      border-radius: 24px;
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(14,26,43,0.96), rgba(11,22,38,0.96));
-      box-shadow: var(--shadow);
-      padding: 22px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 230px;
+    .stat-box {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
     }
 
-    .knowledge-top {
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .stat-copy {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+
+    .helper-list {
       display: grid;
       gap: 12px;
     }
 
-    .knowledge-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 18px;
+    .helper-item {
       display: grid;
-      place-items: center;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--line);
-      font-size: 24px;
+      grid-template-columns: 14px 1fr;
+      gap: 12px;
+      align-items: start;
     }
 
-    .knowledge-title {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 700;
-      line-height: 1.25;
+    .helper-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 6px;
+      background: rgba(223, 234, 247, 0.9);
+      box-shadow: 0 0 14px rgba(223, 234, 247, 0.2);
     }
 
-    .knowledge-text {
-      color: var(--muted);
-      line-height: 1.7;
+    .helper-copy {
+      display: grid;
+      gap: 4px;
+    }
+
+    .helper-title {
       font-size: 15px;
-    }
-
-    .knowledge-link {
-      margin-top: 20px;
-      color: #e9f3fb;
-      text-decoration: none;
       font-weight: 600;
-      font-size: 15px;
-      cursor: pointer;
+      line-height: 1.5;
     }
 
-    .knowledge-link:hover {
-      opacity: 0.88;
+    .helper-sub {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
     }
 
-    @media (max-width: 1120px) {
-      .grid {
-        grid-template-columns: 1fr 1fr;
+    .empty-note {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      padding: 8px 0;
+    }
+
+    @media (max-width: 1320px) {
+      .hero-grid,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .recommended-grid,
+      .knowledge-grid,
+      .quick-grid,
+      .helper-grid,
+      .stats-grid {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -339,10 +622,6 @@
       .sidebar {
         border-right: none;
         border-bottom: 1px solid var(--line);
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
       }
     }
 
@@ -357,8 +636,23 @@
       }
 
       .hero-card,
-      .knowledge-card {
+      .card {
         border-radius: 22px;
+      }
+
+      .hero-title {
+        font-size: 34px;
+      }
+
+      .topbar-right,
+      .hero-actions {
+        width: 100%;
+      }
+
+      .topbar-right > *,
+      .hero-actions > * {
+        width: 100%;
+        justify-content: center;
       }
     }
   </style>
@@ -399,14 +693,14 @@
       </div>
 
       <div class="sidebar-footer">
-        Здесь будет внутренняя навигация сотрудника: адаптация, знания, сервисы и поддержка.
+        База знаний теперь работает как часть маршрута адаптации: показывает актуальные материалы под текущий этап сотрудника.
       </div>
     </aside>
 
     <main class="main">
       <div class="topbar">
         <div class="topbar-left">
-          <div class="page-kicker">Workspace · Knowledge Base</div>
+          <div class="page-kicker">Workspace · Stage-aware knowledge base</div>
           <h1 class="page-title">База знаний</h1>
         </div>
 
@@ -418,88 +712,206 @@
       </div>
 
       <section class="hero-card">
-        <div class="hero-eyebrow">Knowledge · Internal materials</div>
-        <h2 class="hero-title">Все важные материалы в одном месте</h2>
-        <div class="hero-sub">
-          Здесь сотрудник может быстро находить инструкции, внутренние сервисы, HR-материалы, информацию по льготам, документам и ключевым процессам компании.
-        </div>
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-eyebrow">Knowledge system · Contextual guidance</div>
 
-        <div class="search-card">
-          <input
-            id="knowledgeSearch"
-            class="search-input"
-            type="text"
-            placeholder="Поиск по базе знаний..."
-          />
+            <h2 id="heroTitle" class="hero-title">
+              База знаний, которая подстраивается под ваш этап адаптации
+            </h2>
+
+            <div id="heroSub" class="hero-sub">
+              Здесь собраны материалы, которые помогают двигаться по маршруту адаптации без перегруза. Сначала — самое актуальное для вашего этапа, потом — всё остальное.
+            </div>
+
+            <div class="hero-actions">
+              <button class="primary-btn" onclick="window.location.href='onboarding.html'">Открыть адаптацию</button>
+              <button class="ghost-btn" onclick="openAssistant()">Спросить ассистента</button>
+              <button class="ghost-btn" onclick="window.location.href='dashboard.html'">Вернуться на главную</button>
+            </div>
+          </div>
+
+          <div class="hero-side">
+            <h3 class="hero-side-title">Контекст знаний</h3>
+            <div class="hero-side-copy">
+              Вместо одинакового списка для всех система показывает, что полезнее именно сейчас — в зависимости от этапа адаптации.
+            </div>
+
+            <div class="stage-box">
+              <div class="stage-line">
+                <div id="stagePill" class="stage-pill">Этап 1</div>
+                <div id="progressPill" class="stage-pill">Прогресс 0%</div>
+              </div>
+
+              <div id="stageMessage" class="stage-message">
+                Подбираем базовые материалы для старта и первых шагов в системе.
+              </div>
+            </div>
+
+            <button id="openStageFlowBtn" class="primary-btn" style="width:100%;" onclick="window.location.href='onboarding.html'">
+              Продолжить маршрут
+            </button>
+          </div>
         </div>
       </section>
 
-      <section id="knowledgeGrid" class="grid">
-        <article class="knowledge-card" data-title="КосмоСтрах полис врачи клиники дмс">
-          <div class="knowledge-top">
-            <div class="knowledge-icon">🩺</div>
-            <h3 class="knowledge-title">КосмоСтрах</h3>
-            <div class="knowledge-text">
-              Полис, план обслуживания, поиск врача, список клиник и медицинские вопросы сотрудника.
+      <section class="content-grid">
+        <div class="stack">
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Рекомендовано для текущего этапа</h3>
+              <button class="secondary-btn" onclick="window.location.href='onboarding.html'">Связать с маршрутом</button>
             </div>
-          </div>
-          <a class="knowledge-link" onclick="openAssistantWithPrompt('Расскажи про КосмоСтрах')">Открыть тему →</a>
-        </article>
 
-        <article class="knowledge-card" data-title="Бонусы магазин сертификаты баллы мерч">
-          <div class="knowledge-top">
-            <div class="knowledge-icon">🎁</div>
-            <h3 class="knowledge-title">Магазин бонусов</h3>
-            <div class="knowledge-text">
-              Всё про бонусные баллы, сертификаты, внутренние подарки и способы накопления.
+            <div class="card-subtitle">
+              Это главная зона. Здесь показываются материалы, которые логически подходят именно под текущий этап адаптации.
             </div>
-          </div>
-          <a class="knowledge-link" onclick="openAssistantWithPrompt('Как работает магазин бонусов?')">Открыть тему →</a>
-        </article>
 
-        <article class="knowledge-card" data-title="Отгулы выходные отдых остаток сроки">
-          <div class="knowledge-top">
-            <div class="knowledge-icon">⏰</div>
-            <h3 class="knowledge-title">Отгулы</h3>
-            <div class="knowledge-text">
-              Остаток отгулов, сроки действия, правила использования и базовая логика отдыха.
-            </div>
-          </div>
-          <a class="knowledge-link" onclick="openAssistantWithPrompt('Расскажи про отгулы')">Открыть тему →</a>
-        </article>
+            <div id="recommendedGrid" class="recommended-grid"></div>
+          </article>
 
-        <article class="knowledge-card" data-title="Galactic Academy обучение курсы развитие">
-          <div class="knowledge-top">
-            <div class="knowledge-icon">🎓</div>
-            <h3 class="knowledge-title">Galactic Academy</h3>
-            <div class="knowledge-text">
-              Обучающие треки, вход в систему, восстановление доступа и заявки на обучение.
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Все материалы</h3>
             </div>
-          </div>
-          <a class="knowledge-link" onclick="openAssistantWithPrompt('Как войти в Galactic Academy?')">Открыть тему →</a>
-        </article>
 
-        <article class="knowledge-card" data-title="StarTrack цели эффективность показатели">
-          <div class="knowledge-top">
-            <div class="knowledge-icon">📈</div>
-            <h3 class="knowledge-title">StarTrack</h3>
-            <div class="knowledge-text">
-              Корпоративная система целей, показателей и понимания своего вклада в результаты команды.
+            <div class="card-subtitle">
+              Можно искать по темам, фильтровать материалы и открывать нужные статьи через ассистента или прямой переход в сценарий.
             </div>
-          </div>
-          <a class="knowledge-link" onclick="openAssistantWithPrompt('Что такое StarTrack?')">Открыть тему →</a>
-        </article>
 
-        <article class="knowledge-card" data-title="Личный кабинет документы подпись уведомления">
-          <div class="knowledge-top">
-            <div class="knowledge-icon">💼</div>
-            <h3 class="knowledge-title">Личный кабинет экипажа</h3>
-            <div class="knowledge-text">
-              Документы, подписи, уведомления, регистрация и базовые действия сотрудника.
+            <div class="search-panel">
+              <input
+                id="searchInput"
+                class="search-input"
+                type="text"
+                placeholder="Например: испытательный срок, адаптация, роль, документы..."
+              />
+
+              <div class="filter-row">
+                <button class="filter-chip active" data-filter="all">Все</button>
+                <button class="filter-chip" data-filter="adaptation">Адаптация</button>
+                <button class="filter-chip" data-filter="probation">Испытательный срок</button>
+                <button class="filter-chip" data-filter="role">Роль</button>
+                <button class="filter-chip" data-filter="processes">Процессы</button>
+                <button class="filter-chip" data-filter="support">Поддержка</button>
+              </div>
             </div>
-          </div>
-          <a class="knowledge-link" onclick="openAssistantWithPrompt('Расскажи про личный кабинет экипажа')">Открыть тему →</a>
-        </article>
+
+            <div id="knowledgeGrid" class="knowledge-grid" style="margin-top:18px;"></div>
+          </article>
+        </div>
+
+        <div class="stack">
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Статус knowledge layer</h3>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-box">
+                <div class="stat-label">Текущий этап</div>
+                <div id="statStage" class="stat-value">1</div>
+                <div class="stat-copy">Контекст для рекомендаций</div>
+              </div>
+
+              <div class="stat-box">
+                <div class="stat-label">Прогресс</div>
+                <div id="statProgress" class="stat-value">0%</div>
+                <div class="stat-copy">Подтягивается из адаптации</div>
+              </div>
+
+              <div class="stat-box">
+                <div class="stat-label">Материалов</div>
+                <div id="statMaterials" class="stat-value">0</div>
+                <div class="stat-copy">В текущем knowledge-каталоге</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Быстрые сценарии</h3>
+            </div>
+
+            <div class="quick-grid">
+              <div class="item-card">
+                <div class="item-icon">🚀</div>
+                <div class="item-title">Первые шаги</div>
+                <div class="item-copy">Быстрый вход в базовые материалы по старту, правилам и навигации по рабочему контуру.</div>
+                <div class="item-actions">
+                  <button class="secondary-btn" onclick="applyQuickFilter('adaptation')">Показать</button>
+                </div>
+              </div>
+
+              <div class="item-card">
+                <div class="item-icon">⏳</div>
+                <div class="item-title">Испытательный срок</div>
+                <div class="item-copy">Подборка материалов о задачах периода адаптации, ожиданиях и контрольных точках.</div>
+                <div class="item-actions">
+                  <button class="secondary-btn" onclick="applyQuickFilter('probation')">Открыть</button>
+                </div>
+              </div>
+
+              <div class="item-card">
+                <div class="item-icon">🧠</div>
+                <div class="item-title">Понимание роли</div>
+                <div class="item-copy">Материалы о зоне ответственности, внутренних ожиданиях и рабочем контексте сотрудника.</div>
+                <div class="item-actions">
+                  <button class="secondary-btn" onclick="applyQuickFilter('role')">Перейти</button>
+                </div>
+              </div>
+
+              <div class="item-card">
+                <div class="item-icon">💬</div>
+                <div class="item-title">Спросить у ассистента</div>
+                <div class="item-copy">Если нужного материала не видно сразу, ассистент поможет быстро зайти в нужный сценарий.</div>
+                <div class="item-actions">
+                  <button class="secondary-btn" onclick="askAssistantPreset('Покажи материалы по адаптации')">Открыть чат</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Как это работает</h3>
+            </div>
+
+            <div class="helper-list">
+              <div class="helper-item">
+                <div class="helper-dot"></div>
+                <div class="helper-copy">
+                  <div class="helper-title">Этап адаптации влияет на рекомендации</div>
+                  <div class="helper-sub">Knowledge-слой меняет приоритет материалов в зависимости от вашего текущего этапа.</div>
+                </div>
+              </div>
+
+              <div class="helper-item">
+                <div class="helper-dot"></div>
+                <div class="helper-copy">
+                  <div class="helper-title">Поиск работает по заголовкам, описаниям и тегам</div>
+                  <div class="helper-sub">Можно быстро отфильтровать каталог по теме, не переходя между страницами.</div>
+                </div>
+              </div>
+
+              <div class="helper-item">
+                <div class="helper-dot"></div>
+                <div class="helper-copy">
+                  <div class="helper-title">Ассистент встроен в сценарий</div>
+                  <div class="helper-sub">Из базы знаний можно сразу переходить в чат с готовым вопросом, не ломая общий UX.</div>
+                </div>
+              </div>
+
+              <div class="helper-item">
+                <div class="helper-dot"></div>
+                <div class="helper-copy">
+                  <div class="helper-title">Это уже фундамент для умного HR SaaS</div>
+                  <div class="helper-sub">Следующим шагом можно связывать знания не только со stage, но и с ролью сотрудника.</div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
       </section>
     </main>
   </div>
@@ -508,6 +920,102 @@
     const AUTH_KEY = "galactic_tours_auth";
     const USER_LOGIN_KEY = "galactic_tours_login";
     const USER_NAME_KEY = "galactic_tours_user_name";
+    const SESSION_KEY = "galactic_tours_session_id";
+    const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
+    const API_BASE = "https://galactic-tours-demo-backend-production.up.railway.app/api";
+
+    const FALLBACK_STAGE_MESSAGES = {
+      1: "Сейчас в приоритете стартовые материалы: базовая адаптация, первые шаги и навигация по рабочему контуру.",
+      2: "Сейчас полезнее материалы по испытательному сроку, ожиданиям по роли и внутренним процессам.",
+      3: "Сейчас в фокусе закрепление роли, самостоятельная работа и завершение основного маршрута адаптации."
+    };
+
+    const KNOWLEDGE_ITEMS = [
+      {
+        id: "welcome-start",
+        icon: "🚀",
+        title: "Первые шаги нового сотрудника",
+        description: "Что открыть, проверить и пройти в первую очередь после входа в систему и старта адаптации.",
+        category: "adaptation",
+        stages: [1],
+        tags: ["адаптация", "первый день", "старт", "онбординг"],
+        assistantPrompt: "Что нужно знать новому сотруднику?"
+      },
+      {
+        id: "company-navigation",
+        icon: "🛰️",
+        title: "Навигация по рабочему контуру",
+        description: "Как ориентироваться в системе, где искать ключевые разделы и как не потеряться в корпоративной среде.",
+        category: "adaptation",
+        stages: [1],
+        tags: ["адаптация", "навигация", "система", "портал"],
+        assistantPrompt: "Как ориентироваться в системе?"
+      },
+      {
+        id: "probation-overview",
+        icon: "⏳",
+        title: "Что важно знать про испытательный срок",
+        description: "Краткий сценарий про ожидания, контрольные точки и общую логику периода адаптации.",
+        category: "probation",
+        stages: [1, 2],
+        tags: ["испытательный срок", "адаптация", "ожидания"],
+        assistantPrompt: "Что важно знать про испытательный срок?"
+      },
+      {
+        id: "role-expectations",
+        icon: "🧠",
+        title: "Как понять свою роль и ожидания",
+        description: "Материал для понимания зоны ответственности, формата работы и ожиданий от сотрудника.",
+        category: "role",
+        stages: [2, 3],
+        tags: ["роль", "обязанности", "ожидания", "работа"],
+        assistantPrompt: "Расскажи про мою роль"
+      },
+      {
+        id: "communication-process",
+        icon: "🤝",
+        title: "Как устроены рабочие взаимодействия",
+        description: "Процессы взаимодействия, вопросы к руководителю и базовая логика внутренней координации.",
+        category: "processes",
+        stages: [2],
+        tags: ["процессы", "коммуникация", "руководитель", "команда"],
+        assistantPrompt: "Как устроены рабочие взаимодействия?"
+      },
+      {
+        id: "knowledge-usage",
+        icon: "📚",
+        title: "Как пользоваться базой знаний",
+        description: "Как искать материалы, зачем нужны сценарии и как база знаний связана с маршрутом адаптации.",
+        category: "adaptation",
+        stages: [1, 2, 3],
+        tags: ["база знаний", "поиск", "сценарии"],
+        assistantPrompt: "Как пользоваться базой знаний?"
+      },
+      {
+        id: "support-entry",
+        icon: "💬",
+        title: "Когда лучше идти к ассистенту",
+        description: "Как использовать HR-ассистента для типовых вопросов, быстрых ответов и навигации по знаниям.",
+        category: "support",
+        stages: [1, 2, 3],
+        tags: ["ассистент", "поддержка", "вопросы"],
+        assistantPrompt: "В чём ты можешь помочь?"
+      },
+      {
+        id: "self-sufficiency",
+        icon: "✅",
+        title: "Переход к самостоятельной работе",
+        description: "Материал для финального этапа: как закрепить роль и выйти из базового онбординга в рабочий режим.",
+        category: "role",
+        stages: [3],
+        tags: ["самостоятельность", "финальный этап", "роль"],
+        assistantPrompt: "Что дальше после адаптации?"
+      }
+    ];
+
+    let activeFilter = "all";
+    let currentStage = 1;
+    let currentProgress = 0;
 
     const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
     if (!isAuthorized) {
@@ -515,42 +1023,283 @@
     }
 
     const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
-    const savedUserName = localStorage.getItem(USER_NAME_KEY) || savedLogin;
-    document.getElementById("profileChip").textContent = savedUserName;
+    const savedName = localStorage.getItem(USER_NAME_KEY) || "";
+    const profileChip = document.getElementById("profileChip");
 
-    document.getElementById("logoutBtn").addEventListener("click", function() {
+    function getDisplayName() {
+      const rawProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
+
+      if (rawProfile) {
+        try {
+          const profile = JSON.parse(rawProfile);
+          const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
+          if (fullName) return fullName;
+          if (profile.firstName) return profile.firstName;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      return savedName || savedLogin || "сотрудник";
+    }
+
+    profileChip.textContent = getDisplayName();
+
+    document.getElementById("logoutBtn").addEventListener("click", function () {
       localStorage.removeItem(AUTH_KEY);
       localStorage.removeItem(USER_LOGIN_KEY);
-      localStorage.removeItem("galactic_tours_session_id");
-      localStorage.removeItem("galactic_tours_user_name");
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(USER_NAME_KEY);
       window.location.href = "login.html";
     });
 
-    const searchInput = document.getElementById("knowledgeSearch");
-    const cards = Array.from(document.querySelectorAll(".knowledge-card"));
+    function normalizeDashboardData(data) {
+      const safe = data && typeof data === "object" ? data : {};
+      const stage = Number(safe.stage) || 1;
+      const progress = Number.isFinite(Number(safe.progress)) ? Number(safe.progress) : 0;
+      const stageMessage = safe.stage_message || FALLBACK_STAGE_MESSAGES[stage] || FALLBACK_STAGE_MESSAGES[1];
 
-    searchInput.addEventListener("input", function() {
-      const query = this.value.trim().toLowerCase();
+      return {
+        stage,
+        progress: Math.max(0, Math.min(100, progress)),
+        stage_message: stageMessage
+      };
+    }
 
-      cards.forEach(card => {
-        const haystack = (card.dataset.title || "").toLowerCase();
-        card.style.display = !query || haystack.includes(query) ? "" : "none";
+    function renderHero(state) {
+      const displayName = getDisplayName();
+      document.getElementById("heroTitle").textContent = `${displayName}, знания подстроены под ваш этап адаптации`;
+      document.getElementById("heroSub").textContent = `Сначала вы видите приоритетные материалы для этапа ${state.stage}, а затем — весь каталог. Это помогает не перегружать сотрудника лишней информацией и вести его по понятному HR-first сценарию.`;
+
+      document.getElementById("stagePill").textContent = `Этап ${state.stage}`;
+      document.getElementById("progressPill").textContent = `Прогресс ${state.progress}%`;
+      document.getElementById("stageMessage").textContent = state.stage_message;
+
+      document.getElementById("statStage").textContent = state.stage;
+      document.getElementById("statProgress").textContent = `${state.progress}%`;
+      document.getElementById("statMaterials").textContent = KNOWLEDGE_ITEMS.length;
+    }
+
+    function getRecommendedItems(stage) {
+      const exactStage = KNOWLEDGE_ITEMS.filter(item => item.stages.includes(stage));
+      const universal = KNOWLEDGE_ITEMS.filter(item => item.stages.length === 3);
+      const merged = [...exactStage, ...universal].filter((item, index, arr) => {
+        return arr.findIndex(x => x.id === item.id) === index;
       });
-    });
 
-    function openAssistantWithPrompt(promptText) {
+      return merged.slice(0, 4);
+    }
+
+    function renderRecommended(stage) {
+      const container = document.getElementById("recommendedGrid");
+      const items = getRecommendedItems(stage);
+
+      if (!items.length) {
+        container.innerHTML = `<div class="empty-note">Для этого этапа пока нет отдельных рекомендаций. Можно использовать общий каталог ниже.</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(renderKnowledgeCard).join("");
+    }
+
+    function renderKnowledgeCard(item) {
+      const stageText = item.stages.length === 3
+        ? "Подходит для всех этапов"
+        : `Этапы: ${item.stages.join(", ")}`;
+
+      return `
+        <div class="item-card">
+          <div class="item-icon">${item.icon}</div>
+          <div class="item-title">${escapeHtml(item.title)}</div>
+          <div class="item-copy">${escapeHtml(item.description)}</div>
+          <div class="item-meta">
+            <span class="meta-badge">${categoryLabel(item.category)}</span>
+            <span class="meta-badge">${stageText}</span>
+          </div>
+          <div class="item-actions">
+            <button class="secondary-btn" onclick="askAssistantPreset('${escapeJsString(item.assistantPrompt)}')">Открыть через ассистента</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function categoryLabel(category) {
+      const map = {
+        adaptation: "Адаптация",
+        probation: "Испытательный срок",
+        role: "Роль",
+        processes: "Процессы",
+        support: "Поддержка"
+      };
+      return map[category] || "Материал";
+    }
+
+    function getFilteredItems() {
+      const searchValue = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      return KNOWLEDGE_ITEMS.filter(item => {
+        const byFilter = activeFilter === "all" ? true : item.category === activeFilter;
+
+        const haystack = [
+          item.title,
+          item.description,
+          item.category,
+          ...(item.tags || [])
+        ].join(" ").toLowerCase();
+
+        const bySearch = searchValue ? haystack.includes(searchValue) : true;
+
+        return byFilter && bySearch;
+      });
+    }
+
+    function renderKnowledgeGrid() {
+      const grid = document.getElementById("knowledgeGrid");
+      const items = getFilteredItems();
+
+      if (!items.length) {
+        grid.innerHTML = `
+          <div class="empty-note">
+            По текущему фильтру ничего не найдено. Попробуйте другой запрос или сбросьте фильтр.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = items.map(renderKnowledgeCard).join("");
+    }
+
+    function setActiveFilter(filter) {
+      activeFilter = filter;
+
+      document.querySelectorAll(".filter-chip").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.filter === filter);
+      });
+
+      renderKnowledgeGrid();
+    }
+
+    function applyQuickFilter(filter) {
+      setActiveFilter(filter);
+      document.getElementById("searchInput").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    async function askAssistantPreset(text) {
       if (typeof openAssistant === "function") {
         openAssistant();
+      }
 
-        setTimeout(() => {
-          if (typeof callAssistant === "function") {
-            callAssistant(promptText, true);
+      setTimeout(async () => {
+        if (typeof callAssistant === "function") {
+          try {
+            await callAssistant(text);
+            return;
+          } catch (error) {
+            console.error(error);
           }
-        }, 150);
+        }
+
+        if (typeof addAssistantMessage === "function") {
+          addAssistantMessage("user", text);
+        }
+      }, 180);
+    }
+
+    function renderHelperContext(stage) {
+      const button = document.getElementById("openStageFlowBtn");
+
+      if (stage === 1) {
+        button.textContent = "Продолжить старт адаптации";
+      } else if (stage === 2) {
+        button.textContent = "Открыть этап закрепления";
+      } else {
+        button.textContent = "Завершить маршрут адаптации";
       }
     }
 
-    window.openAssistantWithPrompt = openAssistantWithPrompt;
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeJsString(value) {
+      return String(value)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, " ");
+    }
+
+    async function loadStageContext() {
+      const sessionId = localStorage.getItem(SESSION_KEY);
+
+      if (!sessionId) {
+        const fallback = {
+          stage: 1,
+          progress: 0,
+          stage_message: FALLBACK_STAGE_MESSAGES[1]
+        };
+
+        currentStage = fallback.stage;
+        currentProgress = fallback.progress;
+        renderHero(fallback);
+        renderRecommended(currentStage);
+        renderHelperContext(currentStage);
+        renderKnowledgeGrid();
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/tasks?session_id=${encodeURIComponent(sessionId)}`);
+        if (!res.ok) throw new Error("Tasks request failed");
+
+        const data = await res.json();
+        const state = normalizeDashboardData(data);
+
+        currentStage = state.stage;
+        currentProgress = state.progress;
+
+        renderHero(state);
+        renderRecommended(currentStage);
+        renderHelperContext(currentStage);
+        renderKnowledgeGrid();
+      } catch (error) {
+        console.error(error);
+
+        const fallback = {
+          stage: 1,
+          progress: 0,
+          stage_message: FALLBACK_STAGE_MESSAGES[1]
+        };
+
+        currentStage = fallback.stage;
+        currentProgress = fallback.progress;
+
+        renderHero(fallback);
+        renderRecommended(currentStage);
+        renderHelperContext(currentStage);
+        renderKnowledgeGrid();
+      }
+    }
+
+    document.querySelectorAll(".filter-chip").forEach(btn => {
+      btn.addEventListener("click", function () {
+        setActiveFilter(this.dataset.filter);
+      });
+    });
+
+    document.getElementById("searchInput").addEventListener("input", function () {
+      renderKnowledgeGrid();
+    });
+
+    window.applyQuickFilter = applyQuickFilter;
+    window.askAssistantPreset = askAssistantPreset;
+
+    renderKnowledgeGrid();
+    loadStageContext();
   </script>
 
   <script src="assistant.js"></script>
