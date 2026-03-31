@@ -2,110 +2,902 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Профиль сотрудника</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galactic Tours — Профиль сотрудника</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Inter, Arial;
-      background: #07111d;
-      color: #fff;
+    :root {
+      --bg: #07111d;
+      --bg-soft: #0c1727;
+      --panel: rgba(15, 27, 44, 0.94);
+      --panel-2: rgba(19, 34, 55, 0.92);
+      --line: rgba(180, 204, 232, 0.12);
+      --line-2: rgba(180, 204, 232, 0.2);
+      --text: #f4f7fb;
+      --muted: #a9b8cd;
+      --accent: #dfeaf7;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+      --sidebar-width: 250px;
+      --success: #b7d9c0;
     }
 
-    .container {
-      max-width: 900px;
-      margin: 60px auto;
-      padding: 20px;
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(91, 124, 170, 0.16), transparent 28%),
+        linear-gradient(180deg, #06101b 0%, #07111d 100%);
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(8, 18, 31, 0.78);
+      backdrop-filter: blur(12px);
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 6px 8px;
+    }
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+      border: 1px solid var(--line);
+      color: #f0f5fb;
+      font-size: 20px;
+    }
+
+    .brand-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-kicker {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .nav-group {
+      display: grid;
+      gap: 10px;
+    }
+
+    .nav-label {
+      padding: 0 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      padding: 14px 14px;
+      border-radius: 18px;
+      border: 1px solid transparent;
+      transition: 0.18s ease;
+      background: transparent;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: var(--line);
+    }
+
+    .nav-link.active {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--line);
+    }
+
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .main {
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .topbar-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .page-kicker {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .page-title {
+      font-size: 34px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .profile-chip,
+    .logout-btn,
+    .edit-btn,
+    .save-btn,
+    .cancel-btn,
+    .secondary-btn {
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 12px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover,
+    .edit-btn:hover,
+    .save-btn:hover,
+    .cancel-btn:hover,
+    .secondary-btn:hover {
+      background: rgba(255,255,255,0.06);
+    }
+
+    .save-btn {
+      background: #edf5fc;
+      color: #10243d;
+      border: none;
+      font-weight: 700;
+    }
+
+    .hero-card {
+      border-radius: 28px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(20,35,57,0.96), rgba(15,27,44,0.96));
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 22px;
+    }
+
+    .hero-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      width: fit-content;
+      margin-bottom: 18px;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(32px, 4vw, 52px);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+      font-weight: 600;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 16px;
+      margin-top: 16px;
+      max-width: 760px;
+    }
+
+    .notice {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(183, 217, 192, 0.1);
+      border: 1px solid rgba(183, 217, 192, 0.14);
+      color: var(--success);
+      display: none;
+      font-size: 14px;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 22px;
     }
 
     .card {
-      background: #0f223b;
-      padding: 30px;
-      border-radius: 20px;
-      margin-bottom: 20px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(14,26,43,0.96), rgba(11,22,38,0.96));
+      box-shadow: var(--shadow);
+      padding: 22px;
     }
 
-    .title {
-      font-size: 28px;
-      margin-bottom: 20px;
+    .card-title {
+      margin: 0 0 16px;
+      font-size: 24px;
+      font-weight: 700;
     }
 
-    .row {
-      margin-bottom: 12px;
+    .profile-main {
+      display: grid;
+      gap: 18px;
+    }
+
+    .avatar-wrap {
+      display: grid;
+      justify-items: center;
+      gap: 16px;
+    }
+
+    .avatar {
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.14), rgba(255,255,255,0.04) 45%, rgba(255,255,255,0.02) 70%);
+      border: 1px solid var(--line);
+      font-size: 40px;
+      font-weight: 700;
+      color: #f2f7fc;
+    }
+
+    .status-badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(183, 217, 192, 0.12);
+      border: 1px solid rgba(183, 217, 192, 0.16);
+      color: var(--success);
+      font-size: 13px;
+      width: fit-content;
+    }
+
+    .person-name {
+      font-size: 30px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .person-role {
       font-size: 16px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
     }
 
-    .btn {
-      padding: 12px 20px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 6px;
     }
 
-    .danger {
-      background: #ff5c5c;
-      color: white;
+    .metric {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
     }
 
-    .logout {
-      background: #fff;
-      color: black;
-      margin-left: 10px;
+    .metric-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 8px;
     }
 
+    .metric-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .section-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .field-value {
+      min-height: 24px;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .field-input,
+    .field-textarea,
+    .field-select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px 14px;
+      outline: none;
+      font-size: 15px;
+      font-family: inherit;
+      display: none;
+    }
+
+    .field-textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .card.editing .field-value {
+      display: none;
+    }
+
+    .card.editing .field-input,
+    .card.editing .field-textarea,
+    .card.editing .field-select {
+      display: block;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1180px) {
+      .profile-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .main {
+        padding: 16px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-head {
+        flex-direction: column;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .card,
+      .hero-card {
+        border-radius: 22px;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">✦</div>
+        <div class="brand-copy">
+          <div class="brand-kicker">Galactic Tours</div>
+          <div class="brand-title">Employee Platform</div>
+        </div>
+      </div>
 
-<div class="container">
-  <div class="card">
-    <div class="title">Профиль сотрудника</div>
+      <div class="nav-group">
+        <div class="nav-label">Навигация</div>
 
-    <div class="row">👤 Имя: <span id="name"></span></div>
-    <div class="row">📊 Прогресс: <span id="progress"></span>%</div>
-    <div class="row">🚀 Этап: <span id="stage"></span></div>
+        <a class="nav-link" href="dashboard.html">
+          <span class="nav-icon">⌂</span>
+          <span>Главная</span>
+        </a>
+
+        <a class="nav-link" href="onboarding.html">
+          <span class="nav-icon">🚀</span>
+          <span>Адаптация</span>
+        </a>
+
+        <a class="nav-link" href="knowledge.html">
+          <span class="nav-icon">📚</span>
+          <span>База знаний</span>
+        </a>
+
+        <a class="nav-link active" href="profile.html">
+          <span class="nav-icon">👤</span>
+          <span>Профиль</span>
+        </a>
+      </div>
+
+      <div class="sidebar-footer">
+        Здесь будет внутренняя навигация сотрудника: адаптация, знания, сервисы и поддержка.
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="page-kicker">Workspace · Employee profile</div>
+          <h1 class="page-title">Профиль сотрудника</h1>
+        </div>
+
+        <div class="topbar-right">
+          <div id="profileChip" class="profile-chip">Сотрудник</div>
+          <button class="secondary-btn" onclick="openAssistant()">Открыть ассистента</button>
+          <button id="logoutBtn" class="logout-btn">Выйти</button>
+        </div>
+      </div>
+
+      <section class="hero-card">
+        <div class="hero-head">
+          <div>
+            <div class="hero-eyebrow">Employee card · Editable profile</div>
+            <h2 class="hero-title">Карточка сотрудника в рабочем контуре</h2>
+            <div class="hero-sub">
+              Здесь хранятся базовые данные сотрудника, контактная информация, роль, статус адаптации и дополнительные сведения, которые можно редактировать без выхода из системы.
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button id="editProfileBtn" class="edit-btn">Редактировать</button>
+            <button id="saveProfileBtn" class="save-btn" style="display:none;">Сохранить</button>
+            <button id="cancelEditBtn" class="cancel-btn" style="display:none;">Отмена</button>
+          </div>
+        </div>
+
+        <div id="saveNotice" class="notice">Профиль сохранён.</div>
+      </section>
+
+      <section class="profile-layout">
+        <div class="stack">
+          <article id="leftCard" class="card">
+            <div class="profile-main">
+              <div class="avatar-wrap">
+                <div id="avatar" class="avatar">GT</div>
+                <div class="status-badge">В рабочем контуре</div>
+              </div>
+
+              <div id="displayFullName" class="person-name">Сотрудник Galactic Tours</div>
+              <div id="displayRole" class="person-role">Роль пока не заполнена</div>
+
+              <div class="metrics">
+                <div class="metric">
+                  <div class="metric-label">Этап адаптации</div>
+                  <div id="metricStage" class="metric-value">1</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Прогресс</div>
+                  <div id="metricProgress" class="metric-value">0%</div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">Быстрые действия</h3>
+            <div class="card-actions">
+              <button class="secondary-btn" onclick="window.location.href='onboarding.html'">Открыть адаптацию</button>
+              <button class="secondary-btn" onclick="window.location.href='knowledge.html'">Открыть базу знаний</button>
+              <button class="secondary-btn" onclick="resetProgress()">Сбросить адаптацию</button>
+            </div>
+          </article>
+        </div>
+
+        <div class="section-grid">
+          <article id="contactCard" class="card">
+            <h3 class="card-title">Контактная информация</h3>
+
+            <div class="field-grid">
+              <div class="field">
+                <div class="field-label">Имя</div>
+                <div class="field-value" data-view="firstName"></div>
+                <input class="field-input" data-input="firstName" type="text" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Фамилия</div>
+                <div class="field-value" data-view="lastName"></div>
+                <input class="field-input" data-input="lastName" type="text" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Отчество</div>
+                <div class="field-value" data-view="middleName"></div>
+                <input class="field-input" data-input="middleName" type="text" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Рабочая почта</div>
+                <div class="field-value" data-view="email"></div>
+                <input class="field-input" data-input="email" type="email" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Мобильный телефон</div>
+                <div class="field-value" data-view="phone"></div>
+                <input class="field-input" data-input="phone" type="text" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Город</div>
+                <div class="field-value" data-view="city"></div>
+                <input class="field-input" data-input="city" type="text" />
+              </div>
+            </div>
+          </article>
+
+          <article id="workCard" class="card">
+            <h3 class="card-title">Рабочая информация</h3>
+
+            <div class="field-grid">
+              <div class="field">
+                <div class="field-label">Должность</div>
+                <div class="field-value" data-view="role"></div>
+                <input class="field-input" data-input="role" type="text" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Подразделение</div>
+                <div class="field-value" data-view="department"></div>
+                <input class="field-input" data-input="department" type="text" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Руководитель</div>
+                <div class="field-value" data-view="manager"></div>
+                <input class="field-input" data-input="manager" type="text" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Формат работы</div>
+                <div class="field-value" data-view="workMode"></div>
+                <select class="field-select" data-input="workMode">
+                  <option value="Офис">Офис</option>
+                  <option value="Гибрид">Гибрид</option>
+                  <option value="Удалённо">Удалённо</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <div class="field-label">Дата старта</div>
+                <div class="field-value" data-view="startDate"></div>
+                <input class="field-input" data-input="startDate" type="text" />
+              </div>
+
+              <div class="field">
+                <div class="field-label">Статус</div>
+                <div class="field-value" data-view="employmentStatus"></div>
+                <select class="field-select" data-input="employmentStatus">
+                  <option value="В процессе адаптации">В процессе адаптации</option>
+                  <option value="Активный сотрудник">Активный сотрудник</option>
+                  <option value="На испытательном сроке">На испытательном сроке</option>
+                </select>
+              </div>
+            </div>
+          </article>
+
+          <article id="aboutCard" class="card">
+            <h3 class="card-title">О сотруднике</h3>
+
+            <div class="field">
+              <div class="field-label">О себе</div>
+              <div class="field-value" data-view="about"></div>
+              <textarea class="field-textarea" data-input="about"></textarea>
+            </div>
+
+            <div class="field" style="margin-top:18px;">
+              <div class="field-label">Интересы</div>
+              <div class="field-value" data-view="interests"></div>
+              <textarea class="field-textarea" data-input="interests"></textarea>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
   </div>
 
-  <div class="card">
-    <button class="btn danger" onclick="resetProgress()">Сбросить адаптацию</button>
-    <button class="btn logout" onclick="logout()">Выйти</button>
-  </div>
-</div>
+  <script>
+    const AUTH_KEY = "galactic_tours_auth";
+    const USER_LOGIN_KEY = "galactic_tours_login";
+    const USER_NAME_KEY = "galactic_tours_user_name";
+    const SESSION_KEY = "galactic_tours_session_id";
+    const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
+    const API_BASE = "https://galactic-tours-demo-backend-production.up.railway.app/api";
 
-<script>
-const API = "https://galactic-tours-demo-backend-production.up.railway.app/api";
+    const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
+    if (!isAuthorized) {
+      window.location.href = "login.html";
+    }
 
-const sessionId = localStorage.getItem("galactic_tours_session_id");
-const name = localStorage.getItem("galactic_tours_user_name") || "Неизвестно";
+    const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
+    document.getElementById("profileChip").textContent = savedLogin;
 
-document.getElementById("name").innerText = name;
+    document.getElementById("logoutBtn").addEventListener("click", function() {
+      localStorage.removeItem(AUTH_KEY);
+      localStorage.removeItem(USER_LOGIN_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(USER_NAME_KEY);
+      window.location.href = "login.html";
+    });
 
-async function loadProfile() {
-  const res = await fetch(`${API}/tasks?session_id=${sessionId}`);
-  const data = await res.json();
+    const defaultProfile = {
+      firstName: localStorage.getItem(USER_NAME_KEY) || "Новый",
+      lastName: "сотрудник",
+      middleName: "",
+      email: `${savedLogin}@galactic.local`.replace(/\s+/g, "").toLowerCase(),
+      phone: "+7 ",
+      city: "Москва",
+      role: "Специалист",
+      department: "People Operations",
+      manager: "Руководитель не указан",
+      workMode: "Гибрид",
+      startDate: "01.04.2026",
+      employmentStatus: "В процессе адаптации",
+      about: "Здесь можно кратко описать сотрудника, его контекст, зону ответственности и особенности роли.",
+      interests: "Путешествия, обучение, цифровые продукты"
+    };
 
-  document.getElementById("progress").innerText = data.progress;
-  document.getElementById("stage").innerText = data.stage;
-}
+    let profileData = loadProfileData();
+    let editing = false;
 
-async function resetProgress() {
-  await fetch(`${API}/reset/${sessionId}`, {
-    method: "POST"
-  });
+    function loadProfileData() {
+      try {
+        const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
+        if (!saved) return { ...defaultProfile };
+        return { ...defaultProfile, ...JSON.parse(saved) };
+      } catch (error) {
+        return { ...defaultProfile };
+      }
+    }
 
-  alert("Прогресс сброшен");
-  location.reload();
-}
+    function saveProfileData() {
+      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileData));
+      if (profileData.firstName) {
+        localStorage.setItem(USER_NAME_KEY, profileData.firstName);
+      }
+    }
 
-function logout() {
-  localStorage.clear();
-  window.location.href = "login.html";
-}
+    function getFullName() {
+      return [profileData.lastName, profileData.firstName, profileData.middleName]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+    }
 
-loadProfile();
-</script>
+    function getInitials() {
+      const source = [profileData.firstName, profileData.lastName].filter(Boolean);
+      if (!source.length) return "GT";
+      return source.map(item => item.trim().charAt(0).toUpperCase()).join("").slice(0, 2);
+    }
 
+    function fillViews() {
+      document.querySelectorAll("[data-view]").forEach(el => {
+        const key = el.dataset.view;
+        el.textContent = profileData[key] || "—";
+      });
+
+      document.querySelectorAll("[data-input]").forEach(el => {
+        const key = el.dataset.input;
+        el.value = profileData[key] || "";
+      });
+
+      document.getElementById("displayFullName").textContent = getFullName() || "Сотрудник Galactic Tours";
+      document.getElementById("displayRole").textContent = profileData.role || "Роль пока не заполнена";
+      document.getElementById("avatar").textContent = getInitials();
+      document.getElementById("profileChip").textContent = profileData.firstName || savedLogin;
+    }
+
+    async function loadMetrics() {
+      const sessionId = localStorage.getItem(SESSION_KEY);
+      if (!sessionId) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/tasks?session_id=${encodeURIComponent(sessionId)}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        document.getElementById("metricStage").textContent = data.stage ?? "1";
+        document.getElementById("metricProgress").textContent = `${data.progress ?? 0}%`;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function setEditingMode(value) {
+      editing = value;
+
+      document.querySelectorAll(".card").forEach(card => {
+        if (
+          card.id === "contactCard" ||
+          card.id === "workCard" ||
+          card.id === "aboutCard"
+        ) {
+          card.classList.toggle("editing", editing);
+        }
+      });
+
+      document.getElementById("editProfileBtn").style.display = editing ? "none" : "inline-flex";
+      document.getElementById("saveProfileBtn").style.display = editing ? "inline-flex" : "none";
+      document.getElementById("cancelEditBtn").style.display = editing ? "inline-flex" : "none";
+    }
+
+    function collectFormData() {
+      document.querySelectorAll("[data-input]").forEach(el => {
+        const key = el.dataset.input;
+        profileData[key] = el.value.trim();
+      });
+    }
+
+    function showNotice() {
+      const notice = document.getElementById("saveNotice");
+      notice.classList.add("show");
+      setTimeout(() => {
+        notice.classList.remove("show");
+      }, 2200);
+    }
+
+    async function resetProgress() {
+      const sessionId = localStorage.getItem(SESSION_KEY);
+      if (!sessionId) return;
+
+      await fetch(`${API_BASE}/reset/${sessionId}`, {
+        method: "POST"
+      });
+
+      await loadMetrics();
+      showNotice();
+    }
+
+    document.getElementById("editProfileBtn").addEventListener("click", function() {
+      setEditingMode(true);
+    });
+
+    document.getElementById("cancelEditBtn").addEventListener("click", function() {
+      profileData = loadProfileData();
+      fillViews();
+      setEditingMode(false);
+    });
+
+    document.getElementById("saveProfileBtn").addEventListener("click", function() {
+      collectFormData();
+      saveProfileData();
+      fillViews();
+      setEditingMode(false);
+      showNotice();
+    });
+
+    window.resetProgress = resetProgress;
+
+    fillViews();
+    loadMetrics();
+  </script>
+
+  <script src="assistant.js"></script>
 </body>
 </html>
