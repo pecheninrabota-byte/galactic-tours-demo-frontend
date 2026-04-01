@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galactic Tours — Новости</title>
+  <style>
+    :root {
+      --bg: #07111d;
+      --bg-soft: #0c1727;
+      --panel: rgba(15, 27, 44, 0.94);
+      --panel-2: rgba(19, 34, 55, 0.92);
+      --line: rgba(180, 204, 232, 0.12);
+      --line-2: rgba(180, 204, 232, 0.2);
+      --text: #f4f7fb;
+      --muted: #a9b8cd;
+      --accent: #dfeaf7;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+      --sidebar-width: 250px;
+      --success: #b7d9c0;
+      --warning: #f0d7a1;
+      --danger: #efb0b0;
+      --hero-glow: rgba(122, 164, 224, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(91, 124, 170, 0.16), transparent 28%),
+        linear-gradient(180deg, #06101b 0%, #07111d 100%);
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(8, 18, 31, 0.78);
+      backdrop-filter: blur(12px);
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 6px 8px;
+    }
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+      border: 1px solid var(--line);
+      color: #f0f5fb;
+      font-size: 20px;
+    }
+
+    .brand-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-kicker {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .nav-group {
+      display: grid;
+      gap: 10px;
+    }
+
+    .nav-label {
+      padding: 0 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      padding: 14px 14px;
+      border-radius: 18px;
+      border: 1px solid transparent;
+      transition: 0.18s ease;
+      background: transparent;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: var(--line);
+    }
+
+    .nav-link.active {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--line);
+    }
+
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .main {
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .topbar-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .page-kicker {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .page-title {
+      font-size: 34px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .profile-chip,
+    .logout-btn,
+    .secondary-btn,
+    .primary-btn,
+    .ghost-btn,
+    .chip-btn,
+    .tiny-btn,
+    .danger-btn {
+      border-radius: 999px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.18s ease;
+      font-family: inherit;
+    }
+
+    .profile-chip,
+    .logout-btn,
+    .secondary-btn,
+    .ghost-btn,
+    .chip-btn,
+    .tiny-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 12px 16px;
+    }
+
+    .danger-btn {
+      border: 1px solid rgba(239, 176, 176, 0.18);
+      background: rgba(239, 176, 176, 0.08);
+      color: #ffd9d9;
+      padding: 12px 16px;
+    }
+
+    .logout-btn:hover,
+    .secondary-btn:hover,
+    .ghost-btn:hover,
+    .chip-btn:hover,
+    .tiny-btn:hover {
+      background: rgba(255,255,255,0.06);
+    }
+
+    .danger-btn:hover {
+      background: rgba(239, 176, 176, 0.14);
+    }
+
+    .primary-btn {
+      border: none;
+      background: #edf5fc;
+      color: #10243d;
+      padding: 13px 18px;
+      font-weight: 700;
+      box-shadow: 0 12px 30px rgba(221, 236, 249, 0.12);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px rgba(221, 236, 249, 0.16);
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at top right, var(--hero-glow), transparent 24%),
+        linear-gradient(180deg, rgba(20,35,57,0.98), rgba(15,27,44,0.96));
+      box-shadow: var(--shadow);
+      padding: 30px;
+      margin-bottom: 22px;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -120px -160px auto;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 62%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 420px;
+      gap: 22px;
+      align-items: stretch;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-left {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      width: fit-content;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(34px, 4vw, 56px);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+      font-weight: 600;
+      max-width: 760px;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 16px;
+      max-width: 760px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .hero-side {
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .hero-side-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .hero-side-copy {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .status-box {
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(12,24,40,0.95), rgba(9,19,33,0.95));
+      display: grid;
+      gap: 12px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(223, 234, 247, 0.08);
+      border: 1px solid rgba(223, 234, 247, 0.12);
+      color: #eef5fc;
+      font-size: 14px;
+      width: fit-content;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(340px, 0.88fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 22px;
+    }
+
+    .card {
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(14,26,43,0.96), rgba(11,22,38,0.96));
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .card-subtitle {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+      margin-top: -4px;
+      margin-bottom: 18px;
+    }
+
+    .notice {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .notice.success {
+      background: rgba(183, 217, 192, 0.1);
+      border: 1px solid rgba(183, 217, 192, 0.14);
+      color: var(--success);
+    }
+
+    .notice.error {
+      background: rgba(239, 176, 176, 0.1);
+      border: 1px solid rgba(239, 176, 176, 0.14);
+      color: #ffd9d9;
+    }
+
+    .editor-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .news-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .news-card {
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 20px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .news-card.pinned {
+      border-color: rgba(223, 234, 247, 0.16);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .news-meta-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .news-badge {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .news-title {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin: 0;
+    }
+
+    .news-summary {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .news-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .news-author {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .news-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .empty-note {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      padding: 8px 0;
+    }
+
+    .full-news {
+      display: none;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 20px;
+      margin-top: 14px;
+    }
+
+    .full-news.show {
+      display: block;
+    }
+
+    .full-news-content {
+      white-space: pre-wrap;
+      line-height: 1.8;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .field-input,
+    .field-textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px 14px;
+      outline: none;
+      font-size: 15px;
+      font-family: inherit;
+    }
+
+    .field-textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .toggle-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toggle-box input {
+      accent-color: #edf5fc;
+    }
+
+    .section-divider {
+      height: 1px;
+      background: var(--line);
+      margin: 18px 0;
+    }
+
+    .manage-list,
+    .editor-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .manage-item,
+    .editor-item {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      display: grid;
+      gap: 10px;
+    }
+
+    .manage-head,
+    .editor-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .manage-title,
+    .editor-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .manage-copy,
+    .editor-copy {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .manage-actions,
+    .editor-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .editor-form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .editor-form input {
+      flex: 1 1 220px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1320px) {
+      .hero-grid,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .main {
+        padding: 16px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-card,
+      .card {
+        border-radius: 22px;
+      }
+
+      .hero-title {
+        font-size: 34px;
+      }
+
+      .topbar-right,
+      .hero-actions,
+      .editor-toolbar,
+      .form-row,
+      .toggle-row,
+      .editor-form,
+      .manage-actions,
+      .editor-actions,
+      .news-actions {
+        width: 100%;
+      }
+
+      .topbar-right > *,
+      .hero-actions > *,
+      .editor-toolbar > *,
+      .form-row > *,
+      .toggle-row > *,
+      .editor-form > *,
+      .manage-actions > *,
+      .editor-actions > *,
+      .news-actions > * {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">✦</div>
+        <div class="brand-copy">
+          <div class="brand-kicker">Galactic Tours</div>
+          <div class="brand-title">Employee Platform</div>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">Навигация</div>
+
+        <a class="nav-link" href="dashboard.html">
+          <span class="nav-icon">⌂</span>
+          <span>Главная</span>
+        </a>
+
+        <a class="nav-link" href="onboarding.html">
+          <span class="nav-icon">🚀</span>
+          <span>Адаптация</span>
+        </a>
+
+        <a class="nav-link active" href="news.html">
+          <span class="nav-icon">📰</span>
+          <span>Новости</span>
+        </a>
+
+        <a class="nav-link" href="knowledge.html">
+          <span class="nav-icon">📚</span>
+          <span>База знаний</span>
+        </a>
+
+        <a class="nav-link" href="profile.html">
+          <span class="nav-icon">👤</span>
+          <span>Профиль</span>
+        </a>
+
+        <a class="nav-link" href="admin.html">
+          <span class="nav-icon">🛠️</span>
+          <span>HR Admin</span>
+        </a>
+      </div>
+
+      <div class="sidebar-footer">
+        Корпоративный новостной портал Galactic Tours. Админ и назначенные редакторы могут публиковать новости, а сотрудники — читать важные обновления компании в едином employee-пространстве.
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="page-kicker">Workspace · Corporate news portal</div>
+          <h1 class="page-title">Новости</h1>
+        </div>
+
+        <div class="topbar-right">
+          <div id="profileChip" class="profile-chip">Сотрудник</div>
+          <button class="secondary-btn" onclick="openAssistant()">Открыть ассистента</button>
+          <button id="logoutBtn" class="logout-btn">Выйти</button>
+        </div>
+      </div>
+
+      <section class="hero-card">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-eyebrow">Internal communications · Company updates</div>
+
+            <h2 class="hero-title">
+              Единая лента корпоративных новостей внутри платформы
+            </h2>
+
+            <div class="hero-sub">
+              Здесь сотрудники читают обновления компании, а админ и назначенные редакторы публикуют новости, закрепляют важные объявления и управляют корпоративным информационным контуром.
+            </div>
+
+            <div class="hero-actions">
+              <button id="createNewsHeroBtn" class="primary-btn hidden">Создать новость</button>
+              <button id="openManageHeroBtn" class="ghost-btn hidden">Управление публикациями</button>
+              <button id="openEditorsHeroBtn" class="ghost-btn hidden">Редакторы</button>
+            </div>
+          </div>
+
+          <div class="hero-side">
+            <h3 class="hero-side-title">Статус доступа</h3>
+            <div class="hero-side-copy">
+              Права на публикацию новостей задаются централизованно. Обычные сотрудники читают ленту, а редакторы получают отдельную панель управления.
+            </div>
+
+            <div class="status-box">
+              <div class="status-row">
+                <div id="rolePill" class="status-pill">Роль: employee</div>
+                <div id="editorPill" class="status-pill">Доступ к редактуре: нет</div>
+              </div>
+
+              <div id="statusText" class="hero-side-copy" style="margin-top:4px;">
+                У вас открыт режим чтения новостей компании.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="noticeBox" class="notice"></div>
+
+      <section class="content-grid">
+        <div class="stack">
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Лента новостей</h3>
+              <button id="refreshNewsBtn" class="secondary-btn">Обновить</button>
+            </div>
+
+            <div class="card-subtitle">
+              Здесь отображаются опубликованные новости компании. Закреплённые материалы всегда поднимаются наверх.
+            </div>
+
+            <div id="newsList" class="news-list">
+              <div class="empty-note">Загружаем новости...</div>
+            </div>
+          </article>
+
+          <article id="editorComposerCard" class="card hidden">
+            <div class="card-title-row">
+              <h3 id="composerTitle" class="card-title">Создание новости</h3>
+              <button id="resetComposerBtn" class="secondary-btn">Очистить форму</button>
+            </div>
+
+            <div class="card-subtitle">
+              Редакторская форма публикации. Можно сохранить новость как черновик, сразу опубликовать или закрепить её в верхней части ленты.
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label class="field-label" for="newsTitleInput">Заголовок</label>
+                <input id="newsTitleInput" class="field-input" type="text" placeholder="Например: Новый трек адаптации уже доступен" />
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="newsSummaryInput">Краткий анонс</label>
+                <textarea id="newsSummaryInput" class="field-textarea" style="min-height:96px;" placeholder="Короткое описание, которое видно в карточке новости."></textarea>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="newsContentInput">Полный текст новости</label>
+                <textarea id="newsContentInput" class="field-textarea" placeholder="Полный текст новости. Можно писать в несколько абзацев."></textarea>
+              </div>
+
+              <div class="toggle-row">
+                <label class="toggle-box">
+                  <input id="newsPublishedCheckbox" type="checkbox" />
+                  Опубликовать сразу
+                </label>
+
+                <label class="toggle-box">
+                  <input id="newsPinnedCheckbox" type="checkbox" />
+                  Закрепить в ленте
+                </label>
+              </div>
+
+              <div class="form-row">
+                <button id="saveNewsBtn" class="primary-btn">Сохранить новость</button>
+                <button id="cancelEditBtn" class="ghost-btn hidden">Отменить редактирование</button>
+              </div>
+            </div>
+          </article>
+
+          <article id="manageNewsCard" class="card hidden">
+            <div class="card-title-row">
+              <h3 class="card-title">Управление публикациями</h3>
+            </div>
+
+            <div class="card-subtitle">
+              Здесь редактор видит все новости: опубликованные, закреплённые и черновики.
+            </div>
+
+            <div id="manageNewsList" class="manage-list">
+              <div class="empty-note">Загружаем список публикаций...</div>
+            </div>
+          </article>
+        </div>
+
+        <div class="stack">
+          <article id="editorRightsCard" class="card hidden">
+            <div class="card-title-row">
+              <h3 class="card-title">Редакторы новостей</h3>
+            </div>
+
+            <div class="card-subtitle">
+              Только администратор может выдавать и отзывать право публикации новостей.
+            </div>
+
+            <div class="editor-form" style="margin-bottom:16px;">
+              <input id="editorLoginInput" class="field-input" type="text" placeholder="Логин сотрудника" />
+              <button id="grantEditorBtn" class="primary-btn">Выдать доступ</button>
+            </div>
+
+            <div id="editorList" class="editor-list">
+              <div class="empty-note">Загружаем список редакторов...</div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Как устроен news portal</h3>
+            </div>
+
+            <div class="card-subtitle">
+              Это отдельный продуктовый модуль внутри платформы, а не просто декоративная лента.
+            </div>
+
+            <div class="manage-list">
+              <div class="manage-item">
+                <div class="manage-title">Публикация и чтение в одном пространстве</div>
+                <div class="manage-copy">Сотрудники читают новости там же, где проходят адаптацию, работают с базой знаний и общаются с ассистентом.</div>
+              </div>
+
+              <div class="manage-item">
+                <div class="manage-title">Закреплённые новости выше обычных</div>
+                <div class="manage-copy">Важные анонсы и корпоративные объявления всегда можно держать в верхней части ленты.</div>
+              </div>
+
+              <div class="manage-item">
+                <div class="manage-title">Права редактора выдаются централизованно</div>
+                <div class="manage-copy">Администратор сам решает, кто может публиковать контент, а кто остаётся только читателем.</div>
+              </div>
+
+              <div class="manage-item">
+                <div class="manage-title">Сохранение идёт на backend</div>
+                <div class="manage-copy">Новости уже не живут только в браузере. Контент хранится на сервере и переживает перезапуск страницы.</div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const AUTH_KEY = "galactic_tours_auth";
+    const USER_LOGIN_KEY = "galactic_tours_login";
+    const USER_NAME_KEY = "galactic_tours_user_name";
+    const USER_ROLE_KEY = "galactic_tours_role";
+    const SESSION_KEY = "galactic_tours_session_id";
+    const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
+    const API_BASE_STORAGE_KEY = "galactic_tours_api_base";
+
+    function getApiBase() {
+      const stored = localStorage.getItem(API_BASE_STORAGE_KEY);
+      if (!stored) {
+        return "https://galactic-tours-demo-backend-production.up.railway.app";
+      }
+      return stored.replace(/\/+$/, "");
+    }
+
+    const API_BASE = getApiBase();
+
+    function buildApiUrl(path) {
+      if (!path.startsWith("/")) {
+        return `${API_BASE}/${path}`;
+      }
+      return `${API_BASE}${path}`;
+    }
+
+    const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
+    if (!isAuthorized) {
+      window.location.href = "login.html";
+    }
+
+    const currentLogin = localStorage.getItem(USER_LOGIN_KEY) || "";
+    const currentName = localStorage.getItem(USER_NAME_KEY) || currentLogin || "Сотрудник";
+    const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
+
+    let permissions = {
+      is_admin: false,
+      is_editor: false
+    };
+
+    let currentEditingNewsId = null;
+    let publishedNews = [];
+    let manageNews = [];
+    let newsEditors = [];
+
+    function getDisplayName() {
+      const rawProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
+
+      if (rawProfile) {
+        try {
+          const profile = JSON.parse(rawProfile);
+          const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
+          if (fullName) return fullName;
+          if (profile.firstName) return profile.firstName;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      return currentName || currentLogin || "Сотрудник";
+    }
+
+    document.getElementById("profileChip").textContent = getDisplayName();
+
+    document.getElementById("logoutBtn").addEventListener("click", function () {
+      localStorage.removeItem(AUTH_KEY);
+      localStorage.removeItem(USER_LOGIN_KEY);
+      localStorage.removeItem(USER_NAME_KEY);
+      localStorage.removeItem(USER_ROLE_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      window.location.href = "login.html";
+    });
+
+    function showNotice(message, type = "success") {
+      const box = document.getElementById("noticeBox");
+      box.textContent = message;
+      box.className = `notice show ${type}`;
+
+      clearTimeout(showNotice._timer);
+      showNotice._timer = setTimeout(() => {
+        box.className = "notice";
+      }, 2800);
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        },
+        ...options
+      });
+
+      const text = await response.text();
+      let data = null;
+
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch (error) {
+          data = null;
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error(data?.detail || data?.message || `HTTP ${response.status}`);
+      }
+
+      return data;
+    }
+
+    function formatDate(value) {
+      if (!value) return "Дата не указана";
+      return value.replace("T", " ");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeJsString(value) {
+      return String(value ?? "")
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, "\\n");
+    }
+
+    function setEditorUiState() {
+      const isAdmin = permissions.is_admin;
+      const isEditor = permissions.is_editor;
+
+      document.getElementById("createNewsHeroBtn").classList.toggle("hidden", !isEditor);
+      document.getElementById("openManageHeroBtn").classList.toggle("hidden", !isEditor);
+      document.getElementById("openEditorsHeroBtn").classList.toggle("hidden", !isAdmin);
+      document.getElementById("editorComposerCard").classList.toggle("hidden", !isEditor);
+      document.getElementById("manageNewsCard").classList.toggle("hidden", !isEditor);
+      document.getElementById("editorRightsCard").classList.toggle("hidden", !isAdmin);
+
+      document.getElementById("rolePill").textContent = `Роль: ${isAdmin ? "admin" : currentRole}`;
+      document.getElementById("editorPill").textContent = `Доступ к редактуре: ${isEditor ? "да" : "нет"}`;
+
+      const statusText = document.getElementById("statusText");
+      if (isAdmin) {
+        statusText.textContent = "У вас полный доступ к публикациям и управлению редакторами новостного портала.";
+      } else if (isEditor) {
+        statusText.textContent = "У вас открыт режим редактора: можно создавать, редактировать и публиковать новости.";
+      } else {
+        statusText.textContent = "У вас открыт режим чтения новостей компании.";
+      }
+    }
+
+    function renderPublishedNews() {
+      const container = document.getElementById("newsList");
+
+      if (!publishedNews.length) {
+        container.innerHTML = `
+          <div class="empty-note">
+            В ленте пока нет опубликованных новостей. Как только редактор или админ опубликует первую новость, она появится здесь.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = publishedNews.map(item => {
+        const isPinned = item.is_pinned;
+        const summary = item.summary || "Краткий анонс пока не заполнен.";
+        const fullId = `full-news-${item.id}`;
+
+        return `
+          <div class="news-card ${isPinned ? "pinned" : ""}">
+            <div class="news-meta-row">
+              ${isPinned ? `<span class="news-badge">Закреплено</span>` : ""}
+              <span class="news-badge">${item.is_published ? "Опубликовано" : "Черновик"}</span>
+              <span class="news-badge">${escapeHtml(formatDate(item.created_at))}</span>
+            </div>
+
+            <h3 class="news-title">${escapeHtml(item.title)}</h3>
+            <div class="news-summary">${escapeHtml(summary)}</div>
+
+            <div class="news-footer">
+              <div class="news-author">
+                Автор: ${escapeHtml(item.author_name || item.author_login || "Не указан")}
+              </div>
+
+              <div class="news-actions">
+                <button class="secondary-btn" onclick="toggleNewsDetails('${fullId}')">Читать полностью</button>
+                ${permissions.is_editor ? `<button class="ghost-btn" onclick="startEditNews(${item.id})">Редактировать</button>` : ""}
+              </div>
+            </div>
+
+            <div id="${fullId}" class="full-news">
+              <div class="full-news-content">${escapeHtml(item.content || "")}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderManageNews() {
+      const container = document.getElementById("manageNewsList");
+
+      if (!permissions.is_editor) {
+        container.innerHTML = `<div class="empty-note">У вас нет доступа к управлению публикациями.</div>`;
+        return;
+      }
+
+      if (!manageNews.length) {
+        container.innerHTML = `
+          <div class="empty-note">
+            В системе пока нет новостей. Создай первую публикацию через форму выше.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = manageNews.map(item => `
+        <div class="manage-item">
+          <div class="manage-head">
+            <div>
+              <div class="manage-title">${escapeHtml(item.title)}</div>
+              <div class="manage-copy">
+                ${escapeHtml(item.summary || "Краткий анонс не заполнен.")}
+              </div>
+            </div>
+
+            <div class="news-meta-row">
+              ${item.is_pinned ? `<span class="news-badge">Закреплено</span>` : ""}
+              <span class="news-badge">${item.is_published ? "Опубликовано" : "Черновик"}</span>
+            </div>
+          </div>
+
+          <div class="manage-copy">
+            Автор: ${escapeHtml(item.author_name || item.author_login || "Не указан")} · Обновлено: ${escapeHtml(formatDate(item.updated_at))}
+          </div>
+
+          <div class="manage-actions">
+            <button class="tiny-btn" onclick="startEditNews(${item.id})">Редактировать</button>
+            <button class="tiny-btn" onclick="togglePublish(${item.id}, ${item.is_published ? "false" : "true"})">
+              ${item.is_published ? "Снять с публикации" : "Опубликовать"}
+            </button>
+            <button class="tiny-btn" onclick="togglePin(${item.id}, ${item.is_pinned ? "false" : "true"})">
+              ${item.is_pinned ? "Открепить" : "Закрепить"}
+            </button>
+            <button class="danger-btn tiny-btn" onclick="removeNews(${item.id})">Удалить</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderEditors() {
+      const container = document.getElementById("editorList");
+
+      if (!permissions.is_admin) {
+        container.innerHTML = `<div class="empty-note">Только администратор может управлять редакторами.</div>`;
+        return;
+      }
+
+      if (!newsEditors.length) {
+        container.innerHTML = `<div class="empty-note">Список редакторов пока пуст.</div>`;
+        return;
+      }
+
+      container.innerHTML = newsEditors.map(item => `
+        <div class="editor-item">
+          <div class="editor-head">
+            <div>
+              <div class="editor-title">${escapeHtml(item.login)}</div>
+              <div class="editor-copy">
+                Выдано: ${escapeHtml(item.granted_at || "не указано")} · Кем: ${escapeHtml(item.granted_by || "system")}
+              </div>
+            </div>
+
+            <div class="news-meta-row">
+              ${item.is_admin ? `<span class="news-badge">Admin</span>` : `<span class="news-badge">Editor</span>`}
+            </div>
+          </div>
+
+          <div class="editor-actions">
+            ${item.is_admin ? "" : `<button class="danger-btn tiny-btn" onclick="revokeEditor('${escapeJsString(item.login)}')">Отозвать доступ</button>`}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function fillComposer(item) {
+      currentEditingNewsId = item?.id || null;
+
+      document.getElementById("composerTitle").textContent = currentEditingNewsId ? "Редактирование новости" : "Создание новости";
+      document.getElementById("newsTitleInput").value = item?.title || "";
+      document.getElementById("newsSummaryInput").value = item?.summary || "";
+      document.getElementById("newsContentInput").value = item?.content || "";
+      document.getElementById("newsPublishedCheckbox").checked = Boolean(item?.is_published);
+      document.getElementById("newsPinnedCheckbox").checked = Boolean(item?.is_pinned);
+      document.getElementById("cancelEditBtn").classList.toggle("hidden", !currentEditingNewsId);
+    }
+
+    function resetComposer() {
+      fillComposer(null);
+    }
+
+    async function loadPermissions() {
+      const data = await fetchJson(buildApiUrl(`/api/news/permissions/check?login=${encodeURIComponent(currentLogin)}`));
+      permissions = {
+        is_admin: Boolean(data?.is_admin),
+        is_editor: Boolean(data?.is_editor)
+      };
+      setEditorUiState();
+    }
+
+    async function loadPublishedNews() {
+      const data = await fetchJson(buildApiUrl("/api/news"));
+      publishedNews = Array.isArray(data?.items) ? data.items : [];
+      renderPublishedNews();
+    }
+
+    async function loadManageNews() {
+      if (!permissions.is_editor) {
+        manageNews = [];
+        renderManageNews();
+        return;
+      }
+
+      const data = await fetchJson(buildApiUrl(`/api/news/manage?actor_login=${encodeURIComponent(currentLogin)}`));
+      manageNews = Array.isArray(data?.items) ? data.items : [];
+      renderManageNews();
+    }
+
+    async function loadEditors() {
+      if (!permissions.is_admin) {
+        newsEditors = [];
+        renderEditors();
+        return;
+      }
+
+      const data = await fetchJson(buildApiUrl(`/api/news/editors?actor_login=${encodeURIComponent(currentLogin)}`));
+      newsEditors = Array.isArray(data?.items) ? data.items : [];
+      renderEditors();
+    }
+
+    async function loadAllNewsData() {
+      await loadPermissions();
+      await loadPublishedNews();
+      await loadManageNews();
+      await loadEditors();
+    }
+
+    function toggleNewsDetails(id) {
+      const box = document.getElementById(id);
+      if (!box) return;
+      box.classList.toggle("show");
+    }
+
+    async function saveNews() {
+      const title = document.getElementById("newsTitleInput").value.trim();
+      const summary = document.getElementById("newsSummaryInput").value.trim();
+      const content = document.getElementById("newsContentInput").value.trim();
+      const isPublished = document.getElementById("newsPublishedCheckbox").checked;
+      const isPinned = document.getElementById("newsPinnedCheckbox").checked;
+
+      if (!title) {
+        showNotice("Нужно указать заголовок новости.", "error");
+        return;
+      }
+
+      if (!content) {
+        showNotice("Нужно заполнить полный текст новости.", "error");
+        return;
+      }
+
+      try {
+        if (currentEditingNewsId) {
+          await fetchJson(buildApiUrl(`/api/news/${currentEditingNewsId}`), {
+            method: "PUT",
+            body: JSON.stringify({
+              title,
+              summary,
+              content,
+              editor_login: currentLogin,
+              is_published: isPublished,
+              is_pinned: isPinned
+            })
+          });
+
+          showNotice("Новость обновлена.");
+        } else {
+          await fetchJson(buildApiUrl("/api/news"), {
+            method: "POST",
+            body: JSON.stringify({
+              title,
+              summary,
+              content,
+              author_login: currentLogin,
+              author_name: getDisplayName(),
+              is_published: isPublished,
+              is_pinned: isPinned
+            })
+          });
+
+          showNotice("Новость создана.");
+        }
+
+        resetComposer();
+        await loadPublishedNews();
+        await loadManageNews();
+      } catch (error) {
+        console.error(error);
+        showNotice(error.message || "Не удалось сохранить новость.", "error");
+      }
+    }
+
+    async function startEditNews(newsId) {
+      try {
+        const data = await fetchJson(buildApiUrl(`/api/news/${newsId}`));
+        fillComposer(data);
+        document.getElementById("editorComposerCard").scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (error) {
+        console.error(error);
+        showNotice(error.message || "Не удалось открыть новость для редактирования.", "error");
+      }
+    }
+
+    async function removeNews(newsId) {
+      const confirmed = window.confirm("Удалить эту новость?");
+      if (!confirmed) return;
+
+      try {
+        await fetchJson(buildApiUrl(`/api/news/${newsId}?actor_login=${encodeURIComponent(currentLogin)}`), {
+          method: "DELETE"
+        });
+
+        showNotice("Новость удалена.");
+        if (currentEditingNewsId === newsId) {
+          resetComposer();
+        }
+        await loadPublishedNews();
+        await loadManageNews();
+      } catch (error) {
+        console.error(error);
+        showNotice(error.message || "Не удалось удалить новость.", "error");
+      }
+    }
+
+    async function togglePublish(newsId, value) {
+      try {
+        await fetchJson(buildApiUrl(`/api/news/${newsId}/publish`), {
+          method: "POST",
+          body: JSON.stringify({
+            actor_login: currentLogin,
+            value: value === true || value === "true"
+          })
+        });
+
+        showNotice("Статус публикации обновлён.");
+        await loadPublishedNews();
+        await loadManageNews();
+      } catch (error) {
+        console.error(error);
+        showNotice(error.message || "Не удалось изменить статус публикации.", "error");
+      }
+    }
+
+    async function togglePin(newsId, value) {
+      try {
+        await fetchJson(buildApiUrl(`/api/news/${newsId}/pin`), {
+          method: "POST",
+          body: JSON.stringify({
+            actor_login: currentLogin,
+            value: value === true || value === "true"
+          })
+        });
+
+        showNotice("Статус закрепления обновлён.");
+        await loadPublishedNews();
+        await loadManageNews();
+      } catch (error) {
+        console.error(error);
+        showNotice(error.message || "Не удалось изменить статус закрепления.", "error");
+      }
+    }
+
+    async function grantEditor() {
+      const targetLogin = document.getElementById("editorLoginInput").value.trim();
+
+      if (!targetLogin) {
+        showNotice("Укажи логин сотрудника, которому нужно выдать доступ.", "error");
+        return;
+      }
+
+      try {
+        await fetchJson(buildApiUrl("/api/news/editors"), {
+          method: "POST",
+          body: JSON.stringify({
+            actor_login: currentLogin,
+            target_login: targetLogin
+          })
+        });
+
+        document.getElementById("editorLoginInput").value = "";
+        showNotice("Права редактора выданы.");
+        await loadEditors();
+      } catch (error) {
+        console.error(error);
+        showNotice(error.message || "Не удалось выдать права редактора.", "error");
+      }
+    }
+
+    async function revokeEditor(login) {
+      const confirmed = window.confirm(`Отозвать доступ редактора у ${login}?`);
+      if (!confirmed) return;
+
+      try {
+        await fetchJson(buildApiUrl(`/api/news/editors/${encodeURIComponent(login)}?actor_login=${encodeURIComponent(currentLogin)}`), {
+          method: "DELETE"
+        });
+
+        showNotice("Права редактора отозваны.");
+        await loadEditors();
+      } catch (error) {
+        console.error(error);
+        showNotice(error.message || "Не удалось отозвать права редактора.", "error");
+      }
+    }
+
+    document.getElementById("refreshNewsBtn").addEventListener("click", async function() {
+      try {
+        await loadAllNewsData();
+        showNotice("Лента новостей обновлена.");
+      } catch (error) {
+        console.error(error);
+        showNotice(error.message || "Не удалось обновить новости.", "error");
+      }
+    });
+
+    document.getElementById("saveNewsBtn").addEventListener("click", saveNews);
+    document.getElementById("resetComposerBtn").addEventListener("click", resetComposer);
+    document.getElementById("cancelEditBtn").addEventListener("click", resetComposer);
+    document.getElementById("grantEditorBtn").addEventListener("click", grantEditor);
+
+    document.getElementById("createNewsHeroBtn").addEventListener("click", function() {
+      document.getElementById("editorComposerCard").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    document.getElementById("openManageHeroBtn").addEventListener("click", function() {
+      document.getElementById("manageNewsCard").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    document.getElementById("openEditorsHeroBtn").addEventListener("click", function() {
+      document.getElementById("editorRightsCard").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    window.toggleNewsDetails = toggleNewsDetails;
+    window.startEditNews = startEditNews;
+    window.removeNews = removeNews;
+    window.togglePublish = togglePublish;
+    window.togglePin = togglePin;
+    window.revokeEditor = revokeEditor;
+
+    loadAllNewsData().catch(error => {
+      console.error(error);
+      showNotice(error.message || "Не удалось загрузить news portal.", "error");
+      document.getElementById("newsList").innerHTML = `
+        <div class="empty-note">
+          Не удалось загрузить новости. Проверь backend и доступность API.
+        </div>
+      `;
+    });
+  </script>
+
+  <script src="assistant.js"></script>
+</body>
+</html>
