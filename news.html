@@ -474,12 +474,27 @@
       background: rgba(255,255,255,0.03);
       padding: 20px;
       display: grid;
-      gap: 12px;
+      gap: 14px;
     }
 
     .news-card.pinned {
       border-color: rgba(223, 234, 247, 0.16);
       background: rgba(255,255,255,0.05);
+    }
+
+    .news-image {
+      width: 100%;
+      max-height: 340px;
+      object-fit: cover;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      display: block;
+    }
+
+    .news-image.full {
+      max-height: 420px;
+      margin-bottom: 14px;
     }
 
     .news-meta-row {
@@ -897,6 +912,11 @@
               </div>
 
               <div class="field">
+                <label class="field-label" for="newsImageUrlInput">URL изображения</label>
+                <input id="newsImageUrlInput" class="field-input" type="text" placeholder="Например: https://site.com/image.jpg" />
+              </div>
+
+              <div class="field">
                 <label class="field-label" for="newsContentInput">Полный текст новости</label>
                 <textarea id="newsContentInput" class="field-textarea" placeholder="Полный текст новости. Можно писать в несколько абзацев."></textarea>
               </div>
@@ -1123,6 +1143,17 @@
         .replace(/\n/g, "\\n");
     }
 
+    function isValidImageUrl(value) {
+      const safe = String(value || "").trim();
+      return safe.startsWith("http://") || safe.startsWith("https://");
+    }
+
+    function renderNewsImage(url, extraClass = "") {
+      const safeUrl = String(url || "").trim();
+      if (!isValidImageUrl(safeUrl)) return "";
+      return `<img class="news-image ${extraClass}" src="${escapeHtml(safeUrl)}" alt="Изображение новости" />`;
+    }
+
     function setEditorUiState() {
       const isAdmin = permissions.is_admin;
       const isEditor = permissions.is_editor;
@@ -1163,9 +1194,13 @@
         const isPinned = item.is_pinned;
         const summary = item.summary || "Краткий анонс пока не заполнен.";
         const fullId = `full-news-${item.id}`;
+        const previewImage = renderNewsImage(item.image_url);
+        const fullImage = renderNewsImage(item.image_url, "full");
 
         return `
           <div class="news-card ${isPinned ? "pinned" : ""}">
+            ${previewImage}
+
             <div class="news-meta-row">
               ${isPinned ? `<span class="news-badge">Закреплено</span>` : ""}
               <span class="news-badge">${item.is_published ? "Опубликовано" : "Черновик"}</span>
@@ -1187,6 +1222,7 @@
             </div>
 
             <div id="${fullId}" class="full-news">
+              ${fullImage}
               <div class="full-news-content">${escapeHtml(item.content || "")}</div>
             </div>
           </div>
@@ -1224,6 +1260,7 @@
             <div class="news-meta-row">
               ${item.is_pinned ? `<span class="news-badge">Закреплено</span>` : ""}
               <span class="news-badge">${item.is_published ? "Опубликовано" : "Черновик"}</span>
+              ${item.image_url ? `<span class="news-badge">Есть изображение</span>` : ""}
             </div>
           </div>
 
@@ -1286,6 +1323,7 @@
       document.getElementById("composerTitle").textContent = currentEditingNewsId ? "Редактирование новости" : "Создание новости";
       document.getElementById("newsTitleInput").value = item?.title || "";
       document.getElementById("newsSummaryInput").value = item?.summary || "";
+      document.getElementById("newsImageUrlInput").value = item?.image_url || "";
       document.getElementById("newsContentInput").value = item?.content || "";
       document.getElementById("newsPublishedCheckbox").checked = Boolean(item?.is_published);
       document.getElementById("newsPinnedCheckbox").checked = Boolean(item?.is_pinned);
@@ -1309,6 +1347,16 @@
       const data = await fetchJson(buildApiUrl("/api/news"));
       publishedNews = Array.isArray(data?.items) ? data.items : [];
       renderPublishedNews();
+
+      const params = new URLSearchParams(window.location.search);
+      const newsIdFromQuery = params.get("news_id");
+      if (newsIdFromQuery) {
+        const box = document.getElementById(`full-news-${newsIdFromQuery}`);
+        if (box) {
+          box.classList.add("show");
+          box.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
     }
 
     async function loadManageNews() {
@@ -1351,6 +1399,7 @@
     async function saveNews() {
       const title = document.getElementById("newsTitleInput").value.trim();
       const summary = document.getElementById("newsSummaryInput").value.trim();
+      const imageUrl = document.getElementById("newsImageUrlInput").value.trim();
       const content = document.getElementById("newsContentInput").value.trim();
       const isPublished = document.getElementById("newsPublishedCheckbox").checked;
       const isPinned = document.getElementById("newsPinnedCheckbox").checked;
@@ -1365,6 +1414,11 @@
         return;
       }
 
+      if (imageUrl && !isValidImageUrl(imageUrl)) {
+        showNotice("URL изображения должен начинаться с http:// или https://", "error");
+        return;
+      }
+
       try {
         if (currentEditingNewsId) {
           await fetchJson(buildApiUrl(`/api/news/${currentEditingNewsId}`), {
@@ -1373,6 +1427,7 @@
               title,
               summary,
               content,
+              image_url: imageUrl,
               editor_login: currentLogin,
               is_published: isPublished,
               is_pinned: isPinned
@@ -1387,6 +1442,7 @@
               title,
               summary,
               content,
+              image_url: imageUrl,
               author_login: currentLogin,
               author_name: getDisplayName(),
               is_published: isPublished,
