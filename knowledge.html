@@ -46,6 +46,13 @@
       text-decoration: none;
     }
 
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
     .app-shell {
       display: grid;
       grid-template-columns: var(--sidebar-width) 1fr;
@@ -703,7 +710,7 @@
       </div>
 
       <div class="sidebar-footer">
-        База знаний теперь читает контекст не только из backend stage, но и из HR Admin template. Это делает knowledge layer частью управляемого онбординг-сценария.
+        База знаний читает текущий stage context из backend, а рекомендации — из template layer через API. Это делает knowledge layer реальной частью управляемого onboarding-сценария.
       </div>
     </aside>
 
@@ -774,12 +781,12 @@
             </div>
 
             <div class="card-subtitle">
-              Главная зона знаний. Если этап собран в HR Admin, рекомендации идут из шаблона маршрута. Если нет — используется системный fallback.
+              Главная зона знаний. Если этап собран в template layer, рекомендации идут из backend шаблона маршрута. Если нет — используется системный fallback.
             </div>
 
             <div id="recommendedGrid" class="recommended-grid"></div>
             <div id="templateNote" class="template-note" style="display:none;">
-              Эти рекомендации сейчас подставлены из HR Admin template layer.
+              Эти рекомендации сейчас подставлены из backend template layer.
             </div>
           </article>
 
@@ -918,8 +925,8 @@
               <div class="helper-item">
                 <div class="helper-dot"></div>
                 <div class="helper-copy">
-                  <div class="helper-title">Следующий шаг — связать onboarding engine</div>
-                  <div class="helper-sub">Dashboard и knowledge уже читают HR template. Дальше логично переводить onboarding backend на динамическую модель этапов.</div>
+                  <div class="helper-title">Knowledge layer теперь backend-first</div>
+                  <div class="helper-sub">Текущий stage context и template recommendations читаются из API, поэтому employee-side больше не зависит от локальной конфигурации браузера.</div>
                 </div>
               </div>
             </div>
@@ -935,8 +942,24 @@
     const USER_NAME_KEY = "galactic_tours_user_name";
     const SESSION_KEY = "galactic_tours_session_id";
     const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
-    const ONBOARDING_TEMPLATE_KEY = "galactic_tours_onboarding_template";
-    const API_BASE = "https://galactic-tours-demo-backend-production.up.railway.app/api";
+    const API_BASE_STORAGE_KEY = "galactic_tours_api_base";
+
+    function getApiBase() {
+      const stored = localStorage.getItem(API_BASE_STORAGE_KEY);
+      if (!stored) {
+        return "https://galactic-tours-demo-backend-production.up.railway.app";
+      }
+      return stored.replace(/\/+$/, "");
+    }
+
+    const API_BASE = getApiBase();
+
+    function buildApiUrl(path) {
+      if (!path.startsWith("/")) {
+        return `${API_BASE}/${path}`;
+      }
+      return `${API_BASE}${path}`;
+    }
 
     const KNOWLEDGE_ITEMS = [
       {
@@ -1029,6 +1052,18 @@
       3: "Сейчас в фокусе закрепление роли, самостоятельная работа и завершение основного маршрута адаптации."
     };
 
+    const FALLBACK_STAGE_TITLES = {
+      1: "Старт адаптации",
+      2: "Закрепление роли",
+      3: "Самостоятельная работа"
+    };
+
+    const FALLBACK_STAGE_DESCRIPTIONS = {
+      1: "На этом этапе важны стартовые материалы, базовая навигация и первые шаги в системе.",
+      2: "Сейчас важно понять роль, процессы и логику взаимодействий в рабочем контуре.",
+      3: "Фокус смещается на закрепление роли, самостоятельность и завершение базовой адаптации."
+    };
+
     const FALLBACK_RECOMMENDED_BY_STAGE = {
       1: ["welcome-start", "company-navigation", "knowledge-usage"],
       2: ["probation-overview", "role-expectations", "communication-process"],
@@ -1076,35 +1111,18 @@
       window.location.href = "login.html";
     });
 
-    function loadTemplate() {
-      try {
-        const raw = localStorage.getItem(ONBOARDING_TEMPLATE_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed || !Array.isArray(parsed.stages)) return null;
-        return parsed;
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
-    }
-
-    function getTemplateStage(template, stageNumber) {
-      if (!template || !Array.isArray(template.stages)) return null;
-      const index = Math.max(stageNumber - 1, 0);
-      return template.stages[index] || null;
-    }
-
     function normalizeBackendState(data) {
       const safe = data && typeof data === "object" ? data : {};
       const stage = Number(safe.stage) || 1;
-      const progress = Number.isFinite(Number(safe.progress)) ? Number(safe.progress) : 0;
-      const stageMessage = safe.stage_message || FALLBACK_STAGE_MESSAGES[stage] || FALLBACK_STAGE_MESSAGES[1];
+      const progressNumber = Number(safe.progress);
+      const progress = Number.isFinite(progressNumber) ? progressNumber : 0;
 
       return {
         stage,
         progress: Math.max(0, Math.min(100, progress)),
-        stage_message: stageMessage
+        stage_title: safe.stage_title || FALLBACK_STAGE_TITLES[stage] || `Этап ${stage}`,
+        stage_description: safe.stage_description || FALLBACK_STAGE_DESCRIPTIONS[stage] || "",
+        stage_message: safe.stage_message || FALLBACK_STAGE_MESSAGES[stage] || FALLBACK_STAGE_MESSAGES[1]
       };
     }
 
@@ -1112,8 +1130,36 @@
       return {
         stage: 1,
         progress: 0,
+        stage_title: FALLBACK_STAGE_TITLES[1],
+        stage_description: FALLBACK_STAGE_DESCRIPTIONS[1],
         stage_message: FALLBACK_STAGE_MESSAGES[1]
       };
+    }
+
+    function normalizeTemplate(template) {
+      const safe = template && typeof template === "object" ? template : {};
+      const stages = Array.isArray(safe.stages) ? safe.stages : [];
+
+      return {
+        id: safe.id || "base-template",
+        name: safe.name || "Базовый маршрут адаптации",
+        audience: safe.audience || "",
+        description: safe.description || "",
+        stages: stages.map((stage, index) => ({
+          id: stage?.id || `stage-${index + 1}`,
+          title: stage?.title || `Этап ${index + 1}`,
+          description: stage?.description || "",
+          message: stage?.message || "",
+          tasks: Array.isArray(stage?.tasks) ? stage.tasks : [],
+          knowledgeItems: Array.isArray(stage?.knowledgeItems) ? stage.knowledgeItems : []
+        }))
+      };
+    }
+
+    function getTemplateStage(template, stageNumber) {
+      if (!template || !Array.isArray(template.stages)) return null;
+      const index = Math.max(stageNumber - 1, 0);
+      return template.stages[index] || null;
     }
 
     function categoryLabel(category) {
@@ -1136,9 +1182,9 @@
 
     function renderHero(state, templateStage) {
       const displayName = getDisplayName();
-      const stageName = templateStage?.title || `Этап ${state.stage}`;
-      const stageDescription = templateStage?.description
-        ? `Сейчас активен модуль «${stageName}». ${templateStage.description}`
+      const stageTitle = state.stage_title || templateStage?.title || `Этап ${state.stage}`;
+      const stageDescription = state.stage_description
+        ? `Сейчас активен модуль «${stageTitle}». ${state.stage_description}`
         : `Сейчас активен этап ${state.stage}.`;
 
       document.getElementById("heroTitle").textContent = `${displayName}, знания подстроены под ваш этап адаптации`;
@@ -1146,15 +1192,15 @@
 
       document.getElementById("stagePill").textContent = `Этап ${state.stage}`;
       document.getElementById("progressPill").textContent = `Прогресс ${state.progress}%`;
-      document.getElementById("stageMessage").textContent = templateStage?.message || state.stage_message;
+      document.getElementById("stageMessage").textContent = state.stage_message;
 
       document.getElementById("statStage").textContent = state.stage;
       document.getElementById("statProgress").textContent = `${state.progress}%`;
       document.getElementById("statMaterials").textContent = KNOWLEDGE_ITEMS.length;
 
       const flowBtn = document.getElementById("openStageFlowBtn");
-      if (templateStage?.title) {
-        flowBtn.textContent = `Открыть этап «${templateStage.title}»`;
+      if (stageTitle) {
+        flowBtn.textContent = `Открыть этап «${stageTitle}»`;
       } else if (state.stage === 1) {
         flowBtn.textContent = "Продолжить старт адаптации";
       } else if (state.stage === 2) {
@@ -1195,9 +1241,9 @@
         <div class="item-card">
           <div class="item-icon">📄</div>
           <div class="item-title">${escapeHtml(id)}</div>
-          <div class="item-copy">Материал привязан в HR Admin, но пока не описан в frontend knowledge library.</div>
+          <div class="item-copy">Материал привязан в HR Admin template, но пока не описан в frontend knowledge library.</div>
           <div class="item-meta">
-            <span class="meta-badge">HR Admin reference</span>
+            <span class="meta-badge">Template reference</span>
           </div>
           <div class="item-actions">
             <button class="secondary-btn" onclick="window.location.href='admin.html'">Открыть HR Admin</button>
@@ -1308,23 +1354,38 @@
         .replace(/\n/g, " ");
     }
 
+    async function fetchJson(url) {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return response.json();
+    }
+
+    async function loadTemplateFromBackend() {
+      try {
+        const data = await fetchJson(buildApiUrl("/api/template"));
+        return normalizeTemplate(data);
+      } catch (error) {
+        console.error("Failed to load template:", error);
+        return null;
+      }
+    }
+
     async function loadStageContext() {
       const sessionId = localStorage.getItem(SESSION_KEY);
       let state = getFallbackState();
 
       if (sessionId) {
         try {
-          const res = await fetch(`${API_BASE}/tasks?session_id=${encodeURIComponent(sessionId)}`);
-          if (res.ok) {
-            const data = await res.json();
-            state = normalizeBackendState(data);
-          }
+          const data = await fetchJson(buildApiUrl(`/api/tasks?session_id=${encodeURIComponent(sessionId)}`));
+          state = normalizeBackendState(data);
         } catch (error) {
-          console.error(error);
+          console.error("Failed to load knowledge stage context:", error);
         }
       }
 
-      const template = loadTemplate();
+      const template = await loadTemplateFromBackend();
       const templateStage = getTemplateStage(template, state.stage);
 
       currentStage = state.stage;
