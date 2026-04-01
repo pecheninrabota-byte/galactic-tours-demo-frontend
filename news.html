@@ -845,9 +845,9 @@
             </div>
 
             <div class="hero-actions">
-              <button id="createNewsHeroBtn" class="primary-btn hidden">Создать новость</button>
-              <button id="openManageHeroBtn" class="ghost-btn hidden">Управление публикациями</button>
-              <button id="openEditorsHeroBtn" class="ghost-btn hidden">Редакторы</button>
+              <button id="createNewsHeroBtn" class="primary-btn hidden" type="button">Создать новость</button>
+              <button id="openManageHeroBtn" class="ghost-btn hidden" type="button">Управление публикациями</button>
+              <button id="openEditorsHeroBtn" class="ghost-btn hidden" type="button">Редакторы</button>
             </div>
           </div>
 
@@ -878,7 +878,7 @@
           <article class="card">
             <div class="card-title-row">
               <h3 class="card-title">Лента новостей</h3>
-              <button id="refreshNewsBtn" class="secondary-btn">Обновить</button>
+              <button id="refreshNewsBtn" class="secondary-btn" type="button">Обновить</button>
             </div>
 
             <div class="card-subtitle">
@@ -893,7 +893,7 @@
           <article id="editorComposerCard" class="card hidden">
             <div class="card-title-row">
               <h3 id="composerTitle" class="card-title">Создание новости</h3>
-              <button id="resetComposerBtn" class="secondary-btn">Очистить форму</button>
+              <button id="resetComposerBtn" class="secondary-btn" type="button">Очистить форму</button>
             </div>
 
             <div class="card-subtitle">
@@ -923,20 +923,15 @@
 
               <div class="toggle-row">
                 <label class="toggle-box">
-                  <input id="newsPublishedCheckbox" type="checkbox" />
-                  Опубликовать сразу
-                </label>
-
-                <label class="toggle-box">
                   <input id="newsPinnedCheckbox" type="checkbox" />
                   Закрепить в ленте
                 </label>
               </div>
 
               <div class="form-row">
-                <button id="saveNewsBtn" class="primary-btn">Сохранить новость</button>
-                <button id="saveNewsBtn" class="primary-btn">Опубликовать новость</button>
-                <button id="cancelEditBtn" class="ghost-btn hidden">Отменить редактирование</button>
+                <button id="saveDraftBtn" class="secondary-btn" type="button">Сохранить как черновик</button>
+                <button id="publishNewsBtn" class="primary-btn" type="button">Опубликовать новость</button>
+                <button id="cancelEditBtn" class="ghost-btn hidden" type="button">Отменить редактирование</button>
               </div>
             </div>
           </article>
@@ -968,7 +963,7 @@
 
             <div class="editor-form" style="margin-bottom:16px;">
               <input id="editorLoginInput" class="field-input" type="text" placeholder="Логин сотрудника" />
-              <button id="grantEditorBtn" class="primary-btn">Выдать доступ</button>
+              <button id="grantEditorBtn" class="primary-btn" type="button">Выдать доступ</button>
             </div>
 
             <div id="editorList" class="editor-list">
@@ -1125,7 +1120,7 @@
 
     function formatDate(value) {
       if (!value) return "Дата не указана";
-      return value.replace("T", " ");
+      return String(value).replace("T", " ");
     }
 
     function escapeHtml(value) {
@@ -1155,31 +1150,31 @@
       return `<img class="news-image ${extraClass}" src="${escapeHtml(safeUrl)}" alt="Изображение новости" />`;
     }
 
+    function getLikeSummary(item) {
+      return item?.reactions || {
+        like_count: 0,
+        liked_by_user: false,
+        user_reaction: null
+      };
+    }
+
+    function renderLikeButton(item) {
+      const reaction = getLikeSummary(item);
+      const activeClass = reaction.liked_by_user ? "primary-btn" : "secondary-btn";
+      const label = reaction.liked_by_user
+        ? `💙 Лайк (${reaction.like_count})`
+        : `🤍 Лайк (${reaction.like_count})`;
+
+      return `
+        <button class="${activeClass}" type="button" onclick="toggleLike(${item.id})">
+          ${label}
+        </button>
+      `;
+    }
+
     function setEditorUiState() {
       const isAdmin = permissions.is_admin;
       const isEditor = permissions.is_editor;
-
-      function getLikeSummary(item) {
-  return item?.reactions || {
-    like_count: 0,
-    liked_by_user: false,
-    user_reaction: null
-  };
-}
-
-function renderLikeButton(item) {
-  const reaction = getLikeSummary(item);
-  const activeClass = reaction.liked_by_user ? "primary-btn" : "secondary-btn";
-  const label = reaction.liked_by_user
-    ? `💙 Лайк (${reaction.like_count})`
-    : `🤍 Лайк (${reaction.like_count})`;
-
-  return `
-    <button class="${activeClass}" onclick="toggleLike(${item.id})">
-      ${label}
-    </button>
-  `;
-}
 
       document.getElementById("createNewsHeroBtn").classList.toggle("hidden", !isEditor);
       document.getElementById("openManageHeroBtn").classList.toggle("hidden", !isEditor);
@@ -1238,10 +1233,11 @@ function renderLikeButton(item) {
                 Автор: ${escapeHtml(item.author_name || item.author_login || "Не указан")}
               </div>
 
-            <div class="news-actions">
-              ${renderLikeButton(item)}
-              <button class="secondary-btn" onclick="toggleNewsDetails('${fullId}')">Читать полностью</button>
-              ${permissions.is_editor ? `<button class="ghost-btn" onclick="startEditNews(${item.id})">Редактировать</button>` : ""}
+              <div class="news-actions">
+                ${renderLikeButton(item)}
+                <button class="secondary-btn" type="button" onclick="toggleNewsDetails('${fullId}')">Читать полностью</button>
+                ${permissions.is_editor ? `<button class="ghost-btn" type="button" onclick="startEditNews(${item.id})">Редактировать</button>` : ""}
+              </div>
             </div>
 
             <div id="${fullId}" class="full-news">
@@ -1292,14 +1288,14 @@ function renderLikeButton(item) {
           </div>
 
           <div class="manage-actions">
-            <button class="tiny-btn" onclick="startEditNews(${item.id})">Редактировать</button>
-            <button class="tiny-btn" onclick="togglePublish(${item.id}, ${item.is_published ? "false" : "true"})">
+            <button class="tiny-btn" type="button" onclick="startEditNews(${item.id})">Редактировать</button>
+            <button class="tiny-btn" type="button" onclick="togglePublish(${item.id}, ${item.is_published ? "false" : "true"})">
               ${item.is_published ? "Снять с публикации" : "Опубликовать"}
             </button>
-            <button class="tiny-btn" onclick="togglePin(${item.id}, ${item.is_pinned ? "false" : "true"})">
+            <button class="tiny-btn" type="button" onclick="togglePin(${item.id}, ${item.is_pinned ? "false" : "true"})">
               ${item.is_pinned ? "Открепить" : "Закрепить"}
             </button>
-            <button class="danger-btn tiny-btn" onclick="removeNews(${item.id})">Удалить</button>
+            <button class="danger-btn tiny-btn" type="button" onclick="removeNews(${item.id})">Удалить</button>
           </div>
         </div>
       `).join("");
@@ -1334,7 +1330,7 @@ function renderLikeButton(item) {
           </div>
 
           <div class="editor-actions">
-            ${item.is_admin ? "" : `<button class="danger-btn tiny-btn" onclick="revokeEditor('${escapeJsString(item.login)}')">Отозвать доступ</button>`}
+            ${item.is_admin ? "" : `<button class="danger-btn tiny-btn" type="button" onclick="revokeEditor('${escapeJsString(item.login)}')">Отозвать доступ</button>`}
           </div>
         </div>
       `).join("");
@@ -1348,7 +1344,6 @@ function renderLikeButton(item) {
       document.getElementById("newsSummaryInput").value = item?.summary || "";
       document.getElementById("newsImageUrlInput").value = item?.image_url || "";
       document.getElementById("newsContentInput").value = item?.content || "";
-      document.getElementById("newsPublishedCheckbox").checked = Boolean(item?.is_published);
       document.getElementById("newsPinnedCheckbox").checked = Boolean(item?.is_pinned);
       document.getElementById("cancelEditBtn").classList.toggle("hidden", !currentEditingNewsId);
     }
@@ -1367,9 +1362,9 @@ function renderLikeButton(item) {
     }
 
     async function loadPublishedNews() {
-  const data = await fetchJson(
-    buildApiUrl(`/api/news?user_login=${encodeURIComponent(currentLogin)}`)
-  );
+      const data = await fetchJson(
+        buildApiUrl(`/api/news?user_login=${encodeURIComponent(currentLogin)}`)
+      );
       publishedNews = Array.isArray(data?.items) ? data.items : [];
       renderPublishedNews();
 
@@ -1422,46 +1417,45 @@ function renderLikeButton(item) {
     }
 
     async function toggleLike(newsId) {
-  try {
-    const data = await fetchJson(buildApiUrl(`/api/news/${newsId}/react`), {
-      method: "POST",
-      body: JSON.stringify({
-        user_login: currentLogin,
-        reaction: "like"
-      })
-    });
+      try {
+        const data = await fetchJson(buildApiUrl(`/api/news/${newsId}/react`), {
+          method: "POST",
+          body: JSON.stringify({
+            user_login: currentLogin,
+            reaction: "like"
+          })
+        });
 
-    const summary = data?.summary || {
-      like_count: 0,
-      liked_by_user: false,
-      user_reaction: null
-    };
+        const summary = data?.summary || {
+          like_count: 0,
+          liked_by_user: false,
+          user_reaction: null
+        };
 
-    publishedNews = publishedNews.map(item =>
-      item.id === newsId
-        ? { ...item, reactions: summary }
-        : item
-    );
+        publishedNews = publishedNews.map(item =>
+          item.id === newsId
+            ? { ...item, reactions: summary }
+            : item
+        );
 
-    manageNews = manageNews.map(item =>
-      item.id === newsId
-        ? { ...item, reactions: summary }
-        : item
-    );
+        manageNews = manageNews.map(item =>
+          item.id === newsId
+            ? { ...item, reactions: summary }
+            : item
+        );
 
-    renderPublishedNews();
-  } catch (error) {
-    console.error(error);
-    showNotice(error.message || "Не удалось поставить лайк.", "error");
-  }
-}
+        renderPublishedNews();
+      } catch (error) {
+        console.error(error);
+        showNotice(error.message || "Не удалось поставить лайк.", "error");
+      }
+    }
 
-    async function saveNews() {
+    async function submitNews(isPublished) {
       const title = document.getElementById("newsTitleInput").value.trim();
       const summary = document.getElementById("newsSummaryInput").value.trim();
       const imageUrl = document.getElementById("newsImageUrlInput").value.trim();
       const content = document.getElementById("newsContentInput").value.trim();
-      const isPublished = document.getElementById("newsPublishedCheckbox").checked;
       const isPinned = document.getElementById("newsPinnedCheckbox").checked;
 
       if (!title) {
@@ -1494,7 +1488,7 @@ function renderLikeButton(item) {
             })
           });
 
-          showNotice("Новость обновлена.");
+          showNotice(isPublished ? "Новость опубликована." : "Черновик сохранён.");
         } else {
           await fetchJson(buildApiUrl("/api/news"), {
             method: "POST",
@@ -1510,7 +1504,7 @@ function renderLikeButton(item) {
             })
           });
 
-          showNotice("Новость создана.");
+          showNotice(isPublished ? "Новость опубликована." : "Черновик сохранён.");
         }
 
         resetComposer();
@@ -1525,8 +1519,8 @@ function renderLikeButton(item) {
     async function startEditNews(newsId) {
       try {
         const data = await fetchJson(
-  buildApiUrl(`/api/news/${newsId}?user_login=${encodeURIComponent(currentLogin)}`)
-);
+          buildApiUrl(`/api/news/${newsId}?user_login=${encodeURIComponent(currentLogin)}`)
+        );
         fillComposer(data);
         document.getElementById("editorComposerCard").scrollIntoView({ behavior: "smooth", block: "start" });
       } catch (error) {
@@ -1647,7 +1641,14 @@ function renderLikeButton(item) {
       }
     });
 
-    document.getElementById("saveNewsBtn").addEventListener("click", saveNews);
+    document.getElementById("saveDraftBtn").addEventListener("click", function () {
+      submitNews(false);
+    });
+
+    document.getElementById("publishNewsBtn").addEventListener("click", function () {
+      submitNews(true);
+    });
+
     document.getElementById("resetComposerBtn").addEventListener("click", resetComposer);
     document.getElementById("cancelEditBtn").addEventListener("click", resetComposer);
     document.getElementById("grantEditorBtn").addEventListener("click", grantEditor);
