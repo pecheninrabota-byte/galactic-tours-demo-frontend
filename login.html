@@ -381,7 +381,7 @@
         </h1>
 
         <p class="hero-sub">
-          Единая система для адаптации сотрудников, доступа к внутренним материалам и работы с HR-ассистентом Galactic Tours.
+          Единая система для адаптации сотрудников, доступа к внутренним материалам, корпоративным новостям и работы с HR-ассистентом Galactic Tours.
         </p>
       </div>
 
@@ -392,7 +392,7 @@
         </div>
         <div class="hero-point">
           <div class="hero-point-icon">✦</div>
-          <div class="hero-point-text">Быстрый доступ к базе знаний, сервисам и внутренним HR-процессам.</div>
+          <div class="hero-point-text">Быстрый доступ к базе знаний, корпоративным новостям и внутренним HR-процессам.</div>
         </div>
         <div class="hero-point">
           <div class="hero-point-icon">💬</div>
@@ -406,7 +406,7 @@
         <div class="card-kicker">Авторизация</div>
         <h2 class="card-title">Войти в Galactic Tours</h2>
         <div class="card-sub">
-          Используй корпоративные данные для входа в платформу. Для MVP пока используем тестовый доступ.
+          Используй корпоративные данные для входа в платформу. Для MVP доступны тестовые роли сотрудника и администратора.
         </div>
       </div>
 
@@ -439,9 +439,10 @@
       </form>
 
       <div class="hint-box">
-        <strong>Тестовый доступ для MVP:</strong><br />
-        Логин: <strong>test</strong><br />
-        Пароль: <strong>test</strong>
+        <strong>Тестовые доступы для MVP:</strong><br />
+        Администратор: <strong>admin / admin</strong><br />
+        Сотрудник: <strong>test / test</strong><br />
+        Любой другой сотрудник: <strong>любой_логин / test</strong>
       </div>
     </section>
   </div>
@@ -449,6 +450,9 @@
   <script>
     const AUTH_KEY = "galactic_tours_auth";
     const USER_LOGIN_KEY = "galactic_tours_login";
+    const USER_NAME_KEY = "galactic_tours_user_name";
+    const USER_ROLE_KEY = "galactic_tours_role";
+    const SESSION_KEY = "galactic_tours_session_id";
 
     const loginForm = document.getElementById("loginForm");
     const loginInput = document.getElementById("loginInput");
@@ -469,6 +473,30 @@
       window.location.href = "dashboard.html";
     }
 
+    function generateSessionId(login) {
+      return `session-${login}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function saveAuth(login, role) {
+      localStorage.setItem(AUTH_KEY, "true");
+      localStorage.setItem(USER_LOGIN_KEY, login);
+      localStorage.setItem(USER_NAME_KEY, login);
+      localStorage.setItem(USER_ROLE_KEY, role);
+
+      const currentSession = localStorage.getItem(SESSION_KEY);
+      if (!currentSession) {
+        localStorage.setItem(SESSION_KEY, generateSessionId(login));
+      }
+    }
+
+    function resetAuthState() {
+      localStorage.removeItem(AUTH_KEY);
+      localStorage.removeItem(USER_LOGIN_KEY);
+      localStorage.removeItem(USER_NAME_KEY);
+      localStorage.removeItem(USER_ROLE_KEY);
+      localStorage.removeItem(SESSION_KEY);
+    }
+
     const isAlreadyAuthorized = localStorage.getItem(AUTH_KEY) === "true";
     if (isAlreadyAuthorized) {
       redirectToDashboard();
@@ -486,14 +514,21 @@
         return;
       }
 
-      if (login === "test" && password === "test") {
-        localStorage.setItem(AUTH_KEY, "true");
-        localStorage.setItem(USER_LOGIN_KEY, login);
+      resetAuthState();
+
+      if (login === "admin" && password === "admin") {
+        saveAuth(login, "admin");
         redirectToDashboard();
         return;
       }
 
-      showError("Неверный логин или пароль. Для MVP используй test / test.");
+      if (password === "test") {
+        saveAuth(login, "employee");
+        redirectToDashboard();
+        return;
+      }
+
+      showError("Неверный логин или пароль. Для MVP используй admin / admin, test / test или любой_логин / test.");
     });
   </script>
 </body>
