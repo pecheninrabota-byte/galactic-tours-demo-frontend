@@ -54,6 +54,13 @@
       font: inherit;
     }
 
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
     .app-shell {
       display: grid;
       grid-template-columns: var(--sidebar-width) 1fr;
@@ -393,14 +400,26 @@
       margin-top: 16px;
       padding: 12px 14px;
       border-radius: 16px;
-      background: rgba(183, 217, 192, 0.1);
-      border: 1px solid rgba(183, 217, 192, 0.14);
-      color: var(--success);
       font-size: 14px;
+      border: 1px solid rgba(183, 217, 192, 0.14);
+      background: rgba(183, 217, 192, 0.1);
+      color: var(--success);
     }
 
     .notice.show {
       display: block;
+    }
+
+    .notice.warning {
+      border-color: rgba(240, 215, 161, 0.18);
+      background: rgba(240, 215, 161, 0.1);
+      color: var(--warning);
+    }
+
+    .notice.error {
+      border-color: rgba(239, 176, 176, 0.18);
+      background: rgba(239, 176, 176, 0.1);
+      color: #ffd2d2;
     }
 
     .builder-grid {
@@ -920,7 +939,7 @@
       </div>
 
       <div class="sidebar-footer">
-        HR-side слой платформы: здесь собирается шаблон адаптации, который потом можно связать с employee-side сценарием и knowledge layer.
+        HR-side слой платформы: здесь собирается шаблон адаптации, который потом синхронизируется с backend и employee-side контуром.
       </div>
     </aside>
 
@@ -963,7 +982,7 @@
           <div class="hero-side">
             <h3 class="hero-side-title">Статус шаблона</h3>
             <div class="hero-side-copy">
-              Первая версия builder хранит шаблон в localStorage, поэтому ничего не ломает в существующем backend, но уже даёт сильный HR-side интерфейс управления.
+              Builder работает в backend-first режиме: HR редактирует шаблон, сохраняет его в API, а localStorage остаётся только transitional mirror для устойчивости текущего MVP.
             </div>
 
             <div class="template-meta">
@@ -1094,8 +1113,8 @@
               <div class="helper-item">
                 <div class="helper-dot"></div>
                 <div class="helper-copy">
-                  <div class="helper-title">Сейчас всё хранится локально</div>
-                  <div class="helper-sub">Это безопасный MVP-слой. Следующим шагом можно будет связать шаблон с backend и employee pages.</div>
+                  <div class="helper-title">Источник истины — backend</div>
+                  <div class="helper-sub">Шаблон сохраняется в API, а localStorage остаётся только как переходный резервный слой, чтобы текущий MVP не ломался.</div>
                 </div>
               </div>
             </div>
@@ -1112,6 +1131,7 @@
     const SESSION_KEY = "galactic_tours_session_id";
     const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
     const ONBOARDING_TEMPLATE_KEY = "galactic_tours_onboarding_template";
+    const API_BASE_STORAGE_KEY = "galactic_tours_api_base";
 
     const KNOWLEDGE_LIBRARY = [
       { id: "welcome-start", title: "Первые шаги нового сотрудника" },
@@ -1123,6 +1143,25 @@
       { id: "support-entry", title: "Когда лучше идти к ассистенту" },
       { id: "self-sufficiency", title: "Переход к самостоятельной работе" }
     ];
+
+    function getApiBase() {
+      const stored = localStorage.getItem(API_BASE_STORAGE_KEY);
+      if (!stored) return "";
+      return stored.replace(/\/+$/, "");
+    }
+
+    const API_BASE = getApiBase();
+
+    function buildApiUrl(path) {
+      if (!path.startsWith("/")) {
+        return `${API_BASE}/${path}`;
+      }
+      return `${API_BASE}${path}`;
+    }
+
+    function generateId(prefix) {
+      return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    }
 
     function createDefaultTemplate() {
       return {
@@ -1170,49 +1209,150 @@
       };
     }
 
-    function generateId(prefix) {
-      return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    }
+    function normalizeTemplate(payload) {
+      const source = payload && typeof payload === "object" ? payload : {};
 
-    function loadTemplate() {
-      try {
-        const raw = localStorage.getItem(ONBOARDING_TEMPLATE_KEY);
-        if (!raw) return createDefaultTemplate();
+      const stages = Array.isArray(source.stages) ? source.stages : [];
 
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object") return createDefaultTemplate();
-        if (!Array.isArray(parsed.stages)) parsed.stages = [];
-
-        parsed.stages = parsed.stages.map(stage => ({
-          id: stage.id || generateId("stage"),
-          title: stage.title || "Новый этап",
-          description: stage.description || "",
-          message: stage.message || "",
-          tasks: Array.isArray(stage.tasks)
-            ? stage.tasks.map(task => ({
-                id: task.id || generateId("task"),
-                title: task.title || "",
-                required: Boolean(task.required)
+      return {
+        id: source.id || "base-template",
+        name: source.name || "Базовый маршрут адаптации",
+        audience: source.audience || "New hires · office employees",
+        description: source.description || "",
+        stages: stages.map((stage, stageIndex) => ({
+          id: stage?.id || generateId("stage"),
+          title: stage?.title || `Этап ${stageIndex + 1}`,
+          description: stage?.description || "",
+          message: stage?.message || "",
+          tasks: Array.isArray(stage?.tasks)
+            ? stage.tasks.map((task, taskIndex) => ({
+                id: task?.id || generateId("task"),
+                title: task?.title || `Задача ${taskIndex + 1}`,
+                required: Boolean(task?.required)
               }))
             : [],
-          knowledgeItems: Array.isArray(stage.knowledgeItems) ? stage.knowledgeItems : []
-        }));
+          knowledgeItems: Array.isArray(stage?.knowledgeItems)
+            ? stage.knowledgeItems
+                .filter(Boolean)
+                .map(item => String(item))
+            : []
+        }))
+      };
+    }
 
-        return {
-          id: parsed.id || "base-template",
-          name: parsed.name || "Базовый маршрут адаптации",
-          audience: parsed.audience || "New hires · office employees",
-          description: parsed.description || "",
-          stages: parsed.stages
-        };
+    function loadTemplateFromLocalMirror() {
+      try {
+        const raw = localStorage.getItem(ONBOARDING_TEMPLATE_KEY);
+        if (!raw) return null;
+
+        const parsed = JSON.parse(raw);
+        return normalizeTemplate(parsed);
       } catch (error) {
-        console.error(error);
-        return createDefaultTemplate();
+        console.error("Failed to parse local template mirror:", error);
+        return null;
       }
     }
 
-    function saveTemplate() {
-      localStorage.setItem(ONBOARDING_TEMPLATE_KEY, JSON.stringify(template));
+    function persistLocalMirror() {
+      try {
+        localStorage.setItem(ONBOARDING_TEMPLATE_KEY, JSON.stringify(template));
+      } catch (error) {
+        console.error("Failed to persist local template mirror:", error);
+      }
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        },
+        ...options
+      });
+
+      let data = null;
+      const text = await response.text();
+
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch (error) {
+          data = null;
+        }
+      }
+
+      if (!response.ok) {
+        const message =
+          data?.detail ||
+          data?.message ||
+          `HTTP ${response.status}`;
+        throw new Error(message);
+      }
+
+      return data;
+    }
+
+    async function loadTemplateFromBackend() {
+      const data = await fetchJson(buildApiUrl("/api/template"), {
+        method: "GET"
+      });
+
+      return normalizeTemplate(data);
+    }
+
+    async function saveTemplateToBackend(payload) {
+      const data = await fetchJson(buildApiUrl("/api/template"), {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+
+      if (!data || typeof data !== "object") {
+        return normalizeTemplate(payload);
+      }
+
+      if (data.template && typeof data.template === "object") {
+        return normalizeTemplate(data.template);
+      }
+
+      return normalizeTemplate(data);
+    }
+
+    async function resetTemplateOnBackend() {
+      const data = await fetchJson(buildApiUrl("/api/template/reset"), {
+        method: "POST"
+      });
+
+      if (!data || typeof data !== "object") {
+        return createDefaultTemplate();
+      }
+
+      if (data.template && typeof data.template === "object") {
+        return normalizeTemplate(data.template);
+      }
+
+      return normalizeTemplate(data);
+    }
+
+    async function syncCurrentSession() {
+      const sessionId = localStorage.getItem(SESSION_KEY);
+      if (!sessionId) return false;
+
+      try {
+        await fetchJson(buildApiUrl(`/api/sync/${encodeURIComponent(sessionId)}`), {
+          method: "POST"
+        });
+        return true;
+      } catch (error) {
+        console.error("Session sync failed:", error);
+        return false;
+      }
+    }
+
+    function setBusyState(isBusy) {
+      document.getElementById("saveTemplateBtn").disabled = isBusy;
+      document.getElementById("resetTemplateBtn").disabled = isBusy;
+      document.getElementById("addStageHeroBtn").disabled = isBusy;
+      document.getElementById("addStageSideBtn").disabled = isBusy;
     }
 
     const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
@@ -1250,24 +1390,46 @@
       window.location.href = "login.html";
     });
 
-    let template = loadTemplate();
-    let selectedStageId = template.stages[0]?.id || null;
+    let template = createDefaultTemplate();
+    let selectedStageId = null;
 
     const templateNameInput = document.getElementById("templateNameInput");
     const templateAudienceInput = document.getElementById("templateAudienceInput");
     const templateDescriptionInput = document.getElementById("templateDescriptionInput");
 
+    function ensureSelectedStage() {
+      if (!template.stages.length) {
+        selectedStageId = null;
+        return;
+      }
+
+      const selectedExists = template.stages.some(stage => stage.id === selectedStageId);
+      if (!selectedExists) {
+        selectedStageId = template.stages[0].id;
+      }
+    }
+
+    function setTemplateState(nextTemplate) {
+      template = normalizeTemplate(nextTemplate);
+      ensureSelectedStage();
+      persistLocalMirror();
+      renderAll();
+    }
+
     templateNameInput.addEventListener("input", function () {
       template.name = this.value;
+      persistLocalMirror();
       renderMeta();
     });
 
     templateAudienceInput.addEventListener("input", function () {
       template.audience = this.value;
+      persistLocalMirror();
     });
 
     templateDescriptionInput.addEventListener("input", function () {
       template.description = this.value;
+      persistLocalMirror();
     });
 
     function renderMeta() {
@@ -1316,6 +1478,7 @@
 
       template.stages.push(newStage);
       selectedStageId = newStage.id;
+      persistLocalMirror();
       renderAll();
     }
 
@@ -1335,6 +1498,7 @@
         selectedStageId = nextStage ? nextStage.id : null;
       }
 
+      persistLocalMirror();
       renderAll();
     }
 
@@ -1358,6 +1522,7 @@
       const index = template.stages.findIndex(stage => stage.id === stageId);
       template.stages.splice(index + 1, 0, copy);
       selectedStageId = copy.id;
+      persistLocalMirror();
       renderAll();
     }
 
@@ -1371,6 +1536,7 @@
       const [stage] = template.stages.splice(index, 1);
       template.stages.splice(targetIndex, 0, stage);
 
+      persistLocalMirror();
       renderAll();
     }
 
@@ -1491,18 +1657,21 @@
 
       document.getElementById("stageTitleInput").addEventListener("input", function () {
         stage.title = this.value;
+        persistLocalMirror();
         renderStageList();
         renderPreview();
       });
 
       document.getElementById("stageDescriptionInput").addEventListener("input", function () {
         stage.description = this.value;
+        persistLocalMirror();
         renderStageList();
         renderPreview();
       });
 
       document.getElementById("stageMessageInput").addEventListener("input", function () {
         stage.message = this.value;
+        persistLocalMirror();
         renderPreview();
       });
     }
@@ -1610,6 +1779,7 @@
         required: true
       });
 
+      persistLocalMirror();
       renderAll();
     }
 
@@ -1618,6 +1788,7 @@
       if (!stage) return;
 
       stage.tasks = stage.tasks.filter(task => task.id !== taskId);
+      persistLocalMirror();
       renderAll();
     }
 
@@ -1629,9 +1800,13 @@
       if (!task) return;
 
       task.title = value;
-      if (!silent) renderPreview();
-      else renderPreview();
+      persistLocalMirror();
+      renderPreview();
       renderStageList();
+
+      if (!silent) {
+        renderStageEditor();
+      }
     }
 
     function toggleTaskRequired(stageId, taskId, checked) {
@@ -1642,6 +1817,7 @@
       if (!task) return;
 
       task.required = checked;
+      persistLocalMirror();
       renderPreview();
     }
 
@@ -1657,6 +1833,7 @@
 
       const [task] = stage.tasks.splice(index, 1);
       stage.tasks.splice(targetIndex, 0, task);
+      persistLocalMirror();
       renderAll();
     }
 
@@ -1671,6 +1848,7 @@
         stage.knowledgeItems.push(select.value);
       }
 
+      persistLocalMirror();
       renderAll();
     }
 
@@ -1679,6 +1857,7 @@
       if (!stage) return;
 
       stage.knowledgeItems = stage.knowledgeItems.filter(id => id !== knowledgeId);
+      persistLocalMirror();
       renderAll();
     }
 
@@ -1694,6 +1873,7 @@
 
       const [item] = stage.knowledgeItems.splice(index, 1);
       stage.knowledgeItems.splice(targetIndex, 0, item);
+      persistLocalMirror();
       renderAll();
     }
 
@@ -1789,14 +1969,21 @@
       }).join("");
     }
 
-    function showNotice(message) {
+    function showNotice(message, type = "success") {
       const notice = document.getElementById("saveNotice");
       notice.textContent = message;
+      notice.className = "notice";
+      if (type === "warning") {
+        notice.classList.add("warning");
+      } else if (type === "error") {
+        notice.classList.add("error");
+      }
       notice.classList.add("show");
 
-      setTimeout(() => {
+      clearTimeout(showNotice._timer);
+      showNotice._timer = setTimeout(() => {
         notice.classList.remove("show");
-      }, 2200);
+      }, 2600);
     }
 
     function renderAll() {
@@ -1807,12 +1994,12 @@
       renderPreview();
     }
 
-    function resetTemplate() {
+    function resetTemplateLocallyOnly() {
       template = createDefaultTemplate();
       selectedStageId = template.stages[0]?.id || null;
-      saveTemplate();
+      persistLocalMirror();
       renderAll();
-      showNotice("Шаблон сброшен к дефолтной версии.");
+      showNotice("Backend недоступен. Локальное зеркало сброшено к дефолту.", "warning");
     }
 
     function pluralize(number, words) {
@@ -1839,18 +2026,94 @@
         .replace(/>/g, "&gt;");
     }
 
-    document.getElementById("saveTemplateBtn").addEventListener("click", function () {
-      saveTemplate();
-      renderMeta();
-      showNotice("Шаблон адаптации сохранён.");
-    });
+    async function handleSaveTemplate() {
+      try {
+        setBusyState(true);
 
-    document.getElementById("resetTemplateBtn").addEventListener("click", function () {
+        const normalized = normalizeTemplate(template);
+        const savedTemplate = await saveTemplateToBackend(normalized);
+
+        template = savedTemplate;
+        ensureSelectedStage();
+        persistLocalMirror();
+        renderAll();
+
+        const synced = await syncCurrentSession();
+
+        if (synced) {
+          showNotice("Шаблон сохранён в backend и текущая сессия синхронизирована.");
+        } else {
+          showNotice("Шаблон сохранён в backend.");
+        }
+      } catch (error) {
+        console.error("Save failed:", error);
+        persistLocalMirror();
+        showNotice(`Не удалось сохранить шаблон в backend: ${error.message}`, "error");
+      } finally {
+        setBusyState(false);
+      }
+    }
+
+    async function handleResetTemplate() {
       const confirmed = window.confirm("Сбросить текущий шаблон к дефолтной версии?");
       if (!confirmed) return;
-      resetTemplate();
-    });
 
+      try {
+        setBusyState(true);
+
+        const resetTemplate = await resetTemplateOnBackend();
+        template = resetTemplate;
+        selectedStageId = template.stages[0]?.id || null;
+        persistLocalMirror();
+        renderAll();
+
+        const synced = await syncCurrentSession();
+
+        if (synced) {
+          showNotice("Шаблон сброшен в backend и текущая сессия синхронизирована.");
+        } else {
+          showNotice("Шаблон сброшен к дефолтной версии в backend.");
+        }
+      } catch (error) {
+        console.error("Reset failed:", error);
+        resetTemplateLocallyOnly();
+      } finally {
+        setBusyState(false);
+      }
+    }
+
+    async function initAdminPage() {
+      try {
+        setBusyState(true);
+
+        const backendTemplate = await loadTemplateFromBackend();
+        template = backendTemplate;
+        selectedStageId = template.stages[0]?.id || null;
+        persistLocalMirror();
+        renderAll();
+      } catch (error) {
+        console.error("Failed to load template from backend:", error);
+
+        const localMirror = loadTemplateFromLocalMirror();
+        if (localMirror) {
+          template = localMirror;
+          selectedStageId = template.stages[0]?.id || null;
+          renderAll();
+          showNotice("Backend шаблона недоступен. Загружено локальное зеркало.", "warning");
+        } else {
+          template = createDefaultTemplate();
+          selectedStageId = template.stages[0]?.id || null;
+          persistLocalMirror();
+          renderAll();
+          showNotice("Backend шаблона недоступен. Загружен дефолтный шаблон.", "warning");
+        }
+      } finally {
+        setBusyState(false);
+      }
+    }
+
+    document.getElementById("saveTemplateBtn").addEventListener("click", handleSaveTemplate);
+    document.getElementById("resetTemplateBtn").addEventListener("click", handleResetTemplate);
     document.getElementById("addStageHeroBtn").addEventListener("click", addStage);
     document.getElementById("addStageSideBtn").addEventListener("click", addStage);
 
@@ -1867,7 +2130,7 @@
     window.removeKnowledge = removeKnowledge;
     window.moveKnowledge = moveKnowledge;
 
-    renderAll();
+    initAdminPage();
   </script>
 
   <script src="assistant.js"></script>
