@@ -708,7 +708,7 @@
           <span>Профиль</span>
         </a>
 
-        <a class="nav-link" href="admin.html">
+        <a id="adminNavLink" class="nav-link hidden" href="admin.html">
           <span class="nav-icon">🛠️</span>
           <span>HR Admin</span>
         </a>
@@ -1085,6 +1085,13 @@
       window.location.href = "login.html";
     }
 
+    const currentRole = localStorage.getItem("galactic_tours_role") || "employee";
+    const isAdmin = currentRole === "admin";
+    const adminNavLink = document.getElementById("adminNavLink");
+    if (adminNavLink) {
+    adminNavLink.classList.toggle("hidden", !isAdmin);
+    }
+    
     const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
     const savedName = localStorage.getItem(USER_NAME_KEY) || "";
     const profileChip = document.getElementById("profileChip");
