@@ -1156,6 +1156,12 @@
 
     const currentRole = localStorage.getItem("galactic_tours_role") || "employee";
     const isAdmin = currentRole === "admin";
+    const adminNavLink = document.getElementById("adminNavLink");
+    if (adminNavLink) {
+    adminNavLink.classList.toggle("hidden", !isAdmin);
+    }
+    const currentRole = localStorage.getItem("galactic_tours_role") || "employee";
+    const isAdmin = currentRole === "admin";
 
     // 2. Если не админ — скрываем весь HR-контент, показываем сообщение
     const adminContent = document.getElementById("adminContent");
