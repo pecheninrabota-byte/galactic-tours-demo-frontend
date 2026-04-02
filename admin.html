@@ -1160,6 +1160,7 @@
     if (adminNavLink) {
     adminNavLink.classList.toggle("hidden", !isAdmin);
     }
+    
     const currentRole = localStorage.getItem("galactic_tours_role") || "employee";
     const isAdmin = currentRole === "admin";
 
