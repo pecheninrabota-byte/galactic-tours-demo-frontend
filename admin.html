@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Galactic Tours — HR Admin</title>
   <style>
+    /* Весь твой CSS полностью сохранен */
     :root {
       --bg: #07111d;
       --bg-soft: #0c1727;
@@ -941,7 +942,7 @@
           <span>Профиль</span>
         </a>
 
-        <a id="adminNavLink" class="nav-link hidden active" href="admin.html">
+        <a id="adminNavLink" class="nav-link" href="admin.html">
           <span class="nav-icon">🛠️</span>
           <span>HR Admin</span>
         </a>
@@ -966,174 +967,228 @@
         </div>
       </div>
 
-      <section class="hero-card">
-        <div class="hero-grid">
-          <div class="hero-left">
-            <div class="hero-eyebrow">HR control layer · Onboarding builder</div>
+      <!-- БЛОК ДЛЯ HR-АДМИНА (виден только при role=admin) -->
+      <div id="adminContent">
+        <section class="hero-card">
+          <div class="hero-grid">
+            <div class="hero-left">
+              <div class="hero-eyebrow">HR control layer · Onboarding builder</div>
 
-            <h2 class="hero-title">
-              Конструктор адаптации, где HR сам управляет маршрутом сотрудника
-            </h2>
+              <h2 class="hero-title">
+                Конструктор адаптации, где HR сам управляет маршрутом сотрудника
+              </h2>
 
-            <div class="hero-sub">
-              Здесь можно не только редактировать зашитые модули, но и добавлять новые, удалять лишние, менять порядок этапов, собирать задачи и привязывать знания. Это уже не просто витрина, а реальный продуктовый слой управления onboarding-процессом.
+              <div class="hero-sub">
+                Здесь можно не только редактировать зашитые модули, но и добавлять новые, удалять лишние, менять порядок этапов, собирать задачи и привязывать знания. Это уже не просто витрина, а реальный продуктовый слой управления onboarding-процессом.
+              </div>
+
+              <div class="hero-actions">
+                <button id="saveTemplateBtn" class="primary-btn">Сохранить шаблон</button>
+                <button id="resetTemplateBtn" class="danger-btn">Сбросить к дефолту</button>
+                <button id="addStageHeroBtn" class="ghost-btn">Добавить этап</button>
+              </div>
+
+              <div id="saveNotice" class="notice">Шаблон адаптации сохранён.</div>
             </div>
 
-            <div class="hero-actions">
-              <button id="saveTemplateBtn" class="primary-btn">Сохранить шаблон</button>
-              <button id="resetTemplateBtn" class="danger-btn">Сбросить к дефолту</button>
-              <button id="addStageHeroBtn" class="ghost-btn">Добавить этап</button>
-            </div>
+            <div class="hero-side">
+              <h3 class="hero-side-title">Статус шаблона</h3>
+              <div class="hero-side-copy">
+                Builder работает в backend-first режиме: HR редактирует шаблон, сохраняет его в API, а localStorage остаётся только transitional mirror для устойчивости текущего MVP.
+              </div>
 
-            <div id="saveNotice" class="notice">Шаблон адаптации сохранён.</div>
+              <div class="template-meta">
+                <div class="meta-row">
+                  <div class="meta-label">Название маршрута</div>
+                  <div id="templateNameMeta" class="meta-value">Базовый маршрут адаптации</div>
+                </div>
+
+                <div class="meta-row">
+                  <div class="meta-label">Этапов в шаблоне</div>
+                  <div id="templateStageCountMeta" class="meta-value">3</div>
+                </div>
+
+                <div class="meta-row">
+                  <div class="meta-label">Всего задач</div>
+                  <div id="templateTaskCountMeta" class="meta-value">0</div>
+                </div>
+
+                <div class="meta-row">
+                  <div class="meta-label">Knowledge references</div>
+                  <div id="templateKnowledgeCountMeta" class="meta-value">0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="builder-grid">
+          <div class="stack">
+            <article class="card">
+              <div class="card-title-row">
+                <h3 class="card-title">Шаблон адаптации</h3>
+              </div>
+
+              <div class="card-subtitle">
+                Общая информация о маршруте. Здесь HR понимает, для кого и под какой сценарий собирается адаптация.
+              </div>
+
+              <div class="form-grid">
+                <div class="field">
+                  <label class="field-label" for="templateNameInput">Название маршрута</label>
+                  <input id="templateNameInput" class="field-input" type="text" />
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="templateAudienceInput">Аудитория</label>
+                  <input id="templateAudienceInput" class="field-input" type="text" />
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="templateDescriptionInput">Описание</label>
+                  <textarea id="templateDescriptionInput" class="field-textarea"></textarea>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-title-row">
+                <h3 class="card-title">Этапы маршрута</h3>
+                <button id="addStageSideBtn" class="secondary-btn">Добавить этап</button>
+              </div>
+
+              <div class="card-subtitle">
+                Список полностью динамический: можно оставить 2 этапа, сделать 3, 6 или любую другую конфигурацию без жёсткой привязки к fixed stage layout.
+              </div>
+
+              <div id="stageList" class="stage-list"></div>
+            </article>
           </div>
 
-          <div class="hero-side">
-            <h3 class="hero-side-title">Статус шаблона</h3>
-            <div class="hero-side-copy">
-              Builder работает в backend-first режиме: HR редактирует шаблон, сохраняет его в API, а localStorage остаётся только transitional mirror для устойчивости текущего MVP.
-            </div>
-
-            <div class="template-meta">
-              <div class="meta-row">
-                <div class="meta-label">Название маршрута</div>
-                <div id="templateNameMeta" class="meta-value">Базовый маршрут адаптации</div>
+          <div class="stack">
+            <article class="card">
+              <div class="card-title-row">
+                <h3 class="card-title">Редактор этапа</h3>
               </div>
 
-              <div class="meta-row">
-                <div class="meta-label">Этапов в шаблоне</div>
-                <div id="templateStageCountMeta" class="meta-value">3</div>
+              <div class="card-subtitle">
+                Центральная зона редактирования выбранного модуля адаптации. Здесь HR настраивает, что именно увидит сотрудник на конкретном этапе.
               </div>
 
-              <div class="meta-row">
-                <div class="meta-label">Всего задач</div>
-                <div id="templateTaskCountMeta" class="meta-value">0</div>
-              </div>
-
-              <div class="meta-row">
-                <div class="meta-label">Knowledge references</div>
-                <div id="templateKnowledgeCountMeta" class="meta-value">0</div>
-              </div>
-            </div>
+              <div id="stageEditorContent"></div>
+            </article>
           </div>
-        </div>
-      </section>
 
-      <section class="builder-grid">
-        <div class="stack">
-          <article class="card">
-            <div class="card-title-row">
-              <h3 class="card-title">Шаблон адаптации</h3>
-            </div>
-
-            <div class="card-subtitle">
-              Общая информация о маршруте. Здесь HR понимает, для кого и под какой сценарий собирается адаптация.
-            </div>
-
-            <div class="form-grid">
-              <div class="field">
-                <label class="field-label" for="templateNameInput">Название маршрута</label>
-                <input id="templateNameInput" class="field-input" type="text" />
+          <div class="stack preview-column">
+            <article class="card">
+              <div class="card-title-row">
+                <h3 class="card-title">Employee preview</h3>
               </div>
 
-              <div class="field">
-                <label class="field-label" for="templateAudienceInput">Аудитория</label>
-                <input id="templateAudienceInput" class="field-input" type="text" />
+              <div class="card-subtitle">
+                Превью помогает HR сразу видеть, как собранный этап будет ощущаться для сотрудника: сообщение, задачи, рекомендуемые материалы и общая логика модуля.
               </div>
 
-              <div class="field">
-                <label class="field-label" for="templateDescriptionInput">Описание</label>
-                <textarea id="templateDescriptionInput" class="field-textarea"></textarea>
+              <div id="previewContent" class="preview-shell"></div>
+            </article>
+
+            <article class="card">
+              <div class="card-title-row">
+                <h3 class="card-title">Как пользоваться builder</h3>
               </div>
-            </div>
-          </article>
 
-          <article class="card">
-            <div class="card-title-row">
-              <h3 class="card-title">Этапы маршрута</h3>
-              <button id="addStageSideBtn" class="secondary-btn">Добавить этап</button>
-            </div>
+              <div class="helper-list">
+                <div class="helper-item">
+                  <div class="helper-dot"></div>
+                  <div class="helper-copy">
+                    <div class="helper-title">Этапы можно добавлять и убирать без ограничений</div>
+                    <div class="helper-sub">Логика builder не зашита на три стадии. Это именно динамический список модулей маршрута.</div>
+                  </div>
+                </div>
 
-            <div class="card-subtitle">
-              Список полностью динамический: можно оставить 2 этапа, сделать 3, 6 или любую другую конфигурацию без жёсткой привязки к fixed stage layout.
-            </div>
+                <div class="helper-item">
+                  <div class="helper-dot"></div>
+                  <div class="helper-copy">
+                    <div class="helper-title">Задачи управляются внутри этапа</div>
+                    <div class="helper-sub">Для каждого модуля можно собрать собственный набор действий, менять порядок и обязательность.</div>
+                  </div>
+                </div>
 
-            <div id="stageList" class="stage-list"></div>
-          </article>
-        </div>
+                <div class="helper-item">
+                  <div class="helper-dot"></div>
+                  <div class="helper-copy">
+                    <div class="helper-title">Knowledge layer привязывается к этапу</div>
+                    <div class="helper-sub">Это связывает builder с базой знаний и делает employee-side сценарий более умным и контекстным.</div>
+                  </div>
+                </div>
 
-        <div class="stack">
-          <article class="card">
-            <div class="card-title-row">
-              <h3 class="card-title">Редактор этапа</h3>
-            </div>
-
-            <div class="card-subtitle">
-              Центральная зона редактирования выбранного модуля адаптации. Здесь HR настраивает, что именно увидит сотрудник на конкретном этапе.
-            </div>
-
-            <div id="stageEditorContent"></div>
-          </article>
-        </div>
-
-        <div class="stack preview-column">
-          <article class="card">
-            <div class="card-title-row">
-              <h3 class="card-title">Employee preview</h3>
-            </div>
-
-            <div class="card-subtitle">
-              Превью помогает HR сразу видеть, как собранный этап будет ощущаться для сотрудника: сообщение, задачи, рекомендуемые материалы и общая логика модуля.
-            </div>
-
-            <div id="previewContent" class="preview-shell"></div>
-          </article>
-
-          <article class="card">
-            <div class="card-title-row">
-              <h3 class="card-title">Как пользоваться builder</h3>
-            </div>
-
-            <div class="helper-list">
-              <div class="helper-item">
-                <div class="helper-dot"></div>
-                <div class="helper-copy">
-                  <div class="helper-title">Этапы можно добавлять и убирать без ограничений</div>
-                  <div class="helper-sub">Логика builder не зашита на три стадии. Это именно динамический список модулей маршрута.</div>
+                <div class="helper-item">
+                  <div class="helper-dot"></div>
+                  <div class="helper-copy">
+                    <div class="helper-title">Источник истины — backend</div>
+                    <div class="helper-sub">Шаблон сохраняется в API, а localStorage остаётся только как переходный резервный слой, чтобы текущий MVP не ломался.</div>
+                  </div>
                 </div>
               </div>
+            </article>
+          </div>
+        </section>
+      </div>
 
-              <div class="helper-item">
-                <div class="helper-dot"></div>
-                <div class="helper-copy">
-                  <div class="helper-title">Задачи управляются внутри этапа</div>
-                  <div class="helper-sub">Для каждого модуля можно собрать собственный набор действий, менять порядок и обязательность.</div>
-                </div>
-              </div>
-
-              <div class="helper-item">
-                <div class="helper-dot"></div>
-                <div class="helper-copy">
-                  <div class="helper-title">Knowledge layer привязывается к этапу</div>
-                  <div class="helper-sub">Это связывает builder с базой знаний и делает employee-side сценарий более умным и контекстным.</div>
-                </div>
-              </div>
-
-              <div class="helper-item">
-                <div class="helper-dot"></div>
-                <div class="helper-copy">
-                  <div class="helper-title">Источник истины — backend</div>
-                  <div class="helper-sub">Шаблон сохраняется в API, а localStorage остаётся только как переходный резервный слой, чтобы текущий MVP не ломался.</div>
-                </div>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
+      <!-- БЛОК ДЛЯ НЕ-АДМИНОВ (простое сообщение) -->
+      <div id="accessDenied" style="display: none; text-align: center; padding: 60px 20px;">
+        <div style="font-size: 48px; margin-bottom: 20px;">🛸</div>
+        <h2 style="font-size: 32px; margin-bottom: 16px;">Доступ ограничен</h2>
+        <p style="color: var(--muted); font-size: 18px; max-width: 500px; margin: 0 auto;">
+          Эта страница доступна только HR-администраторам. Если вы считаете, что это ошибка, обратитесь к руководителю.
+        </p>
+        <button id="goToDashboardBtn" class="primary-btn" style="margin-top: 32px;">Перейти на главную</button>
+      </div>
     </main>
   </div>
 
   <script>
+    // 1. Проверка авторизации и роли
+    const isAuthorized = localStorage.getItem("galactic_tours_auth") === "true";
+    if (!isAuthorized) {
+      window.location.href = "login.html";
+    }
+
+    const currentRole = localStorage.getItem("galactic_tours_role") || "employee";
+    const isAdmin = currentRole === "admin";
+
+    // 2. Если не админ — скрываем весь HR-контент, показываем сообщение
+    const adminContent = document.getElementById("adminContent");
+    const accessDenied = document.getElementById("accessDenied");
+
+    if (!isAdmin) {
+      if (adminContent) adminContent.style.display = "none";
+      if (accessDenied) accessDenied.style.display = "block";
+      // Скрываем ссылку на HR Admin в сайдбаре (дополнительная защита)
+      const adminLink = document.getElementById("adminNavLink");
+      if (adminLink) adminLink.style.display = "none";
+    } else {
+      if (adminContent) adminContent.style.display = "block";
+      if (accessDenied) accessDenied.style.display = "none";
+    }
+
+    // Кнопка "Перейти на главную" для не-админов
+    const goToDashboardBtn = document.getElementById("goToDashboardBtn");
+    if (goToDashboardBtn) {
+      goToDashboardBtn.addEventListener("click", () => {
+        window.location.href = "dashboard.html";
+      });
+    }
+
+    // 3. Дальше идёт ТОЛЬКО код для админов (весь остальной JS)
+    if (!isAdmin) {
+      // Если не админ — выходим, ничего не инициализируем
+      throw new Error("Access denied");
+    }
+
+    // ========== ВСЁ, ЧТО НИЖЕ, ВЫПОЛНЯЕТСЯ ТОЛЬКО ДЛЯ АДМИНИСТРАТОРОВ ==========
+
+    // Твои существующие функции и данные
     const AUTH_KEY = "galactic_tours_auth";
     const USER_LOGIN_KEY = "galactic_tours_login";
     const USER_NAME_KEY = "galactic_tours_user_name";
@@ -1167,23 +1222,6 @@
         return `${API_BASE}/${path}`;
       }
       return `${API_BASE}${path}`;
-    }
-
-    const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
-    if (!isAuthorized) {
-      window.location.href = "login.html";
-    }
-
-    const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
-    const isAdminUser = currentRole === "admin";
-
-    if (!isAdminUser) {
-      window.location.href = "dashboard.html";
-    }
-
-    const adminNavLink = document.getElementById("adminNavLink");
-    if (adminNavLink) {
-      adminNavLink.classList.toggle("hidden", !isAdminUser);
     }
 
     function generateId(prefix) {
@@ -1371,10 +1409,11 @@
     }
 
     function setBusyState(isBusy) {
-      document.getElementById("saveTemplateBtn").disabled = isBusy;
-      document.getElementById("resetTemplateBtn").disabled = isBusy;
-      document.getElementById("addStageHeroBtn").disabled = isBusy;
-      document.getElementById("addStageSideBtn").disabled = isBusy;
+      const btns = ["saveTemplateBtn", "resetTemplateBtn", "addStageHeroBtn", "addStageSideBtn"];
+      btns.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.disabled = isBusy;
+      });
     }
 
     const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
