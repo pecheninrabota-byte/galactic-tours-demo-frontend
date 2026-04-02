@@ -980,9 +980,9 @@
             </div>
 
             <div class="hero-actions">
-              <button id="saveTemplateBtn" class="primary-btn" type="button">Сохранить шаблон</button>
-              <button id="resetTemplateBtn" class="danger-btn" type="button">Сбросить к дефолту</button>
-              <button id="addStageHeroBtn" class="ghost-btn" type="button">Добавить этап</button>
+              <button id="saveTemplateBtn" class="primary-btn">Сохранить шаблон</button>
+              <button id="resetTemplateBtn" class="danger-btn">Сбросить к дефолту</button>
+              <button id="addStageHeroBtn" class="ghost-btn">Добавить этап</button>
             </div>
 
             <div id="saveNotice" class="notice">Шаблон адаптации сохранён.</div>
@@ -1051,7 +1051,7 @@
           <article class="card">
             <div class="card-title-row">
               <h3 class="card-title">Этапы маршрута</h3>
-              <button id="addStageSideBtn" class="secondary-btn" type="button">Добавить этап</button>
+              <button id="addStageSideBtn" class="secondary-btn">Добавить этап</button>
             </div>
 
             <div class="card-subtitle">
@@ -1156,9 +1156,7 @@
 
     function getApiBase() {
       const stored = localStorage.getItem(API_BASE_STORAGE_KEY);
-      if (!stored) {
-        return "";
-      }
+      if (!stored) return "";
       return stored.replace(/\/+$/, "");
     }
 
@@ -1169,6 +1167,23 @@
         return `${API_BASE}/${path}`;
       }
       return `${API_BASE}${path}`;
+    }
+
+    const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
+    if (!isAuthorized) {
+      window.location.href = "login.html";
+    }
+
+    const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
+    const isAdminUser = currentRole === "admin";
+
+    if (!isAdminUser) {
+      window.location.href = "dashboard.html";
+    }
+
+    const adminNavLink = document.getElementById("adminNavLink");
+    if (adminNavLink) {
+      adminNavLink.classList.toggle("hidden", !isAdminUser);
     }
 
     function generateId(prefix) {
@@ -1253,7 +1268,8 @@
       try {
         const raw = localStorage.getItem(ONBOARDING_TEMPLATE_KEY);
         if (!raw) return null;
-        return normalizeTemplate(JSON.parse(raw));
+        const parsed = JSON.parse(raw);
+        return normalizeTemplate(parsed);
       } catch (error) {
         console.error("Failed to parse local template mirror:", error);
         return null;
@@ -1289,49 +1305,14 @@
       }
 
       if (!response.ok) {
-        const message = data?.detail || data?.message || `HTTP ${response.status}`;
+        const message =
+          data?.detail ||
+          data?.message ||
+          `HTTP ${response.status}`;
         throw new Error(message);
       }
 
       return data;
-    }
-
-    async function checkAdminAccess() {
-      const login = localStorage.getItem(USER_LOGIN_KEY) || "";
-      const role = localStorage.getItem(USER_ROLE_KEY) || "employee";
-
-      if (!login) {
-        window.location.href = "login.html";
-        return false;
-      }
-
-      try {
-        if (API_BASE) {
-          const data = await fetchJson(buildApiUrl(`/api/news/permissions/check?login=${encodeURIComponent(login)}`));
-          const isAdmin = Boolean(data?.is_admin);
-
-          document.getElementById("adminNavLink").classList.toggle("hidden", !isAdmin);
-
-          if (!isAdmin) {
-            window.location.href = "dashboard.html";
-            return false;
-          }
-
-          return true;
-        }
-      } catch (error) {
-        console.error("Admin access check failed:", error);
-      }
-
-      const isAdminByRole = role === "admin";
-      document.getElementById("adminNavLink").classList.toggle("hidden", !isAdminByRole);
-
-      if (!isAdminByRole) {
-        window.location.href = "dashboard.html";
-        return false;
-      }
-
-      return true;
     }
 
     async function loadTemplateFromBackend() {
@@ -1376,7 +1357,7 @@
 
     async function syncCurrentSession() {
       const sessionId = localStorage.getItem(SESSION_KEY);
-      if (!sessionId || !API_BASE) return false;
+      if (!sessionId) return false;
 
       try {
         await fetchJson(buildApiUrl(`/api/sync/${encodeURIComponent(sessionId)}`), {
@@ -1394,11 +1375,6 @@
       document.getElementById("resetTemplateBtn").disabled = isBusy;
       document.getElementById("addStageHeroBtn").disabled = isBusy;
       document.getElementById("addStageSideBtn").disabled = isBusy;
-    }
-
-    const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
-    if (!isAuthorized) {
-      window.location.href = "login.html";
     }
 
     const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
@@ -1600,4 +1576,582 @@
         const knowledgeCount = stage.knowledgeItems.length;
 
         return `
-          <div class="stage-item ${isActive
+          <div class="stage-item ${isActive ? "active" : ""}" onclick="selectStage('${stage.id}')">
+            <div class="stage-item-top">
+              <div>
+                <div class="stage-name">${escapeHtml(stage.title || "Без названия")}</div>
+              </div>
+              <div class="stage-order">Этап ${index + 1}</div>
+            </div>
+
+            <div class="stage-desc">${escapeHtml(stage.description || "Описание этапа пока не заполнено.")}</div>
+
+            <div class="stage-meta">
+              <span class="meta-badge">${taskCount} ${pluralize(taskCount, ["задача", "задачи", "задач"])}</span>
+              <span class="meta-badge">${knowledgeCount} knowledge refs</span>
+            </div>
+
+            <div class="stage-actions" onclick="event.stopPropagation()">
+              <button class="tiny-btn" type="button" onclick="moveStage('${stage.id}', 'up')">↑ Вверх</button>
+              <button class="tiny-btn" type="button" onclick="moveStage('${stage.id}', 'down')">↓ Вниз</button>
+              <button class="tiny-btn" type="button" onclick="duplicateStage('${stage.id}')">Дублировать</button>
+              <button class="danger-btn tiny-btn" type="button" onclick="deleteStage('${stage.id}')">Удалить</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderStageEditor() {
+      const container = document.getElementById("stageEditorContent");
+      const stage = getSelectedStage();
+
+      if (!stage) {
+        container.innerHTML = `
+          <div class="empty-state">
+            Нет выбранного этапа. Добавьте модуль или выберите существующий, чтобы открыть редактор.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="stageTitleInput">Название этапа</label>
+            <input id="stageTitleInput" class="field-input" type="text" value="${escapeAttr(stage.title)}" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="stageDescriptionInput">Краткое описание этапа</label>
+            <textarea id="stageDescriptionInput" class="field-textarea">${escapeHtml(stage.description)}</textarea>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="stageMessageInput">Stage message для сотрудника</label>
+            <textarea id="stageMessageInput" class="field-textarea">${escapeHtml(stage.message)}</textarea>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="card-title-row" style="margin-bottom: 12px;">
+          <h3 class="card-title" style="font-size:20px;">Задачи этапа</h3>
+          <button class="secondary-btn" type="button" onclick="addTask('${stage.id}')">Добавить задачу</button>
+        </div>
+
+        <div class="card-subtitle">
+          Задачи собираются внутри этапа. Можно менять порядок, удалять и отмечать обязательность без ограничений по количеству.
+        </div>
+
+        <div id="taskListEditor" class="task-list">
+          ${renderTaskEditorList(stage)}
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="card-title-row" style="margin-bottom: 12px;">
+          <h3 class="card-title" style="font-size:20px;">Knowledge recommendations</h3>
+        </div>
+
+        <div class="card-subtitle">
+          Привязывайте материалы из knowledge layer к этапу, чтобы рекомендации на employee-side были контекстными.
+        </div>
+
+        <div class="field" style="margin-bottom:14px;">
+          <label class="field-label" for="knowledgeSelect">Добавить материал из библиотеки</label>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <select id="knowledgeSelect" class="field-select" style="display:block; flex:1 1 260px;">
+              ${renderKnowledgeOptions(stage)}
+            </select>
+            <button class="secondary-btn" type="button" onclick="addKnowledgeToStage('${stage.id}')">Добавить материал</button>
+          </div>
+        </div>
+
+        <div class="knowledge-list">
+          ${renderKnowledgeEditorList(stage)}
+        </div>
+      `;
+
+      document.getElementById("stageTitleInput").addEventListener("input", function () {
+        stage.title = this.value;
+        persistLocalMirror();
+        renderStageList();
+        renderPreview();
+      });
+
+      document.getElementById("stageDescriptionInput").addEventListener("input", function () {
+        stage.description = this.value;
+        persistLocalMirror();
+        renderStageList();
+        renderPreview();
+      });
+
+      document.getElementById("stageMessageInput").addEventListener("input", function () {
+        stage.message = this.value;
+        persistLocalMirror();
+        renderPreview();
+      });
+    }
+
+    function renderTaskEditorList(stage) {
+      if (!stage.tasks.length) {
+        return `
+          <div class="empty-state">
+            В этом этапе пока нет задач. Добавьте первую, чтобы сформировать employee-side сценарий.
+          </div>
+        `;
+      }
+
+      return stage.tasks.map((task, index) => `
+        <div class="task-item">
+          <div class="task-head">
+            <div class="task-title-row">
+              <input
+                class="field-input compact-input"
+                type="text"
+                value="${escapeAttr(task.title)}"
+                onchange="updateTaskTitle('${stage.id}', '${task.id}', this.value)"
+                oninput="updateTaskTitle('${stage.id}', '${task.id}', this.value, true)"
+              />
+            </div>
+
+            <div class="task-controls">
+              <label class="task-optional">
+                <input
+                  class="task-checkbox"
+                  type="checkbox"
+                  ${task.required ? "checked" : ""}
+                  onchange="toggleTaskRequired('${stage.id}', '${task.id}', this.checked)"
+                />
+                обязательная
+              </label>
+
+              <button class="tiny-btn" type="button" onclick="moveTask('${stage.id}', '${task.id}', 'up')">↑</button>
+              <button class="tiny-btn" type="button" onclick="moveTask('${stage.id}', '${task.id}', 'down')">↓</button>
+              <button class="danger-btn tiny-btn" type="button" onclick="deleteTask('${stage.id}', '${task.id}')">Удалить</button>
+            </div>
+          </div>
+
+          <div class="meta-badge">Позиция: ${index + 1}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderKnowledgeOptions(stage) {
+      const selectedIds = new Set(stage.knowledgeItems);
+      const available = KNOWLEDGE_LIBRARY.filter(item => !selectedIds.has(item.id));
+
+      if (!available.length) {
+        return `<option value="">Все материалы из библиотеки уже добавлены</option>`;
+      }
+
+      return [
+        `<option value="">Выберите материал</option>`,
+        ...available.map(item => `<option value="${item.id}">${escapeHtml(item.title)}</option>`)
+      ].join("");
+    }
+
+    function renderKnowledgeEditorList(stage) {
+      if (!stage.knowledgeItems.length) {
+        return `
+          <div class="empty-state">
+            Для этого этапа пока не выбраны материалы. Добавьте knowledge references из библиотеки выше.
+          </div>
+        `;
+      }
+
+      return stage.knowledgeItems.map((knowledgeId, index) => {
+        const item = KNOWLEDGE_LIBRARY.find(entry => entry.id === knowledgeId);
+        const title = item ? item.title : knowledgeId;
+
+        return `
+          <div class="knowledge-item">
+            <div class="knowledge-head">
+              <div class="knowledge-title-row">
+                <div class="field-label">Материал</div>
+                <div style="font-size:15px; font-weight:600; line-height:1.5;">${escapeHtml(title)}</div>
+                <div class="meta-badge">ID: ${escapeHtml(knowledgeId)}</div>
+              </div>
+
+              <div class="knowledge-controls">
+                <button class="tiny-btn" type="button" onclick="moveKnowledge('${stage.id}', '${knowledgeId}', 'up')">↑</button>
+                <button class="tiny-btn" type="button" onclick="moveKnowledge('${stage.id}', '${knowledgeId}', 'down')">↓</button>
+                <button class="danger-btn tiny-btn" type="button" onclick="removeKnowledge('${stage.id}', '${knowledgeId}')">Удалить</button>
+              </div>
+            </div>
+
+            <div class="meta-badge">Позиция: ${index + 1}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function addTask(stageId) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      stage.tasks.push({
+        id: generateId("task"),
+        title: "Новая задача",
+        required: true
+      });
+
+      persistLocalMirror();
+      renderAll();
+    }
+
+    function deleteTask(stageId, taskId) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      stage.tasks = stage.tasks.filter(task => task.id !== taskId);
+      persistLocalMirror();
+      renderAll();
+    }
+
+    function updateTaskTitle(stageId, taskId, value, silent = false) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      const task = stage.tasks.find(item => item.id === taskId);
+      if (!task) return;
+
+      task.title = value;
+      persistLocalMirror();
+      renderPreview();
+      renderStageList();
+
+      if (!silent) {
+        renderStageEditor();
+      }
+    }
+
+    function toggleTaskRequired(stageId, taskId, checked) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      const task = stage.tasks.find(item => item.id === taskId);
+      if (!task) return;
+
+      task.required = checked;
+      persistLocalMirror();
+      renderPreview();
+    }
+
+    function moveTask(stageId, taskId, direction) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      const index = stage.tasks.findIndex(task => task.id === taskId);
+      if (index === -1) return;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= stage.tasks.length) return;
+
+      const [task] = stage.tasks.splice(index, 1);
+      stage.tasks.splice(targetIndex, 0, task);
+      persistLocalMirror();
+      renderAll();
+    }
+
+    function addKnowledgeToStage(stageId) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      const select = document.getElementById("knowledgeSelect");
+      if (!select || !select.value) return;
+
+      if (!stage.knowledgeItems.includes(select.value)) {
+        stage.knowledgeItems.push(select.value);
+      }
+
+      persistLocalMirror();
+      renderAll();
+    }
+
+    function removeKnowledge(stageId, knowledgeId) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      stage.knowledgeItems = stage.knowledgeItems.filter(id => id !== knowledgeId);
+      persistLocalMirror();
+      renderAll();
+    }
+
+    function moveKnowledge(stageId, knowledgeId, direction) {
+      const stage = template.stages.find(item => item.id === stageId);
+      if (!stage) return;
+
+      const index = stage.knowledgeItems.findIndex(id => id === knowledgeId);
+      if (index === -1) return;
+
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= stage.knowledgeItems.length) return;
+
+      const [item] = stage.knowledgeItems.splice(index, 1);
+      stage.knowledgeItems.splice(targetIndex, 0, item);
+      persistLocalMirror();
+      renderAll();
+    }
+
+    function renderPreview() {
+      const container = document.getElementById("previewContent");
+      const stage = getSelectedStage();
+
+      if (!stage) {
+        container.innerHTML = `
+          <div class="empty-state">
+            Выберите этап, чтобы увидеть, как этот модуль будет выглядеть для сотрудника.
+          </div>
+        `;
+        return;
+      }
+
+      const stageIndex = template.stages.findIndex(item => item.id === stage.id);
+
+      container.innerHTML = `
+        <div class="preview-badge">Этап ${stageIndex + 1} · Employee view</div>
+
+        <h3 class="preview-title">${escapeHtml(stage.title || "Без названия")}</h3>
+
+        <div class="preview-copy">
+          ${escapeHtml(stage.message || "Сообщение этапа пока не заполнено.")}
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-label">Описание этапа</div>
+          <div class="preview-copy" style="font-size:14px;">
+            ${escapeHtml(stage.description || "Описание этапа пока не заполнено.")}
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-label">Задачи этапа</div>
+          <div class="preview-task-list">
+            ${renderPreviewTasks(stage)}
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-label">Рекомендованные материалы</div>
+          <div class="preview-knowledge-list">
+            ${renderPreviewKnowledge(stage)}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPreviewTasks(stage) {
+      if (!stage.tasks.length) {
+        return `
+          <div class="empty-state">
+            На employee-side здесь появится список задач, когда HR добавит хотя бы одну задачу в модуль.
+          </div>
+        `;
+      }
+
+      return stage.tasks.map(task => `
+        <div class="preview-task-item">
+          <div class="preview-check ${task.required ? "required" : ""}"></div>
+          <div class="preview-item-copy">
+            <div class="preview-item-title">${escapeHtml(task.title || "Задача без названия")}</div>
+            <div class="preview-item-sub">${task.required ? "Обязательная задача этапа" : "Необязательная задача этапа"}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderPreviewKnowledge(stage) {
+      if (!stage.knowledgeItems.length) {
+        return `
+          <div class="empty-state">
+            На этом этапе пока нет привязанных материалов базы знаний.
+          </div>
+        `;
+      }
+
+      return stage.knowledgeItems.map(knowledgeId => {
+        const item = KNOWLEDGE_LIBRARY.find(entry => entry.id === knowledgeId);
+        const title = item ? item.title : knowledgeId;
+
+        return `
+          <div class="preview-knowledge-item">
+            <div class="preview-dot"></div>
+            <div class="preview-item-copy">
+              <div class="preview-item-title">${escapeHtml(title)}</div>
+              <div class="preview-item-sub">Будет рекомендовано сотруднику как материал текущего этапа</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function showNotice(message, type = "success") {
+      const notice = document.getElementById("saveNotice");
+      notice.textContent = message;
+      notice.className = "notice";
+      if (type === "warning") {
+        notice.classList.add("warning");
+      } else if (type === "error") {
+        notice.classList.add("error");
+      }
+      notice.classList.add("show");
+
+      clearTimeout(showNotice._timer);
+      showNotice._timer = setTimeout(() => {
+        notice.classList.remove("show");
+      }, 2600);
+    }
+
+    function renderAll() {
+      fillTemplateFields();
+      renderMeta();
+      renderStageList();
+      renderStageEditor();
+      renderPreview();
+    }
+
+    function resetTemplateLocallyOnly() {
+      template = createDefaultTemplate();
+      selectedStageId = template.stages[0]?.id || null;
+      persistLocalMirror();
+      renderAll();
+      showNotice("Backend недоступен. Локальное зеркало сброшено к дефолту.", "warning");
+    }
+
+    function pluralize(number, words) {
+      const n = Math.abs(number) % 100;
+      const n1 = n % 10;
+      if (n > 10 && n < 20) return words[2];
+      if (n1 > 1 && n1 < 5) return words[1];
+      if (n1 === 1) return words[0];
+      return words[2];
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function escapeAttr(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    async function handleSaveTemplate() {
+      try {
+        setBusyState(true);
+
+        const normalized = normalizeTemplate(template);
+        const savedTemplate = await saveTemplateToBackend(normalized);
+
+        template = savedTemplate;
+        ensureSelectedStage();
+        persistLocalMirror();
+        renderAll();
+
+        const synced = await syncCurrentSession();
+
+        if (synced) {
+          showNotice("Шаблон сохранён в backend и текущая сессия синхронизирована.");
+        } else {
+          showNotice("Шаблон сохранён в backend.");
+        }
+      } catch (error) {
+        console.error("Save failed:", error);
+        persistLocalMirror();
+        showNotice(`Не удалось сохранить шаблон в backend: ${error.message}`, "error");
+      } finally {
+        setBusyState(false);
+      }
+    }
+
+    async function handleResetTemplate() {
+      const confirmed = window.confirm("Сбросить текущий шаблон к дефолтной версии?");
+      if (!confirmed) return;
+
+      try {
+        setBusyState(true);
+
+        const resetTemplate = await resetTemplateOnBackend();
+        template = resetTemplate;
+        selectedStageId = template.stages[0]?.id || null;
+        persistLocalMirror();
+        renderAll();
+
+        const synced = await syncCurrentSession();
+
+        if (synced) {
+          showNotice("Шаблон сброшен в backend и текущая сессия синхронизирована.");
+        } else {
+          showNotice("Шаблон сброшен к дефолтной версии в backend.");
+        }
+      } catch (error) {
+        console.error("Reset failed:", error);
+        resetTemplateLocallyOnly();
+      } finally {
+        setBusyState(false);
+      }
+    }
+
+    async function initAdminPage() {
+      try {
+        setBusyState(true);
+
+        const backendTemplate = await loadTemplateFromBackend();
+        template = backendTemplate;
+        selectedStageId = template.stages[0]?.id || null;
+        persistLocalMirror();
+        renderAll();
+      } catch (error) {
+        console.error("Failed to load template from backend:", error);
+
+        const localMirror = loadTemplateFromLocalMirror();
+        if (localMirror) {
+          template = localMirror;
+          selectedStageId = template.stages[0]?.id || null;
+          renderAll();
+          showNotice("Backend шаблона недоступен. Загружено локальное зеркало.", "warning");
+        } else {
+          template = createDefaultTemplate();
+          selectedStageId = template.stages[0]?.id || null;
+          persistLocalMirror();
+          renderAll();
+          showNotice("Backend шаблона недоступен. Загружен дефолтный шаблон.", "warning");
+        }
+      } finally {
+        setBusyState(false);
+      }
+    }
+
+    document.getElementById("saveTemplateBtn").addEventListener("click", handleSaveTemplate);
+    document.getElementById("resetTemplateBtn").addEventListener("click", handleResetTemplate);
+    document.getElementById("addStageHeroBtn").addEventListener("click", addStage);
+    document.getElementById("addStageSideBtn").addEventListener("click", addStage);
+
+    window.selectStage = selectStage;
+    window.moveStage = moveStage;
+    window.deleteStage = deleteStage;
+    window.duplicateStage = duplicateStage;
+    window.addTask = addTask;
+    window.deleteTask = deleteTask;
+    window.updateTaskTitle = updateTaskTitle;
+    window.toggleTaskRequired = toggleTaskRequired;
+    window.moveTask = moveTask;
+    window.addKnowledgeToStage = addKnowledgeToStage;
+    window.removeKnowledge = removeKnowledge;
+    window.moveKnowledge = moveKnowledge;
+
+    initAdminPage();
+  </script>
+
+  <script src="assistant.js"></script>
+  <script src="notifications.js"></script>
+</body>
+</html>
