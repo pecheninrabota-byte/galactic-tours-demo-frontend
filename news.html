@@ -806,7 +806,7 @@
           <span>Профиль</span>
         </a>
 
-        <a class="nav-link" href="admin.html">
+        <a id="adminNavLink" class="nav-link hidden" href="admin.html">
           <span class="nav-icon">🛠️</span>
           <span>HR Admin</span>
         </a>
@@ -1038,6 +1038,12 @@
       window.location.href = "login.html";
     }
 
+    const adminNavLink = document.getElementById("adminNavLink");
+    const isAdmin = (localStorage.getItem(USER_ROLE_KEY) || "employee") === "admin";
+    if (adminNavLink) {
+    adminNavLink.classList.toggle("hidden", !isAdmin);
+    }
+    
     const currentLogin = localStorage.getItem(USER_LOGIN_KEY) || "";
     const currentName = localStorage.getItem(USER_NAME_KEY) || currentLogin || "Сотрудник";
     const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
