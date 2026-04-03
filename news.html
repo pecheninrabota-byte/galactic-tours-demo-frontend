@@ -21,13 +21,17 @@
       --warning: #f0d7a1;
       --danger: #efb0b0;
       --hero-glow: rgba(122, 164, 224, 0.18);
+      --like-red: #ff7b8b;
+      --like-red-strong: #ff5d73;
+      --comment-blue: #bdd7ff;
     }
 
     * {
       box-sizing: border-box;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       min-height: 100%;
@@ -52,6 +56,10 @@
     textarea,
     select {
       font: inherit;
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     .app-shell {
@@ -147,7 +155,7 @@
     .nav-icon {
       width: 20px;
       text-align: center;
-      opacity: 0.9;
+      opacity: 0.95;
     }
 
     .sidebar-footer {
@@ -206,7 +214,9 @@
     .ghost-btn,
     .chip-btn,
     .tiny-btn,
-    .danger-btn {
+    .danger-btn,
+    .like-btn,
+    .comment-btn {
       border-radius: 999px;
       font-size: 14px;
       cursor: pointer;
@@ -219,7 +229,8 @@
     .secondary-btn,
     .ghost-btn,
     .chip-btn,
-    .tiny-btn {
+    .tiny-btn,
+    .comment-btn {
       border: 1px solid var(--line);
       background: rgba(255,255,255,0.03);
       color: var(--text);
@@ -233,16 +244,35 @@
       padding: 12px 16px;
     }
 
+    .like-btn {
+      border: 1px solid rgba(255, 93, 115, 0.22);
+      background: rgba(255, 93, 115, 0.08);
+      color: #ffd6dc;
+      padding: 12px 16px;
+    }
+
+    .like-btn.active {
+      border-color: rgba(255, 93, 115, 0.36);
+      background: rgba(255, 93, 115, 0.18);
+      color: #fff0f3;
+      box-shadow: 0 10px 24px rgba(255, 93, 115, 0.14);
+    }
+
     .logout-btn:hover,
     .secondary-btn:hover,
     .ghost-btn:hover,
     .chip-btn:hover,
-    .tiny-btn:hover {
+    .tiny-btn:hover,
+    .comment-btn:hover {
       background: rgba(255,255,255,0.06);
     }
 
     .danger-btn:hover {
       background: rgba(239, 176, 176, 0.14);
+    }
+
+    .like-btn:hover {
+      background: rgba(255, 93, 115, 0.14);
     }
 
     .primary-btn {
@@ -513,6 +543,12 @@
       border: 1px solid rgba(255,255,255,0.06);
     }
 
+    .news-badge.hot {
+      color: #ffe8b2;
+      border-color: rgba(240, 215, 161, 0.2);
+      background: rgba(240, 215, 161, 0.08);
+    }
+
     .news-title {
       font-size: 24px;
       font-weight: 700;
@@ -571,6 +607,110 @@
       line-height: 1.8;
       color: var(--text);
       font-size: 15px;
+    }
+
+    .comment-block {
+      margin-top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .comment-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .comment-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .comment-count {
+      font-size: 13px;
+      color: var(--comment-blue);
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(189, 215, 255, 0.14);
+      background: rgba(189, 215, 255, 0.06);
+    }
+
+    .comment-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .comment-textarea {
+      width: 100%;
+      min-height: 88px;
+      resize: vertical;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px 14px;
+      outline: none;
+      font-size: 14px;
+      line-height: 1.7;
+      font-family: inherit;
+    }
+
+    .comment-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .comment-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .comment-item {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.025);
+      display: grid;
+      gap: 8px;
+    }
+
+    .comment-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .comment-author {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .comment-date {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .comment-body {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+
+    .comment-empty {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      padding: 4px 0;
     }
 
     .form-grid {
@@ -637,12 +777,6 @@
       accent-color: #edf5fc;
     }
 
-    .section-divider {
-      height: 1px;
-      background: var(--line);
-      margin: 18px 0;
-    }
-
     .manage-list,
     .editor-list {
       display: grid;
@@ -699,10 +833,6 @@
       flex: 1 1 220px;
     }
 
-    .hidden {
-      display: none !important;
-    }
-
     @media (max-width: 1320px) {
       .hero-grid,
       .content-grid {
@@ -748,7 +878,8 @@
       .editor-form,
       .manage-actions,
       .editor-actions,
-      .news-actions {
+      .news-actions,
+      .comment-actions {
         width: 100%;
       }
 
@@ -760,7 +891,8 @@
       .editor-form > *,
       .manage-actions > *,
       .editor-actions > *,
-      .news-actions > * {
+      .news-actions > *,
+      .comment-actions > * {
         width: 100%;
         justify-content: center;
       }
@@ -813,7 +945,7 @@
       </div>
 
       <div class="sidebar-footer">
-        Корпоративный новостной портал Galactic Tours. Админ и назначенные редакторы могут публиковать новости, а сотрудники — читать важные обновления компании в едином employee-пространстве.
+        Корпоративный новостной портал Galactic Tours. 🚀 Админ и назначенные редакторы могут публиковать новости, а сотрудники — читать важные обновления компании в едином employee-пространстве.
       </div>
     </aside>
 
@@ -826,28 +958,28 @@
 
         <div class="topbar-right">
           <div id="profileChip" class="profile-chip">Сотрудник</div>
-          <button class="secondary-btn" onclick="openAssistant()">Открыть ассистента</button>
-          <button id="logoutBtn" class="logout-btn">Выйти</button>
+          <button class="secondary-btn" onclick="openAssistant()">💬 Открыть ассистента</button>
+          <button id="logoutBtn" class="logout-btn">↩ Выйти</button>
         </div>
       </div>
 
       <section class="hero-card">
         <div class="hero-grid">
           <div class="hero-left">
-            <div class="hero-eyebrow">Internal communications · Company updates</div>
+            <div class="hero-eyebrow">🛰 Internal communications · Company updates</div>
 
             <h2 class="hero-title">
               Единая лента корпоративных новостей внутри платформы
             </h2>
 
             <div class="hero-sub">
-              Здесь сотрудники читают обновления компании, а админ и назначенные редакторы публикуют новости, закрепляют важные объявления и управляют корпоративным информационным контуром.
+              Здесь сотрудники читают обновления компании, а админ и назначенные редакторы публикуют новости, закрепляют важные объявления и управляют корпоративным информационным контуром. ✨
             </div>
 
             <div class="hero-actions">
-              <button id="createNewsHeroBtn" class="primary-btn hidden" type="button">Создать новость</button>
-              <button id="openManageHeroBtn" class="ghost-btn hidden" type="button">Управление публикациями</button>
-              <button id="openEditorsHeroBtn" class="ghost-btn hidden" type="button">Редакторы</button>
+              <button id="createNewsHeroBtn" class="primary-btn hidden" type="button">📝 Создать новость</button>
+              <button id="openManageHeroBtn" class="ghost-btn hidden" type="button">🗂 Управление публикациями</button>
+              <button id="openEditorsHeroBtn" class="ghost-btn hidden" type="button">👥 Редакторы</button>
             </div>
           </div>
 
@@ -859,8 +991,8 @@
 
             <div class="status-box">
               <div class="status-row">
-                <div id="rolePill" class="status-pill">Роль: employee</div>
-                <div id="editorPill" class="status-pill">Доступ к редактуре: нет</div>
+                <div id="rolePill" class="status-pill">🪪 Роль: employee</div>
+                <div id="editorPill" class="status-pill">✍️ Доступ к редактуре: нет</div>
               </div>
 
               <div id="statusText" class="hero-side-copy" style="margin-top:4px;">
@@ -878,7 +1010,7 @@
           <article class="card">
             <div class="card-title-row">
               <h3 class="card-title">Лента новостей</h3>
-              <button id="refreshNewsBtn" class="secondary-btn" type="button">Обновить</button>
+              <button id="refreshNewsBtn" class="secondary-btn" type="button">🔄 Обновить</button>
             </div>
 
             <div class="card-subtitle">
@@ -893,7 +1025,7 @@
           <article id="editorComposerCard" class="card hidden">
             <div class="card-title-row">
               <h3 id="composerTitle" class="card-title">Создание новости</h3>
-              <button id="resetComposerBtn" class="secondary-btn" type="button">Очистить форму</button>
+              <button id="resetComposerBtn" class="secondary-btn" type="button">🧹 Очистить форму</button>
             </div>
 
             <div class="card-subtitle">
@@ -924,14 +1056,14 @@
               <div class="toggle-row">
                 <label class="toggle-box">
                   <input id="newsPinnedCheckbox" type="checkbox" />
-                  Закрепить в ленте
+                  📌 Закрепить в ленте
                 </label>
               </div>
 
               <div class="form-row">
-                <button id="saveDraftBtn" class="secondary-btn" type="button">Сохранить как черновик</button>
-                <button id="publishNewsBtn" class="primary-btn" type="button">Опубликовать новость</button>
-                <button id="cancelEditBtn" class="ghost-btn hidden" type="button">Отменить редактирование</button>
+                <button id="saveDraftBtn" class="secondary-btn" type="button">💾 Сохранить как черновик</button>
+                <button id="publishNewsBtn" class="primary-btn" type="button">🚀 Опубликовать новость</button>
+                <button id="cancelEditBtn" class="ghost-btn hidden" type="button">✖ Отменить редактирование</button>
               </div>
             </div>
           </article>
@@ -963,7 +1095,7 @@
 
             <div class="editor-form" style="margin-bottom:16px;">
               <input id="editorLoginInput" class="field-input" type="text" placeholder="Логин сотрудника" />
-              <button id="grantEditorBtn" class="primary-btn" type="button">Выдать доступ</button>
+              <button id="grantEditorBtn" class="primary-btn" type="button">➕ Выдать доступ</button>
             </div>
 
             <div id="editorList" class="editor-list">
@@ -982,22 +1114,32 @@
 
             <div class="manage-list">
               <div class="manage-item">
-                <div class="manage-title">Публикация и чтение в одном пространстве</div>
+                <div class="manage-title">📰 Публикация и чтение в одном пространстве</div>
                 <div class="manage-copy">Сотрудники читают новости там же, где проходят адаптацию, работают с базой знаний и общаются с ассистентом.</div>
               </div>
 
               <div class="manage-item">
-                <div class="manage-title">Закреплённые новости выше обычных</div>
+                <div class="manage-title">📌 Закреплённые новости выше обычных</div>
                 <div class="manage-copy">Важные анонсы и корпоративные объявления всегда можно держать в верхней части ленты.</div>
               </div>
 
               <div class="manage-item">
-                <div class="manage-title">Права редактора выдаются централизованно</div>
+                <div class="manage-title">👥 Права редактора выдаются централизованно</div>
                 <div class="manage-copy">Администратор сам решает, кто может публиковать контент, а кто остаётся только читателем.</div>
               </div>
 
               <div class="manage-item">
-                <div class="manage-title">Сохранение идёт на backend</div>
+                <div class="manage-title">💬 У новостей появились комментарии</div>
+                <div class="manage-copy">Сотрудники могут оставлять обратную связь под новостями прямо внутри портала.</div>
+              </div>
+
+              <div class="manage-item">
+                <div class="manage-title">❤️ Лайки стали заметнее</div>
+                <div class="manage-copy">Реакции вынесены визуально сильнее, чтобы активность под новостью считывалась быстрее.</div>
+              </div>
+
+              <div class="manage-item">
+                <div class="manage-title">🗄 Сохранение идёт на backend</div>
                 <div class="manage-copy">Новости уже не живут только в браузере. Контент хранится на сервере и переживает перезапуск страницы.</div>
               </div>
             </div>
@@ -1015,6 +1157,7 @@
     const SESSION_KEY = "galactic_tours_session_id";
     const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
     const API_BASE_STORAGE_KEY = "galactic_tours_api_base";
+    const NEWS_COMMENTS_STORAGE_KEY = "galactic_tours_news_comments_v1";
 
     function getApiBase() {
       const stored = localStorage.getItem(API_BASE_STORAGE_KEY);
@@ -1038,15 +1181,15 @@
       window.location.href = "login.html";
     }
 
+    const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
+    const isAdmin = currentRole === "admin";
     const adminNavLink = document.getElementById("adminNavLink");
-    const isAdmin = (localStorage.getItem(USER_ROLE_KEY) || "employee") === "admin";
     if (adminNavLink) {
-    adminNavLink.classList.toggle("hidden", !isAdmin);
+      adminNavLink.classList.toggle("hidden", !isAdmin);
     }
-    
+
     const currentLogin = localStorage.getItem(USER_LOGIN_KEY) || "";
     const currentName = localStorage.getItem(USER_NAME_KEY) || currentLogin || "Сотрудник";
-    const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
 
     let permissions = {
       is_admin: false,
@@ -1129,6 +1272,14 @@
       return String(value).replace("T", " ");
     }
 
+    function formatCommentDate(value) {
+      try {
+        return new Date(value).toLocaleString("ru-RU");
+      } catch (error) {
+        return String(value || "");
+      }
+    }
+
     function escapeHtml(value) {
       return String(value ?? "")
         .replace(/&/g, "&amp;")
@@ -1164,36 +1315,123 @@
       };
     }
 
+    function loadCommentsMap() {
+      try {
+        const raw = localStorage.getItem(NEWS_COMMENTS_STORAGE_KEY);
+        if (!raw) return {};
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (error) {
+        console.error(error);
+        return {};
+      }
+    }
+
+    function saveCommentsMap(map) {
+      localStorage.setItem(NEWS_COMMENTS_STORAGE_KEY, JSON.stringify(map));
+    }
+
+    function getNewsComments(newsId) {
+      const map = loadCommentsMap();
+      return Array.isArray(map[newsId]) ? map[newsId] : [];
+    }
+
+    function addNewsComment(newsId, text) {
+      const safeText = String(text || "").trim();
+      if (!safeText) return;
+
+      const map = loadCommentsMap();
+      const current = Array.isArray(map[newsId]) ? map[newsId] : [];
+
+      current.unshift({
+        id: `comment-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        author_login: currentLogin,
+        author_name: getDisplayName(),
+        text: safeText,
+        created_at: new Date().toISOString()
+      });
+
+      map[newsId] = current;
+      saveCommentsMap(map);
+    }
+
+    function getCommentCount(newsId) {
+      return getNewsComments(newsId).length;
+    }
+
+    function renderCommentList(newsId) {
+      const comments = getNewsComments(newsId);
+
+      if (!comments.length) {
+        return `<div class="comment-empty">Пока нет комментариев. Можно оставить первый 💬</div>`;
+      }
+
+      return comments.map(item => `
+        <div class="comment-item">
+          <div class="comment-meta">
+            <div class="comment-author">👤 ${escapeHtml(item.author_name || item.author_login || "Сотрудник")}</div>
+            <div class="comment-date">${escapeHtml(formatCommentDate(item.created_at))}</div>
+          </div>
+          <div class="comment-body">${escapeHtml(item.text)}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderCommentsBlock(newsId) {
+      const count = getCommentCount(newsId);
+
+      return `
+        <div class="comment-block">
+          <div class="comment-head">
+            <h4 class="comment-title">💬 Комментарии</h4>
+            <div class="comment-count">Всего: ${count}</div>
+          </div>
+
+          <div class="comment-form">
+            <textarea id="commentInput-${newsId}" class="comment-textarea" placeholder="Напиши комментарий к новости..."></textarea>
+            <div class="comment-actions">
+              <div class="empty-note">Комментарии сейчас сохраняются локально в браузере для MVP.</div>
+              <button class="comment-btn" type="button" onclick="submitComment(${newsId})">💬 Добавить комментарий</button>
+            </div>
+          </div>
+
+          <div id="commentList-${newsId}" class="comment-list">
+            ${renderCommentList(newsId)}
+          </div>
+        </div>
+      `;
+    }
+
     function renderLikeButton(item) {
       const reaction = getLikeSummary(item);
-      const activeClass = reaction.liked_by_user ? "primary-btn" : "secondary-btn";
+      const activeClass = reaction.liked_by_user ? "active" : "";
       const label = reaction.liked_by_user
-        ? `💙 Лайк (${reaction.like_count})`
+        ? `❤️ Лайк (${reaction.like_count})`
         : `🤍 Лайк (${reaction.like_count})`;
 
       return `
-        <button class="${activeClass}" type="button" onclick="toggleLike(${item.id})">
+        <button class="like-btn ${activeClass}" type="button" onclick="toggleLike(${item.id})">
           ${label}
         </button>
       `;
     }
 
     function setEditorUiState() {
-      const isAdmin = permissions.is_admin;
+      const isAdminUser = permissions.is_admin;
       const isEditor = permissions.is_editor;
 
       document.getElementById("createNewsHeroBtn").classList.toggle("hidden", !isEditor);
       document.getElementById("openManageHeroBtn").classList.toggle("hidden", !isEditor);
-      document.getElementById("openEditorsHeroBtn").classList.toggle("hidden", !isAdmin);
+      document.getElementById("openEditorsHeroBtn").classList.toggle("hidden", !isAdminUser);
       document.getElementById("editorComposerCard").classList.toggle("hidden", !isEditor);
       document.getElementById("manageNewsCard").classList.toggle("hidden", !isEditor);
-      document.getElementById("editorRightsCard").classList.toggle("hidden", !isAdmin);
+      document.getElementById("editorRightsCard").classList.toggle("hidden", !isAdminUser);
 
-      document.getElementById("rolePill").textContent = `Роль: ${isAdmin ? "admin" : currentRole}`;
-      document.getElementById("editorPill").textContent = `Доступ к редактуре: ${isEditor ? "да" : "нет"}`;
+      document.getElementById("rolePill").textContent = `🪪 Роль: ${isAdminUser ? "admin" : currentRole}`;
+      document.getElementById("editorPill").textContent = `✍️ Доступ к редактуре: ${isEditor ? "да" : "нет"}`;
 
       const statusText = document.getElementById("statusText");
-      if (isAdmin) {
+      if (isAdminUser) {
         statusText.textContent = "У вас полный доступ к публикациям и управлению редакторами новостного портала.";
       } else if (isEditor) {
         statusText.textContent = "У вас открыт режим редактора: можно создавать, редактировать и публиковать новости.";
@@ -1220,15 +1458,17 @@
         const fullId = `full-news-${item.id}`;
         const previewImage = renderNewsImage(item.image_url);
         const fullImage = renderNewsImage(item.image_url, "full");
+        const commentsCount = getCommentCount(item.id);
 
         return `
           <div class="news-card ${isPinned ? "pinned" : ""}">
             ${previewImage}
 
             <div class="news-meta-row">
-              ${isPinned ? `<span class="news-badge">Закреплено</span>` : ""}
-              <span class="news-badge">${item.is_published ? "Опубликовано" : "Черновик"}</span>
-              <span class="news-badge">${escapeHtml(formatDate(item.created_at))}</span>
+              ${isPinned ? `<span class="news-badge hot">📌 Закреплено</span>` : ""}
+              <span class="news-badge">${item.is_published ? "✨ Опубликовано" : "📝 Черновик"}</span>
+              <span class="news-badge">🕓 ${escapeHtml(formatDate(item.created_at))}</span>
+              <span class="news-badge">💬 ${commentsCount}</span>
             </div>
 
             <h3 class="news-title">${escapeHtml(item.title)}</h3>
@@ -1241,14 +1481,16 @@
 
               <div class="news-actions">
                 ${renderLikeButton(item)}
-                <button class="secondary-btn" type="button" onclick="toggleNewsDetails('${fullId}')">Читать полностью</button>
-                ${permissions.is_editor ? `<button class="ghost-btn" type="button" onclick="startEditNews(${item.id})">Редактировать</button>` : ""}
+                <button class="comment-btn" type="button" onclick="toggleNewsDetails('${fullId}')">💬 Комментарии</button>
+                <button class="secondary-btn" type="button" onclick="toggleNewsDetails('${fullId}')">📖 Читать полностью</button>
+                ${permissions.is_editor ? `<button class="ghost-btn" type="button" onclick="startEditNews(${item.id})">✏️ Редактировать</button>` : ""}
               </div>
             </div>
 
             <div id="${fullId}" class="full-news">
               ${fullImage}
               <div class="full-news-content">${escapeHtml(item.content || "")}</div>
+              ${renderCommentsBlock(item.id)}
             </div>
           </div>
         `;
@@ -1283,9 +1525,10 @@
             </div>
 
             <div class="news-meta-row">
-              ${item.is_pinned ? `<span class="news-badge">Закреплено</span>` : ""}
-              <span class="news-badge">${item.is_published ? "Опубликовано" : "Черновик"}</span>
-              ${item.image_url ? `<span class="news-badge">Есть изображение</span>` : ""}
+              ${item.is_pinned ? `<span class="news-badge hot">📌 Закреплено</span>` : ""}
+              <span class="news-badge">${item.is_published ? "✨ Опубликовано" : "📝 Черновик"}</span>
+              ${item.image_url ? `<span class="news-badge">🖼 Есть изображение</span>` : ""}
+              <span class="news-badge">💬 ${getCommentCount(item.id)}</span>
             </div>
           </div>
 
@@ -1294,14 +1537,14 @@
           </div>
 
           <div class="manage-actions">
-            <button class="tiny-btn" type="button" onclick="startEditNews(${item.id})">Редактировать</button>
+            <button class="tiny-btn" type="button" onclick="startEditNews(${item.id})">✏️ Редактировать</button>
             <button class="tiny-btn" type="button" onclick="togglePublish(${item.id}, ${item.is_published ? "false" : "true"})">
-              ${item.is_published ? "Снять с публикации" : "Опубликовать"}
+              ${item.is_published ? "🙈 Снять с публикации" : "🚀 Опубликовать"}
             </button>
             <button class="tiny-btn" type="button" onclick="togglePin(${item.id}, ${item.is_pinned ? "false" : "true"})">
-              ${item.is_pinned ? "Открепить" : "Закрепить"}
+              ${item.is_pinned ? "📍 Открепить" : "📌 Закрепить"}
             </button>
-            <button class="danger-btn tiny-btn" type="button" onclick="removeNews(${item.id})">Удалить</button>
+            <button class="danger-btn tiny-btn" type="button" onclick="removeNews(${item.id})">🗑 Удалить</button>
           </div>
         </div>
       `).join("");
@@ -1331,12 +1574,12 @@
             </div>
 
             <div class="news-meta-row">
-              ${item.is_admin ? `<span class="news-badge">Admin</span>` : `<span class="news-badge">Editor</span>`}
+              ${item.is_admin ? `<span class="news-badge">👑 Admin</span>` : `<span class="news-badge">✍️ Editor</span>`}
             </div>
           </div>
 
           <div class="editor-actions">
-            ${item.is_admin ? "" : `<button class="danger-btn tiny-btn" type="button" onclick="revokeEditor('${escapeJsString(item.login)}')">Отозвать доступ</button>`}
+            ${item.is_admin ? "" : `<button class="danger-btn tiny-btn" type="button" onclick="revokeEditor('${escapeJsString(item.login)}')">🚫 Отозвать доступ</button>`}
           </div>
         </div>
       `).join("");
@@ -1368,9 +1611,7 @@
     }
 
     async function loadPublishedNews() {
-      const data = await fetchJson(
-        buildApiUrl(`/api/news?user_login=${encodeURIComponent(currentLogin)}`)
-      );
+      const data = await fetchJson(buildApiUrl(`/api/news?user_login=${encodeURIComponent(currentLogin)}`));
       publishedNews = Array.isArray(data?.items) ? data.items : [];
       renderPublishedNews();
 
@@ -1439,15 +1680,11 @@
         };
 
         publishedNews = publishedNews.map(item =>
-          item.id === newsId
-            ? { ...item, reactions: summary }
-            : item
+          item.id === newsId ? { ...item, reactions: summary } : item
         );
 
         manageNews = manageNews.map(item =>
-          item.id === newsId
-            ? { ...item, reactions: summary }
-            : item
+          item.id === newsId ? { ...item, reactions: summary } : item
         );
 
         renderPublishedNews();
@@ -1455,6 +1692,29 @@
         console.error(error);
         showNotice(error.message || "Не удалось поставить лайк.", "error");
       }
+    }
+
+    function submitComment(newsId) {
+      const input = document.getElementById(`commentInput-${newsId}`);
+      if (!input) return;
+
+      const text = input.value.trim();
+      if (!text) {
+        showNotice("Нужно написать текст комментария.", "error");
+        return;
+      }
+
+      addNewsComment(newsId, text);
+      input.value = "";
+
+      const list = document.getElementById(`commentList-${newsId}`);
+      if (list) {
+        list.innerHTML = renderCommentList(newsId);
+      }
+
+      renderPublishedNews();
+      renderManageNews();
+      showNotice("Комментарий добавлен.");
     }
 
     async function submitNews(isPublished) {
@@ -1524,9 +1784,7 @@
 
     async function startEditNews(newsId) {
       try {
-        const data = await fetchJson(
-          buildApiUrl(`/api/news/${newsId}?user_login=${encodeURIComponent(currentLogin)}`)
-        );
+        const data = await fetchJson(buildApiUrl(`/api/news/${newsId}?user_login=${encodeURIComponent(currentLogin)}`));
         fillComposer(data);
         document.getElementById("editorComposerCard").scrollIntoView({ behavior: "smooth", block: "start" });
       } catch (error) {
@@ -1548,6 +1806,11 @@
         if (currentEditingNewsId === newsId) {
           resetComposer();
         }
+
+        const commentsMap = loadCommentsMap();
+        delete commentsMap[newsId];
+        saveCommentsMap(commentsMap);
+
         await loadPublishedNews();
         await loadManageNews();
       } catch (error) {
@@ -1637,7 +1900,7 @@
       }
     }
 
-    document.getElementById("refreshNewsBtn").addEventListener("click", async function() {
+    document.getElementById("refreshNewsBtn").addEventListener("click", async function () {
       try {
         await loadAllNewsData();
         showNotice("Лента новостей обновлена.");
@@ -1659,20 +1922,21 @@
     document.getElementById("cancelEditBtn").addEventListener("click", resetComposer);
     document.getElementById("grantEditorBtn").addEventListener("click", grantEditor);
 
-    document.getElementById("createNewsHeroBtn").addEventListener("click", function() {
+    document.getElementById("createNewsHeroBtn").addEventListener("click", function () {
       document.getElementById("editorComposerCard").scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
-    document.getElementById("openManageHeroBtn").addEventListener("click", function() {
+    document.getElementById("openManageHeroBtn").addEventListener("click", function () {
       document.getElementById("manageNewsCard").scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
-    document.getElementById("openEditorsHeroBtn").addEventListener("click", function() {
+    document.getElementById("openEditorsHeroBtn").addEventListener("click", function () {
       document.getElementById("editorRightsCard").scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
     window.toggleNewsDetails = toggleNewsDetails;
     window.toggleLike = toggleLike;
+    window.submitComment = submitComment;
     window.startEditNews = startEditNews;
     window.removeNews = removeNews;
     window.togglePublish = togglePublish;
