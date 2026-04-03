@@ -9,6 +9,7 @@
   localStorage.setItem(SESSION_KEY, SESSION_ID);
 
   let assistantBotStarted = false;
+  let assistantUiInitialized = false;
 
   function getStoredUserName() {
     return localStorage.getItem(USER_NAME_KEY) || "";
@@ -21,7 +22,11 @@
   }
 
   function ensureAssistantRoot() {
-    if (document.getElementById("assistantLauncher")) return;
+    if (assistantUiInitialized) return;
+    if (document.getElementById("assistantLauncher")) {
+      assistantUiInitialized = true;
+      return;
+    }
 
     const wrapper = document.createElement("div");
     wrapper.innerHTML = `
@@ -264,11 +269,16 @@
         sendAssistantMessage();
       }
     });
+
+    assistantUiInitialized = true;
   }
 
   function openAssistant() {
+    ensureAssistantRoot();
+
     const overlay = document.getElementById("assistantOverlay");
     if (!overlay) return;
+
     overlay.classList.add("open");
     startAssistantBot();
   }
@@ -381,9 +391,15 @@
     input.focus();
   }
 
-  window.addEventListener("load", function() {
+  function bootstrapAssistant() {
     ensureAssistantRoot();
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootstrapAssistant);
+  } else {
+    bootstrapAssistant();
+  }
 
   window.openAssistant = openAssistant;
   window.closeAssistant = closeAssistant;
