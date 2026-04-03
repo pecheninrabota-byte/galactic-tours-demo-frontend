@@ -53,6 +53,10 @@
       font: inherit;
     }
 
+    .hidden {
+      display: none !important;
+    }
+
     .app-shell {
       display: grid;
       grid-template-columns: var(--sidebar-width) 1fr;
@@ -697,7 +701,7 @@
           <span class="nav-icon">📰</span>
           <span>Новости</span>
         </a>
-        
+
         <a class="nav-link active" href="knowledge.html">
           <span class="nav-icon">📚</span>
           <span>База знаний</span>
@@ -945,6 +949,7 @@
     const AUTH_KEY = "galactic_tours_auth";
     const USER_LOGIN_KEY = "galactic_tours_login";
     const USER_NAME_KEY = "galactic_tours_user_name";
+    const USER_ROLE_KEY = "galactic_tours_role";
     const SESSION_KEY = "galactic_tours_session_id";
     const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
     const API_BASE_STORAGE_KEY = "galactic_tours_api_base";
@@ -1085,13 +1090,13 @@
       window.location.href = "login.html";
     }
 
-    const currentRole = localStorage.getItem("galactic_tours_role") || "employee";
+    const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
     const isAdmin = currentRole === "admin";
     const adminNavLink = document.getElementById("adminNavLink");
     if (adminNavLink) {
-    adminNavLink.classList.toggle("hidden", !isAdmin);
+      adminNavLink.classList.toggle("hidden", !isAdmin);
     }
-    
+
     const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
     const savedName = localStorage.getItem(USER_NAME_KEY) || "";
     const profileChip = document.getElementById("profileChip");
@@ -1120,6 +1125,7 @@
       localStorage.removeItem(USER_LOGIN_KEY);
       localStorage.removeItem(SESSION_KEY);
       localStorage.removeItem(USER_NAME_KEY);
+      localStorage.removeItem(USER_ROLE_KEY);
       window.location.href = "login.html";
     });
 
@@ -1258,7 +1264,7 @@
             <span class="meta-badge">Template reference</span>
           </div>
           <div class="item-actions">
-            <button class="secondary-btn" onclick="window.location.href='admin.html'">Открыть HR Admin</button>
+            <button class="secondary-btn" onclick="window.location.href='knowledge.html'">Открыть каталог</button>
           </div>
         </div>
       `;
