@@ -48,6 +48,10 @@
       min-height: 100vh;
     }
 
+    .hidden {
+      display: none !important;
+    }
+
     .app-shell {
       display: grid;
       grid-template-columns: var(--sidebar-width) 1fr;
@@ -722,7 +726,7 @@
           <span class="nav-icon">📰</span>
           <span>Новости</span>
         </a>
-        
+
         <a class="nav-link" href="knowledge.html">
           <span class="nav-icon">📚</span>
           <span>База знаний</span>
@@ -855,35 +859,65 @@
     const AUTH_KEY = "galactic_tours_auth";
     const USER_LOGIN_KEY = "galactic_tours_login";
     const USER_NAME_KEY = "galactic_tours_user_name";
+    const USER_ROLE_KEY = "galactic_tours_role";
     const SESSION_KEY = "galactic_tours_session_id";
+    const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
+    const API_BASE_STORAGE_KEY = "galactic_tours_api_base";
 
     const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
     if (!isAuthorized) {
       window.location.href = "login.html";
     }
 
-    const currentRole = localStorage.getItem("galactic_tours_role") || "employee";
+    const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
     const isAdmin = currentRole === "admin";
     const adminNavLink = document.getElementById("adminNavLink");
     if (adminNavLink) {
-    adminNavLink.classList.toggle("hidden", !isAdmin);
+      adminNavLink.classList.toggle("hidden", !isAdmin);
     }
-    
+
     const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
     const savedUserName = localStorage.getItem(USER_NAME_KEY) || savedLogin;
-    document.getElementById("profileChip").textContent = savedUserName;
 
-    document.getElementById("logoutBtn").addEventListener("click", function() {
+    function getDisplayName() {
+      const rawProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
+
+      if (rawProfile) {
+        try {
+          const profile = JSON.parse(rawProfile);
+          const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
+          if (fullName) return fullName;
+          if (profile.firstName) return profile.firstName;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      return savedUserName || savedLogin || "Сотрудник";
+    }
+
+    document.getElementById("profileChip").textContent = getDisplayName();
+
+    document.getElementById("logoutBtn").addEventListener("click", function () {
       localStorage.removeItem(AUTH_KEY);
       localStorage.removeItem(USER_LOGIN_KEY);
       localStorage.removeItem(SESSION_KEY);
       localStorage.removeItem(USER_NAME_KEY);
+      localStorage.removeItem(USER_ROLE_KEY);
       window.location.href = "login.html";
     });
 
-    const API_BASE = "https://galactic-tours-demo-backend-production.up.railway.app/api";
-    const TASKS_API_URL = `${API_BASE}/tasks`;
-    const COMPLETE_TASK_API_URL = `${API_BASE}/tasks/complete`;
+    function getApiBase() {
+      const stored = localStorage.getItem(API_BASE_STORAGE_KEY);
+      if (!stored) {
+        return "https://galactic-tours-demo-backend-production.up.railway.app";
+      }
+      return stored.replace(/\/+$/, "");
+    }
+
+    const API_BASE = getApiBase();
+    const TASKS_API_URL = `${API_BASE}/api/tasks`;
+    const COMPLETE_TASK_API_URL = `${API_BASE}/api/tasks/complete`;
 
     const SESSION_ID = localStorage.getItem(SESSION_KEY) || `demo_${Date.now()}`;
     localStorage.setItem(SESSION_KEY, SESSION_ID);
@@ -896,12 +930,8 @@
     let currentProgress = 0;
     let isCompletingTask = false;
 
-    function getStoredUserName() {
-      return localStorage.getItem(USER_NAME_KEY) || "";
-    }
-
     function escapeHtml(text) {
-      return String(text)
+      return String(text ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -920,25 +950,22 @@
       if (progress >= 100) {
         return "Badge: Onboarding Completed";
       }
-
       if (stage === 1) {
         return "Badge: Mission Started";
       }
-
       if (stage === 2) {
         return "Badge: System Ready";
       }
-
       return "Badge: Progress Unlocked";
     }
 
     function updateMissionBlock() {
-      const userName = getStoredUserName();
-      const displayName = userName ? `Привет, ${userName}` : "Привет";
+      const displayName = getDisplayName();
+      const greeting = displayName ? `Привет, ${displayName}` : "Привет";
 
       document.getElementById("missionTitle").innerText = currentStageTitle
-        ? `${displayName}\n${currentStageTitle}`
-        : displayName;
+        ? `${greeting}\n${currentStageTitle}`
+        : greeting;
 
       const missionBodyParts = [];
       if (currentStageDescription) {
@@ -994,8 +1021,7 @@
           : "Новый этап скоро доступен";
 
       document.getElementById("rewardText").innerText = getRewardLabel(currentStage, currentProgress);
-
-      document.getElementById("templateNote").style.display = currentStageTitle || currentStageDescription ? "block" : "none";
+      document.getElementById("templateNote").style.display = (currentStageTitle || currentStageDescription) ? "block" : "none";
     }
 
     function updateProgressUI(progress) {
@@ -1032,7 +1058,7 @@
             <div class="task-desc">
               Задача текущего этапа адаптации. Заверши её, чтобы продвинуться по маршруту и открыть следующий шаг.
             </div>
-            <div class="task-stage">${escapeHtml(currentStageTitle || `Этап ${task.stage}`)}</div>
+            <div class="task-stage">${escapeHtml(currentStageTitle || `Этап ${task.stage || currentStage}`)}</div>
           </div>
         </label>
       `).join("");
@@ -1154,13 +1180,12 @@
 
     window.handleTaskToggle = handleTaskToggle;
 
-    window.addEventListener("load", async function() {
+    window.addEventListener("load", async function () {
       updateProgressUI(0);
       await loadTasks();
     });
   </script>
 
   <script src="assistant.js"></script>
-  <script src="notifications.js"></script>
 </body>
 </html>
