@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Galactic Tours — HR Admin</title>
   <style>
-    /* Весь твой CSS полностью сохранен */
     :root {
       --bg: #07111d;
       --bg-soft: #0c1727;
@@ -28,7 +27,8 @@
       box-sizing: border-box;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       min-height: 100%;
@@ -137,7 +137,6 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      text-decoration: none;
       color: var(--text);
       padding: 14px 14px;
       border-radius: 18px;
@@ -826,6 +825,38 @@
       color: var(--muted);
     }
 
+    .access-denied {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+      border-radius: 28px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(14,26,43,0.96), rgba(11,22,38,0.96));
+      box-shadow: var(--shadow);
+    }
+
+    .access-denied-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .access-denied-title {
+      font-size: 32px;
+      margin: 0 0 16px;
+    }
+
+    .access-denied-text {
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .access-denied .primary-btn {
+      margin-top: 32px;
+    }
+
     @media (max-width: 1440px) {
       .builder-grid {
         grid-template-columns: 320px minmax(0, 1fr);
@@ -870,7 +901,8 @@
       }
 
       .hero-card,
-      .card {
+      .card,
+      .access-denied {
         border-radius: 22px;
       }
 
@@ -942,7 +974,7 @@
           <span>Профиль</span>
         </a>
 
-        <a id="adminNavLink" class="nav-link hidden" href="admin.html">
+        <a id="adminNavLink" class="nav-link hidden active" href="admin.html">
           <span class="nav-icon">🛠️</span>
           <span>HR Admin</span>
         </a>
@@ -967,7 +999,6 @@
         </div>
       </div>
 
-      <!-- БЛОК ДЛЯ HR-АДМИНА (виден только при role=admin) -->
       <div id="adminContent">
         <section class="hero-card">
           <div class="hero-grid">
@@ -1135,67 +1166,18 @@
         </section>
       </div>
 
-      <!-- БЛОК ДЛЯ НЕ-АДМИНОВ (простое сообщение) -->
-      <div id="accessDenied" style="display: none; text-align: center; padding: 60px 20px;">
-        <div style="font-size: 48px; margin-bottom: 20px;">🛸</div>
-        <h2 style="font-size: 32px; margin-bottom: 16px;">Доступ ограничен</h2>
-        <p style="color: var(--muted); font-size: 18px; max-width: 500px; margin: 0 auto;">
+      <div id="accessDenied" class="access-denied">
+        <div class="access-denied-icon">🛸</div>
+        <h2 class="access-denied-title">Доступ ограничен</h2>
+        <p class="access-denied-text">
           Эта страница доступна только HR-администраторам. Если вы считаете, что это ошибка, обратитесь к руководителю.
         </p>
-        <button id="goToDashboardBtn" class="primary-btn" style="margin-top: 32px;">Перейти на главную</button>
+        <button id="goToDashboardBtn" class="primary-btn">Перейти на главную</button>
       </div>
     </main>
   </div>
 
   <script>
-    // 1. Проверка авторизации и роли
-    const isAuthorized = localStorage.getItem("galactic_tours_auth") === "true";
-    if (!isAuthorized) {
-      window.location.href = "login.html";
-    }
-
-    const currentRole = localStorage.getItem("galactic_tours_role") || "employee";
-    const isAdmin = currentRole === "admin";
-    const adminNavLink = document.getElementById("adminNavLink");
-    if (adminNavLink) {
-    adminNavLink.classList.toggle("hidden", !isAdmin);
-    }
-    
-    const currentRole = localStorage.getItem("galactic_tours_role") || "employee";
-    const isAdmin = currentRole === "admin";
-
-    // 2. Если не админ — скрываем весь HR-контент, показываем сообщение
-    const adminContent = document.getElementById("adminContent");
-    const accessDenied = document.getElementById("accessDenied");
-
-    if (!isAdmin) {
-      if (adminContent) adminContent.style.display = "none";
-      if (accessDenied) accessDenied.style.display = "block";
-      // Скрываем ссылку на HR Admin в сайдбаре (дополнительная защита)
-      const adminLink = document.getElementById("adminNavLink");
-      if (adminLink) adminLink.style.display = "none";
-    } else {
-      if (adminContent) adminContent.style.display = "block";
-      if (accessDenied) accessDenied.style.display = "none";
-    }
-
-    // Кнопка "Перейти на главную" для не-админов
-    const goToDashboardBtn = document.getElementById("goToDashboardBtn");
-    if (goToDashboardBtn) {
-      goToDashboardBtn.addEventListener("click", () => {
-        window.location.href = "dashboard.html";
-      });
-    }
-
-    // 3. Дальше идёт ТОЛЬКО код для админов (весь остальной JS)
-    if (!isAdmin) {
-      // Если не админ — выходим, ничего не инициализируем
-      throw new Error("Access denied");
-    }
-
-    // ========== ВСЁ, ЧТО НИЖЕ, ВЫПОЛНЯЕТСЯ ТОЛЬКО ДЛЯ АДМИНИСТРАТОРОВ ==========
-
-    // Твои существующие функции и данные
     const AUTH_KEY = "galactic_tours_auth";
     const USER_LOGIN_KEY = "galactic_tours_login";
     const USER_NAME_KEY = "galactic_tours_user_name";
@@ -1204,6 +1186,39 @@
     const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
     const ONBOARDING_TEMPLATE_KEY = "galactic_tours_onboarding_template";
     const API_BASE_STORAGE_KEY = "galactic_tours_api_base";
+
+    const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
+    if (!isAuthorized) {
+      window.location.href = "login.html";
+    }
+
+    const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
+    const isAdmin = currentRole === "admin";
+
+    const adminNavLink = document.getElementById("adminNavLink");
+    if (adminNavLink) {
+      adminNavLink.classList.toggle("hidden", !isAdmin);
+    }
+
+    const adminContent = document.getElementById("adminContent");
+    const accessDenied = document.getElementById("accessDenied");
+    const goToDashboardBtn = document.getElementById("goToDashboardBtn");
+
+    if (!isAdmin) {
+      if (adminContent) adminContent.style.display = "none";
+      if (accessDenied) accessDenied.style.display = "block";
+
+      if (goToDashboardBtn) {
+        goToDashboardBtn.addEventListener("click", () => {
+          window.location.href = "dashboard.html";
+        });
+      }
+
+      throw new Error("Access denied");
+    } else {
+      if (adminContent) adminContent.style.display = "block";
+      if (accessDenied) accessDenied.style.display = "none";
+    }
 
     const KNOWLEDGE_LIBRARY = [
       { id: "welcome-start", title: "Первые шаги нового сотрудника" },
@@ -1313,8 +1328,7 @@
       try {
         const raw = localStorage.getItem(ONBOARDING_TEMPLATE_KEY);
         if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        return normalizeTemplate(parsed);
+        return normalizeTemplate(JSON.parse(raw));
       } catch (error) {
         console.error("Failed to parse local template mirror:", error);
         return null;
@@ -1350,10 +1364,7 @@
       }
 
       if (!response.ok) {
-        const message =
-          data?.detail ||
-          data?.message ||
-          `HTTP ${response.status}`;
+        const message = data?.detail || data?.message || `HTTP ${response.status}`;
         throw new Error(message);
       }
 
@@ -1361,9 +1372,7 @@
     }
 
     async function loadTemplateFromBackend() {
-      const data = await fetchJson(buildApiUrl("/api/template"), {
-        method: "GET"
-      });
+      const data = await fetchJson(buildApiUrl("/api/template"), { method: "GET" });
       return normalizeTemplate(data);
     }
 
@@ -1416,8 +1425,8 @@
     }
 
     function setBusyState(isBusy) {
-      const btns = ["saveTemplateBtn", "resetTemplateBtn", "addStageHeroBtn", "addStageSideBtn"];
-      btns.forEach(id => {
+      const btnIds = ["saveTemplateBtn", "resetTemplateBtn", "addStageHeroBtn", "addStageSideBtn"];
+      btnIds.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.disabled = isBusy;
       });
@@ -1436,23 +1445,29 @@
           if (fullName) return fullName;
           if (profile.firstName) return profile.firstName;
         } catch (error) {
-          console.error(error);
+          console.error("Failed to parse profile:", error);
         }
       }
 
       return savedName || savedLogin || "Сотрудник";
     }
 
-    document.getElementById("profileChip").textContent = getDisplayName();
+    const profileChip = document.getElementById("profileChip");
+    if (profileChip) {
+      profileChip.textContent = getDisplayName();
+    }
 
-    document.getElementById("logoutBtn").addEventListener("click", function () {
-      localStorage.removeItem(AUTH_KEY);
-      localStorage.removeItem(USER_LOGIN_KEY);
-      localStorage.removeItem(SESSION_KEY);
-      localStorage.removeItem(USER_NAME_KEY);
-      localStorage.removeItem(USER_ROLE_KEY);
-      window.location.href = "login.html";
-    });
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function () {
+        localStorage.removeItem(AUTH_KEY);
+        localStorage.removeItem(USER_LOGIN_KEY);
+        localStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem(USER_NAME_KEY);
+        localStorage.removeItem(USER_ROLE_KEY);
+        window.location.href = "login.html";
+      });
+    }
 
     let template = createDefaultTemplate();
     let selectedStageId = null;
@@ -1473,28 +1488,15 @@
       }
     }
 
-    function setTemplateState(nextTemplate) {
-      template = normalizeTemplate(nextTemplate);
-      ensureSelectedStage();
-      persistLocalMirror();
-      renderAll();
+    function fillTemplateFields() {
+      templateNameInput.value = template.name || "";
+      templateAudienceInput.value = template.audience || "";
+      templateDescriptionInput.value = template.description || "";
     }
 
-    templateNameInput.addEventListener("input", function () {
-      template.name = this.value;
-      persistLocalMirror();
-      renderMeta();
-    });
-
-    templateAudienceInput.addEventListener("input", function () {
-      template.audience = this.value;
-      persistLocalMirror();
-    });
-
-    templateDescriptionInput.addEventListener("input", function () {
-      template.description = this.value;
-      persistLocalMirror();
-    });
+    function getSelectedStage() {
+      return template.stages.find(stage => stage.id === selectedStageId) || null;
+    }
 
     function renderMeta() {
       const stageCount = template.stages.length;
@@ -1505,16 +1507,6 @@
       document.getElementById("templateStageCountMeta").textContent = stageCount;
       document.getElementById("templateTaskCountMeta").textContent = taskCount;
       document.getElementById("templateKnowledgeCountMeta").textContent = knowledgeCount;
-    }
-
-    function fillTemplateFields() {
-      templateNameInput.value = template.name || "";
-      templateAudienceInput.value = template.audience || "";
-      templateDescriptionInput.value = template.description || "";
-    }
-
-    function getSelectedStage() {
-      return template.stages.find(stage => stage.id === selectedStageId) || null;
     }
 
     function selectStage(stageId) {
@@ -1617,12 +1609,12 @@
       }
 
       stageList.innerHTML = template.stages.map((stage, index) => {
-        const isActive = stage.id === selectedStageId;
+        const isActiveStage = stage.id === selectedStageId;
         const taskCount = stage.tasks.length;
         const knowledgeCount = stage.knowledgeItems.length;
 
         return `
-          <div class="stage-item ${isActive ? "active" : ""}" onclick="selectStage('${stage.id}')">
+          <div class="stage-item ${isActiveStage ? "active" : ""}" onclick="selectStage('${stage.id}')">
             <div class="stage-item-top">
               <div>
                 <div class="stage-name">${escapeHtml(stage.title || "Без названия")}</div>
@@ -1643,6 +1635,99 @@
               <button class="tiny-btn" type="button" onclick="duplicateStage('${stage.id}')">Дублировать</button>
               <button class="danger-btn tiny-btn" type="button" onclick="deleteStage('${stage.id}')">Удалить</button>
             </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderTaskEditorList(stage) {
+      if (!stage.tasks.length) {
+        return `
+          <div class="empty-state">
+            В этом этапе пока нет задач. Добавьте первую, чтобы сформировать employee-side сценарий.
+          </div>
+        `;
+      }
+
+      return stage.tasks.map((task, index) => `
+        <div class="task-item">
+          <div class="task-head">
+            <div class="task-title-row">
+              <input
+                class="field-input compact-input"
+                type="text"
+                value="${escapeAttr(task.title)}"
+                onchange="updateTaskTitle('${stage.id}', '${task.id}', this.value)"
+                oninput="updateTaskTitle('${stage.id}', '${task.id}', this.value, true)"
+              />
+            </div>
+
+            <div class="task-controls">
+              <label class="task-optional">
+                <input
+                  class="task-checkbox"
+                  type="checkbox"
+                  ${task.required ? "checked" : ""}
+                  onchange="toggleTaskRequired('${stage.id}', '${task.id}', this.checked)"
+                />
+                обязательная
+              </label>
+
+              <button class="tiny-btn" type="button" onclick="moveTask('${stage.id}', '${task.id}', 'up')">↑</button>
+              <button class="tiny-btn" type="button" onclick="moveTask('${stage.id}', '${task.id}', 'down')">↓</button>
+              <button class="danger-btn tiny-btn" type="button" onclick="deleteTask('${stage.id}', '${task.id}')">Удалить</button>
+            </div>
+          </div>
+
+          <div class="meta-badge">Позиция: ${index + 1}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderKnowledgeOptions(stage) {
+      const selectedIds = new Set(stage.knowledgeItems);
+      const available = KNOWLEDGE_LIBRARY.filter(item => !selectedIds.has(item.id));
+
+      if (!available.length) {
+        return `<option value="">Все материалы из библиотеки уже добавлены</option>`;
+      }
+
+      return [
+        `<option value="">Выберите материал</option>`,
+        ...available.map(item => `<option value="${item.id}">${escapeHtml(item.title)}</option>`)
+      ].join("");
+    }
+
+    function renderKnowledgeEditorList(stage) {
+      if (!stage.knowledgeItems.length) {
+        return `
+          <div class="empty-state">
+            Для этого этапа пока не выбраны материалы. Добавьте knowledge references из библиотеки выше.
+          </div>
+        `;
+      }
+
+      return stage.knowledgeItems.map((knowledgeId, index) => {
+        const item = KNOWLEDGE_LIBRARY.find(entry => entry.id === knowledgeId);
+        const title = item ? item.title : knowledgeId;
+
+        return `
+          <div class="knowledge-item">
+            <div class="knowledge-head">
+              <div class="knowledge-title-row">
+                <div class="field-label">Материал</div>
+                <div style="font-size:15px; font-weight:600; line-height:1.5;">${escapeHtml(title)}</div>
+                <div class="meta-badge">ID: ${escapeHtml(knowledgeId)}</div>
+              </div>
+
+              <div class="knowledge-controls">
+                <button class="tiny-btn" type="button" onclick="moveKnowledge('${stage.id}', '${knowledgeId}', 'up')">↑</button>
+                <button class="tiny-btn" type="button" onclick="moveKnowledge('${stage.id}', '${knowledgeId}', 'down')">↓</button>
+                <button class="danger-btn tiny-btn" type="button" onclick="removeKnowledge('${stage.id}', '${knowledgeId}')">Удалить</button>
+              </div>
+            </div>
+
+            <div class="meta-badge">Позиция: ${index + 1}</div>
           </div>
         `;
       }).join("");
@@ -1740,97 +1825,156 @@
       });
     }
 
-    function renderTaskEditorList(stage) {
+    function renderPreviewTasks(stage) {
       if (!stage.tasks.length) {
         return `
           <div class="empty-state">
-            В этом этапе пока нет задач. Добавьте первую, чтобы сформировать employee-side сценарий.
+            На employee-side здесь появится список задач, когда HR добавит хотя бы одну задачу в модуль.
           </div>
         `;
       }
 
-      return stage.tasks.map((task, index) => `
-        <div class="task-item">
-          <div class="task-head">
-            <div class="task-title-row">
-              <input
-                class="field-input compact-input"
-                type="text"
-                value="${escapeAttr(task.title)}"
-                onchange="updateTaskTitle('${stage.id}', '${task.id}', this.value)"
-                oninput="updateTaskTitle('${stage.id}', '${task.id}', this.value, true)"
-              />
-            </div>
-
-            <div class="task-controls">
-              <label class="task-optional">
-                <input
-                  class="task-checkbox"
-                  type="checkbox"
-                  ${task.required ? "checked" : ""}
-                  onchange="toggleTaskRequired('${stage.id}', '${task.id}', this.checked)"
-                />
-                обязательная
-              </label>
-
-              <button class="tiny-btn" type="button" onclick="moveTask('${stage.id}', '${task.id}', 'up')">↑</button>
-              <button class="tiny-btn" type="button" onclick="moveTask('${stage.id}', '${task.id}', 'down')">↓</button>
-              <button class="danger-btn tiny-btn" type="button" onclick="deleteTask('${stage.id}', '${task.id}')">Удалить</button>
-            </div>
+      return stage.tasks.map(task => `
+        <div class="preview-task-item">
+          <div class="preview-check ${task.required ? "required" : ""}"></div>
+          <div class="preview-item-copy">
+            <div class="preview-item-title">${escapeHtml(task.title || "Задача без названия")}</div>
+            <div class="preview-item-sub">${task.required ? "Обязательная задача этапа" : "Необязательная задача этапа"}</div>
           </div>
-
-          <div class="meta-badge">Позиция: ${index + 1}</div>
         </div>
       `).join("");
     }
 
-    function renderKnowledgeOptions(stage) {
-      const selectedIds = new Set(stage.knowledgeItems);
-      const available = KNOWLEDGE_LIBRARY.filter(item => !selectedIds.has(item.id));
-
-      if (!available.length) {
-        return `<option value="">Все материалы из библиотеки уже добавлены</option>`;
-      }
-
-      return [
-        `<option value="">Выберите материал</option>`,
-        ...available.map(item => `<option value="${item.id}">${escapeHtml(item.title)}</option>`)
-      ].join("");
-    }
-
-    function renderKnowledgeEditorList(stage) {
+    function renderPreviewKnowledge(stage) {
       if (!stage.knowledgeItems.length) {
         return `
           <div class="empty-state">
-            Для этого этапа пока не выбраны материалы. Добавьте knowledge references из библиотеки выше.
+            На этом этапе пока нет привязанных материалов базы знаний.
           </div>
         `;
       }
 
-      return stage.knowledgeItems.map((knowledgeId, index) => {
+      return stage.knowledgeItems.map(knowledgeId => {
         const item = KNOWLEDGE_LIBRARY.find(entry => entry.id === knowledgeId);
         const title = item ? item.title : knowledgeId;
 
         return `
-          <div class="knowledge-item">
-            <div class="knowledge-head">
-              <div class="knowledge-title-row">
-                <div class="field-label">Материал</div>
-                <div style="font-size:15px; font-weight:600; line-height:1.5;">${escapeHtml(title)}</div>
-                <div class="meta-badge">ID: ${escapeHtml(knowledgeId)}</div>
-              </div>
-
-              <div class="knowledge-controls">
-                <button class="tiny-btn" type="button" onclick="moveKnowledge('${stage.id}', '${knowledgeId}', 'up')">↑</button>
-                <button class="tiny-btn" type="button" onclick="moveKnowledge('${stage.id}', '${knowledgeId}', 'down')">↓</button>
-                <button class="danger-btn tiny-btn" type="button" onclick="removeKnowledge('${stage.id}', '${knowledgeId}')">Удалить</button>
-              </div>
+          <div class="preview-knowledge-item">
+            <div class="preview-dot"></div>
+            <div class="preview-item-copy">
+              <div class="preview-item-title">${escapeHtml(title)}</div>
+              <div class="preview-item-sub">Будет рекомендовано сотруднику как материал текущего этапа</div>
             </div>
-
-            <div class="meta-badge">Позиция: ${index + 1}</div>
           </div>
         `;
       }).join("");
+    }
+
+    function renderPreview() {
+      const container = document.getElementById("previewContent");
+      const stage = getSelectedStage();
+
+      if (!stage) {
+        container.innerHTML = `
+          <div class="empty-state">
+            Выберите этап, чтобы увидеть, как этот модуль будет выглядеть для сотрудника.
+          </div>
+        `;
+        return;
+      }
+
+      const stageIndex = template.stages.findIndex(item => item.id === stage.id);
+
+      container.innerHTML = `
+        <div class="preview-badge">Этап ${stageIndex + 1} · Employee view</div>
+        <h3 class="preview-title">${escapeHtml(stage.title || "Без названия")}</h3>
+
+        <div class="preview-copy">
+          ${escapeHtml(stage.message || "Сообщение этапа пока не заполнено.")}
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-label">Описание этапа</div>
+          <div class="preview-copy" style="font-size:14px;">
+            ${escapeHtml(stage.description || "Описание этапа пока не заполнено.")}
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-label">Задачи этапа</div>
+          <div class="preview-task-list">
+            ${renderPreviewTasks(stage)}
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-label">Рекомендованные материалы</div>
+          <div class="preview-knowledge-list">
+            ${renderPreviewKnowledge(stage)}
+          </div>
+        </div>
+      `;
+    }
+
+    function showNotice(message, type = "success") {
+      const notice = document.getElementById("saveNotice");
+      if (!notice) return;
+
+      notice.textContent = message;
+      notice.className = "notice";
+
+      if (type === "warning") {
+        notice.classList.add("warning");
+      } else if (type === "error") {
+        notice.classList.add("error");
+      }
+
+      notice.classList.add("show");
+
+      clearTimeout(showNotice._timer);
+      showNotice._timer = setTimeout(() => {
+        notice.classList.remove("show");
+      }, 2600);
+    }
+
+    function renderAll() {
+      fillTemplateFields();
+      renderMeta();
+      renderStageList();
+      renderStageEditor();
+      renderPreview();
+    }
+
+    function resetTemplateLocallyOnly() {
+      template = createDefaultTemplate();
+      selectedStageId = template.stages[0]?.id || null;
+      persistLocalMirror();
+      renderAll();
+      showNotice("Backend недоступен. Локальное зеркало сброшено к дефолту.", "warning");
+    }
+
+    function pluralize(number, words) {
+      const n = Math.abs(number) % 100;
+      const n1 = n % 10;
+      if (n > 10 && n < 20) return words[2];
+      if (n1 > 1 && n1 < 5) return words[1];
+      if (n1 === 1) return words[0];
+      return words[2];
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function escapeAttr(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     }
 
     function addTask(stageId) {
@@ -1897,6 +2041,7 @@
 
       const [task] = stage.tasks.splice(index, 1);
       stage.tasks.splice(targetIndex, 0, task);
+
       persistLocalMirror();
       renderAll();
     }
@@ -1937,157 +2082,9 @@
 
       const [item] = stage.knowledgeItems.splice(index, 1);
       stage.knowledgeItems.splice(targetIndex, 0, item);
+
       persistLocalMirror();
       renderAll();
-    }
-
-    function renderPreview() {
-      const container = document.getElementById("previewContent");
-      const stage = getSelectedStage();
-
-      if (!stage) {
-        container.innerHTML = `
-          <div class="empty-state">
-            Выберите этап, чтобы увидеть, как этот модуль будет выглядеть для сотрудника.
-          </div>
-        `;
-        return;
-      }
-
-      const stageIndex = template.stages.findIndex(item => item.id === stage.id);
-
-      container.innerHTML = `
-        <div class="preview-badge">Этап ${stageIndex + 1} · Employee view</div>
-
-        <h3 class="preview-title">${escapeHtml(stage.title || "Без названия")}</h3>
-
-        <div class="preview-copy">
-          ${escapeHtml(stage.message || "Сообщение этапа пока не заполнено.")}
-        </div>
-
-        <div class="preview-box">
-          <div class="preview-label">Описание этапа</div>
-          <div class="preview-copy" style="font-size:14px;">
-            ${escapeHtml(stage.description || "Описание этапа пока не заполнено.")}
-          </div>
-        </div>
-
-        <div class="preview-box">
-          <div class="preview-label">Задачи этапа</div>
-          <div class="preview-task-list">
-            ${renderPreviewTasks(stage)}
-          </div>
-        </div>
-
-        <div class="preview-box">
-          <div class="preview-label">Рекомендованные материалы</div>
-          <div class="preview-knowledge-list">
-            ${renderPreviewKnowledge(stage)}
-          </div>
-        </div>
-      `;
-    }
-
-    function renderPreviewTasks(stage) {
-      if (!stage.tasks.length) {
-        return `
-          <div class="empty-state">
-            На employee-side здесь появится список задач, когда HR добавит хотя бы одну задачу в модуль.
-          </div>
-        `;
-      }
-
-      return stage.tasks.map(task => `
-        <div class="preview-task-item">
-          <div class="preview-check ${task.required ? "required" : ""}"></div>
-          <div class="preview-item-copy">
-            <div class="preview-item-title">${escapeHtml(task.title || "Задача без названия")}</div>
-            <div class="preview-item-sub">${task.required ? "Обязательная задача этапа" : "Необязательная задача этапа"}</div>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function renderPreviewKnowledge(stage) {
-      if (!stage.knowledgeItems.length) {
-        return `
-          <div class="empty-state">
-            На этом этапе пока нет привязанных материалов базы знаний.
-          </div>
-        `;
-      }
-
-      return stage.knowledgeItems.map(knowledgeId => {
-        const item = KNOWLEDGE_LIBRARY.find(entry => entry.id === knowledgeId);
-        const title = item ? item.title : knowledgeId;
-
-        return `
-          <div class="preview-knowledge-item">
-            <div class="preview-dot"></div>
-            <div class="preview-item-copy">
-              <div class="preview-item-title">${escapeHtml(title)}</div>
-              <div class="preview-item-sub">Будет рекомендовано сотруднику как материал текущего этапа</div>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function showNotice(message, type = "success") {
-      const notice = document.getElementById("saveNotice");
-      notice.textContent = message;
-      notice.className = "notice";
-      if (type === "warning") {
-        notice.classList.add("warning");
-      } else if (type === "error") {
-        notice.classList.add("error");
-      }
-      notice.classList.add("show");
-
-      clearTimeout(showNotice._timer);
-      showNotice._timer = setTimeout(() => {
-        notice.classList.remove("show");
-      }, 2600);
-    }
-
-    function renderAll() {
-      fillTemplateFields();
-      renderMeta();
-      renderStageList();
-      renderStageEditor();
-      renderPreview();
-    }
-
-    function resetTemplateLocallyOnly() {
-      template = createDefaultTemplate();
-      selectedStageId = template.stages[0]?.id || null;
-      persistLocalMirror();
-      renderAll();
-      showNotice("Backend недоступен. Локальное зеркало сброшено к дефолту.", "warning");
-    }
-
-    function pluralize(number, words) {
-      const n = Math.abs(number) % 100;
-      const n1 = n % 10;
-      if (n > 10 && n < 20) return words[2];
-      if (n1 > 1 && n1 < 5) return words[1];
-      if (n1 === 1) return words[0];
-      return words[2];
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    }
-
-    function escapeAttr(value) {
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/"/g, "&quot;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
     }
 
     async function handleSaveTemplate() {
@@ -2175,6 +2172,22 @@
         setBusyState(false);
       }
     }
+
+    templateNameInput.addEventListener("input", function () {
+      template.name = this.value;
+      persistLocalMirror();
+      renderMeta();
+    });
+
+    templateAudienceInput.addEventListener("input", function () {
+      template.audience = this.value;
+      persistLocalMirror();
+    });
+
+    templateDescriptionInput.addEventListener("input", function () {
+      template.description = this.value;
+      persistLocalMirror();
+    });
 
     document.getElementById("saveTemplateBtn").addEventListener("click", handleSaveTemplate);
     document.getElementById("resetTemplateBtn").addEventListener("click", handleResetTemplate);
