@@ -1,408 +1,1718 @@
-(() => {
-  const ASSISTANT_API_BASE = "https://galactic-tours-demo-backend-production.up.railway.app/api";
-  const MESSAGE_API_URL = `${ASSISTANT_API_BASE}/message`;
-
-  const SESSION_KEY = "galactic_tours_session_id";
-  const USER_NAME_KEY = "galactic_tours_user_name";
-
-  const SESSION_ID = localStorage.getItem(SESSION_KEY) || `demo_${Date.now()}`;
-  localStorage.setItem(SESSION_KEY, SESSION_ID);
-
-  let assistantBotStarted = false;
-  let assistantUiInitialized = false;
-
-  function getStoredUserName() {
-    return localStorage.getItem(USER_NAME_KEY) || "";
-  }
-
-  function setStoredUserName(name) {
-    if (name && name.trim()) {
-      localStorage.setItem(USER_NAME_KEY, name.trim());
-    }
-  }
-
-  function ensureAssistantRoot() {
-    if (assistantUiInitialized) return;
-    if (document.getElementById("assistantLauncher")) {
-      assistantUiInitialized = true;
-      return;
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galactic Tours — Dashboard</title>
+  <style>
+    :root {
+      --bg: #07111d;
+      --bg-soft: #0c1727;
+      --panel: rgba(15, 27, 44, 0.94);
+      --panel-2: rgba(19, 34, 55, 0.92);
+      --line: rgba(180, 204, 232, 0.12);
+      --line-2: rgba(180, 204, 232, 0.2);
+      --text: #f4f7fb;
+      --muted: #a9b8cd;
+      --accent: #dfeaf7;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+      --sidebar-width: 250px;
+      --success: #b7d9c0;
+      --warning: #f0d7a1;
+      --danger: #efb0b0;
+      --hero-glow: rgba(122, 164, 224, 0.18);
     }
 
-    const wrapper = document.createElement("div");
-    wrapper.innerHTML = `
-      <style>
-        .assistant-launcher {
-          position: fixed;
-          right: 24px;
-          bottom: 24px;
-          width: 64px;
-          height: 64px;
-          border-radius: 50%;
-          border: 1px solid rgba(180, 204, 232, 0.18);
-          background: linear-gradient(180deg, rgba(20,35,57,0.96), rgba(15,27,44,0.96));
-          color: #f4f7fb;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
-          cursor: pointer;
-          font-size: 26px;
-          z-index: 9999;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        .assistant-overlay {
-          position: fixed;
-          right: 24px;
-          bottom: 100px;
-          width: min(420px, calc(100vw - 32px));
-          height: min(680px, calc(100vh - 140px));
-          border-radius: 24px;
-          background: linear-gradient(180deg, rgba(14,26,43,0.98), rgba(11,22,38,0.98));
-          border: 1px solid rgba(180, 204, 232, 0.12);
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.32);
-          overflow: hidden;
-          display: none;
-          z-index: 9998;
-        }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(91, 124, 170, 0.16), transparent 28%),
+        linear-gradient(180deg, #06101b 0%, #07111d 100%);
+      color: var(--text);
+    }
 
-        .assistant-overlay.open {
-          display: flex;
-          flex-direction: column;
-        }
+    body {
+      min-height: 100vh;
+    }
 
-        .assistant-overlay-top {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 12px;
-          padding: 16px 18px;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
+    a {
+      color: inherit;
+    }
 
-        .assistant-overlay-left {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
 
-        .assistant-overlay-avatar {
-          width: 42px;
-          height: 42px;
-          border-radius: 14px;
-          display: grid;
-          place-items: center;
-          background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
-          border: 1px solid rgba(255,255,255,0.08);
-          font-size: 20px;
-        }
+    .hidden {
+      display: none !important;
+    }
 
-        .assistant-overlay-name {
-          font-size: 16px;
-          font-weight: 700;
-          color: #f4f7fb;
-        }
+    .app-shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      min-height: 100vh;
+    }
 
-        .assistant-overlay-sub {
-          font-size: 13px;
-          color: #a9b8cd;
-          margin-top: 3px;
-        }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(8, 18, 31, 0.78);
+      backdrop-filter: blur(12px);
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
 
-        .assistant-overlay-close {
-          width: 38px;
-          height: 38px;
-          border-radius: 12px;
-          border: 1px solid rgba(255,255,255,0.08);
-          background: rgba(255,255,255,0.03);
-          color: #f4f7fb;
-          cursor: pointer;
-          font-size: 18px;
-        }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 6px 8px;
+    }
 
-        .assistant-overlay-chat {
-          flex: 1;
-          overflow-y: auto;
-          padding: 18px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          scroll-behavior: smooth;
-        }
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+      border: 1px solid var(--line);
+      color: #f0f5fb;
+      font-size: 20px;
+    }
 
-        .assistant-overlay-chat::-webkit-scrollbar {
-          width: 8px;
-        }
+    .brand-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
 
-        .assistant-overlay-chat::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.1);
-          border-radius: 999px;
-        }
+    .brand-kicker {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
 
-        .assistant-message {
-          max-width: 82%;
-          padding: 14px 16px;
-          border-radius: 18px;
-          line-height: 1.6;
-          white-space: pre-line;
-          font-size: 15px;
-          color: #f4f7fb;
-        }
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
 
-        .assistant-message.user {
-          align-self: flex-end;
-          background: linear-gradient(135deg, #6f93c8, #5a7eb7);
-          color: #f9fcff;
-          border-bottom-right-radius: 8px;
-        }
+    .nav-group {
+      display: grid;
+      gap: 10px;
+    }
 
-        .assistant-message.bot {
-          align-self: flex-start;
-          background: rgba(35, 51, 80, 0.95);
-          border: 1px solid rgba(255,255,255,0.05);
-          border-bottom-left-radius: 8px;
-        }
+    .nav-label {
+      padding: 0 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
 
-        .assistant-message.system {
-          align-self: flex-start;
-          background: rgba(77, 53, 53, 0.78);
-          border: 1px solid rgba(255,255,255,0.05);
-        }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      padding: 14px 14px;
+      border-radius: 18px;
+      border: 1px solid transparent;
+      transition: 0.18s ease;
+      background: transparent;
+    }
 
-        .assistant-overlay-replies {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          padding: 0 18px 14px;
-        }
+    .nav-link:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: var(--line);
+    }
 
-        .assistant-reply-btn {
-          padding: 10px 14px;
-          border-radius: 999px;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(145, 177, 220, 0.24);
-          color: #f4f7fb;
-          cursor: pointer;
-          font-size: 14px;
-        }
+    .nav-link.active {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--line);
+    }
 
-        .assistant-overlay-input {
-          display: grid;
-          grid-template-columns: 1fr auto;
-          gap: 12px;
-          padding: 0 18px 18px;
-        }
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      opacity: 0.9;
+    }
 
-        .assistant-input {
-          width: 100%;
-          border: 1px solid rgba(255,255,255,0.07);
-          background: rgba(255,255,255,0.03);
-          color: #f4f7fb;
-          border-radius: 18px;
-          padding: 15px 16px;
-          outline: none;
-          font-size: 15px;
-        }
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
 
-        .assistant-send {
-          border: none;
-          border-radius: 18px;
-          padding: 15px 18px;
-          min-width: 110px;
-          cursor: pointer;
-          background: #edf5fc;
-          color: #10243d;
-          font-weight: 700;
-          font-size: 14px;
-        }
+    .main {
+      padding: 24px;
+    }
 
-        @media (max-width: 640px) {
-          .assistant-launcher {
-            right: 16px;
-            bottom: 16px;
-          }
+    .topbar {
+      position: relative;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
 
-          .assistant-overlay {
-            right: 16px;
-            bottom: 88px;
-            width: calc(100vw - 32px);
-            height: calc(100vh - 120px);
-          }
+    .topbar-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-          .assistant-overlay-input {
-            grid-template-columns: 1fr;
-          }
+    .page-kicker {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
 
-          .assistant-send {
-            width: 100%;
-          }
-        }
-      </style>
+    .page-title {
+      font-size: 34px;
+      font-weight: 700;
+      margin: 0;
+    }
 
-      <button id="assistantLauncher" class="assistant-launcher" type="button">💬</button>
+    .topbar-right {
+      position: relative;
+      z-index: 21;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
 
-      <div id="assistantOverlay" class="assistant-overlay">
-        <div class="assistant-overlay-top">
-          <div class="assistant-overlay-left">
-            <div class="assistant-overlay-avatar">🤖</div>
-            <div>
-              <div class="assistant-overlay-name">Добрыня</div>
-              <div class="assistant-overlay-sub">Galactic Tours HR Assistant</div>
-            </div>
-          </div>
-          <button id="assistantClose" class="assistant-overlay-close" type="button">×</button>
-        </div>
+    .profile-chip,
+    .logout-btn,
+    .secondary-btn,
+    .primary-btn,
+    .ghost-btn,
+    .chip-btn {
+      border-radius: 999px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.18s ease;
+      font-family: inherit;
+    }
 
-        <div id="assistantChat" class="assistant-overlay-chat"></div>
-        <div id="assistantReplies" class="assistant-overlay-replies"></div>
+    .profile-chip,
+    .logout-btn,
+    .secondary-btn,
+    .ghost-btn,
+    .chip-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 12px 16px;
+    }
 
-        <div class="assistant-overlay-input">
-          <input id="assistantInput" class="assistant-input" placeholder="Напиши вопрос..." />
-          <button id="assistantSend" class="assistant-send" type="button">Отправить</button>
+    .logout-btn:hover,
+    .secondary-btn:hover,
+    .ghost-btn:hover,
+    .chip-btn:hover {
+      background: rgba(255,255,255,0.06);
+    }
+
+    .primary-btn {
+      border: none;
+      background: #edf5fc;
+      color: #10243d;
+      padding: 13px 18px;
+      font-weight: 700;
+      box-shadow: 0 12px 30px rgba(221, 236, 249, 0.12);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px rgba(221, 236, 249, 0.16);
+    }
+
+    .hero-card {
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      border-radius: 30px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at top right, var(--hero-glow), transparent 24%),
+        linear-gradient(180deg, rgba(20,35,57,0.98), rgba(15,27,44,0.96));
+      box-shadow: var(--shadow);
+      padding: 30px;
+      margin-bottom: 22px;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -120px -160px auto;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 62%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.4fr 420px;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .hero-left {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      width: fit-content;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(34px, 4vw, 56px);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+      font-weight: 600;
+      max-width: 820px;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 16px;
+      max-width: 760px;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 12px rgba(183, 217, 192, 0.55);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .hero-side {
+      position: relative;
+      z-index: 1;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+      min-height: 100%;
+    }
+
+    .hero-side-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .hero-side-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .hero-side-copy {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .next-step-box {
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(12,24,40,0.95), rgba(9,19,33,0.95));
+    }
+
+    .next-step-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .next-step-title {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .next-step-sub {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 22px;
+    }
+
+    .card {
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(14,26,43,0.96), rgba(11,22,38,0.96));
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .card-subtitle {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+      margin-top: -4px;
+      margin-bottom: 18px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .metric-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .metric-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .metric-hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .stage-panel {
+      display: grid;
+      gap: 18px;
+    }
+
+    .stage-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(223, 234, 247, 0.08);
+      border: 1px solid rgba(223, 234, 247, 0.12);
+      color: #eef5fc;
+      font-size: 14px;
+      width: fit-content;
+    }
+
+    .stage-name-inline {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .stage-message {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 15px;
+      max-width: 720px;
+    }
+
+    .progress-wrap {
+      display: grid;
+      gap: 10px;
+    }
+
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .progress-label {
+      color: var(--muted);
+    }
+
+    .progress-value {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(223, 234, 247, 0.75), rgba(255,255,255,0.95));
+      transition: width 0.28s ease;
+    }
+
+    .tasks-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .summary-box {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .summary-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .summary-caption {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .task-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-top: 2px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.02);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .task-item.done .task-check {
+      background: rgba(183, 217, 192, 0.16);
+      border-color: rgba(183, 217, 192, 0.24);
+    }
+
+    .task-item.done .task-check::after {
+      content: "✓";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: var(--success);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .task-copy {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .task-meta {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .access-grid,
+    .recommended-grid,
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .mini-card {
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+      min-height: 154px;
+    }
+
+    .mini-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      font-size: 20px;
+    }
+
+    .mini-title {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .mini-copy {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .mini-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .activity-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .activity-item {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 10px 0;
+    }
+
+    .activity-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 6px;
+      background: rgba(223, 234, 247, 0.9);
+      box-shadow: 0 0 14px rgba(223, 234, 247, 0.2);
+    }
+
+    .activity-copy {
+      display: grid;
+      gap: 4px;
+    }
+
+    .activity-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .activity-sub {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .loading-note,
+    .empty-note {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      padding: 10px 0;
+    }
+
+    .stage-note {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(240, 215, 161, 0.08);
+      border: 1px solid rgba(240, 215, 161, 0.12);
+      color: var(--warning);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 1320px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .metric-grid,
+      .tasks-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .access-grid,
+      .recommended-grid,
+      .support-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .main {
+        padding: 16px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-card,
+      .card {
+        border-radius: 22px;
+      }
+
+      .hero-title {
+        font-size: 34px;
+      }
+
+      .metric-grid,
+      .tasks-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-actions,
+      .topbar-right {
+        width: 100%;
+      }
+
+      .hero-actions > *,
+      .topbar-right > * {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">✦</div>
+        <div class="brand-copy">
+          <div class="brand-kicker">Galactic Tours</div>
+          <div class="brand-title">Employee Platform</div>
         </div>
       </div>
-    `;
 
-    document.body.appendChild(wrapper);
+      <div class="nav-group">
+        <div class="nav-label">Навигация</div>
 
-    document.getElementById("assistantLauncher").addEventListener("click", openAssistant);
-    document.getElementById("assistantClose").addEventListener("click", closeAssistant);
-    document.getElementById("assistantSend").addEventListener("click", sendAssistantMessage);
-    document.getElementById("assistantInput").addEventListener("keydown", function(event) {
-      if (event.key === "Enter") {
-        sendAssistantMessage();
+        <a class="nav-link active" href="dashboard.html">
+          <span class="nav-icon">⌂</span>
+          <span>Главная</span>
+        </a>
+
+        <a class="nav-link" href="onboarding.html">
+          <span class="nav-icon">🚀</span>
+          <span>Адаптация</span>
+        </a>
+
+        <a class="nav-link" href="news.html">
+          <span class="nav-icon">📰</span>
+          <span>Новости</span>
+        </a>
+
+        <a class="nav-link" href="knowledge.html">
+          <span class="nav-icon">📚</span>
+          <span>База знаний</span>
+        </a>
+
+        <a class="nav-link" href="profile.html">
+          <span class="nav-icon">👤</span>
+          <span>Профиль</span>
+        </a>
+
+        <a id="adminNavLink" class="nav-link hidden" href="admin.html">
+          <span class="nav-icon">🛠️</span>
+          <span>HR Admin</span>
+        </a>
+      </div>
+
+      <div class="sidebar-footer">
+        Главный экран сотрудника: прогресс адаптации, следующий шаг, знания и быстрый доступ к ключевым разделам платформы. Stage context теперь приходит из backend, а knowledge recommendations синхронизируются с template layer.
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="page-kicker">Workspace · Onboarding command center</div>
+          <h1 class="page-title">Главная</h1>
+        </div>
+
+        <div class="topbar-right">
+          <div id="profileChip" class="profile-chip">Сотрудник</div>
+          <button class="secondary-btn" onclick="openAssistant()">Открыть ассистента</button>
+          <button id="logoutBtn" class="logout-btn">Выйти</button>
+        </div>
+      </div>
+
+      <section class="hero-card">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-eyebrow">Employee onboarding · Live status</div>
+
+            <h2 id="heroTitle" class="hero-title">
+              Добро пожаловать в рабочий контур Galactic Tours
+            </h2>
+
+            <div id="heroSub" class="hero-sub">
+              Здесь собран ваш текущий статус адаптации, ключевые действия, рекомендованные материалы и быстрый доступ к основным разделам платформы.
+            </div>
+
+            <div class="status-row">
+              <div class="status-pill">
+                <span class="status-dot"></span>
+                <span id="statusPillText">Адаптация активна</span>
+              </div>
+
+              <div class="status-pill">
+                <span>Этап:</span>
+                <strong id="heroStage">1</strong>
+              </div>
+
+              <div class="status-pill">
+                <span>Прогресс:</span>
+                <strong id="heroProgress">0%</strong>
+              </div>
+            </div>
+
+            <div class="hero-actions">
+              <button class="primary-btn" onclick="window.location.href='onboarding.html'">Продолжить адаптацию</button>
+              <button class="ghost-btn" onclick="window.location.href='knowledge.html'">Открыть базу знаний</button>
+              <button class="ghost-btn" onclick="openAssistant()">Задать вопрос ассистенту</button>
+            </div>
+          </div>
+
+          <div class="hero-side">
+            <div class="hero-side-head">
+              <h3 class="hero-side-title">Следующее действие</h3>
+              <button class="chip-btn" onclick="window.location.href='onboarding.html'">Перейти</button>
+            </div>
+
+            <div class="hero-side-copy">
+              Система подсказывает, куда двигаться дальше, чтобы вы не терялись внутри маршрута адаптации.
+            </div>
+
+            <div class="next-step-box">
+              <div class="next-step-label">Приоритет на сейчас</div>
+              <div id="nextStepTitle" class="next-step-title">Открыть маршрут адаптации</div>
+              <div id="nextStepSub" class="next-step-sub">
+                Перейдите в маршрут, чтобы увидеть задачи текущего этапа и продолжить движение по онбордингу.
+              </div>
+            </div>
+
+            <button id="nextStepButton" class="primary-btn" style="width:100%;" onclick="window.location.href='onboarding.html'">
+              Продолжить маршрут
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <div class="stack">
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Прогресс адаптации</h3>
+            </div>
+            <div class="card-subtitle">
+              Ключевые метрики по вашему текущему этапу. Stage metadata и задачи подтягиваются из backend, а recommendations согласованы с template layer.
+            </div>
+
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-label">Текущий этап</div>
+                <div id="metricStage" class="metric-value">1</div>
+                <div class="metric-hint">Активный этап маршрута</div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-label">Прогресс</div>
+                <div id="metricProgress" class="metric-value">0%</div>
+                <div class="metric-hint">Доля выполненных задач</div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-label">Выполнено</div>
+                <div id="metricCompleted" class="metric-value">0</div>
+                <div class="metric-hint">Задач закрыто на этапе</div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-label">Осталось</div>
+                <div id="metricRemaining" class="metric-value">0</div>
+                <div class="metric-hint">Задач до завершения этапа</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Текущий маршрут адаптации</h3>
+              <button class="secondary-btn" onclick="window.location.href='onboarding.html'">Открыть страницу</button>
+            </div>
+
+            <div class="stage-panel">
+              <div class="stage-head">
+                <div>
+                  <div id="stageBadge" class="stage-badge">Этап 1 · Активен</div>
+                </div>
+                <div id="stageNameInline" class="stage-name-inline">Стартовый этап</div>
+              </div>
+
+              <div id="stageMessage" class="stage-message">
+                Система готова показать вам текущие задачи этапа и помочь пройти адаптацию пошагово.
+              </div>
+
+              <div id="stageTemplateNote" class="stage-note" style="display:none;">
+                Для knowledge recommendations используется template layer. Основное состояние этапа и чеклист приходят из backend.
+              </div>
+
+              <div class="progress-wrap">
+                <div class="progress-head">
+                  <span class="progress-label">Общий прогресс текущего этапа</span>
+                  <span id="progressInlineValue" class="progress-value">0%</span>
+                </div>
+
+                <div class="progress-bar">
+                  <div id="progressBarFill" class="progress-bar-fill"></div>
+                </div>
+              </div>
+
+              <div class="tasks-summary">
+                <div class="summary-box">
+                  <div class="summary-label">Всего задач</div>
+                  <div id="summaryTotal" class="summary-value">0</div>
+                  <div class="summary-caption">Доступно в текущем этапе</div>
+                </div>
+
+                <div class="summary-box">
+                  <div class="summary-label">Выполнено</div>
+                  <div id="summaryCompleted" class="summary-value">0</div>
+                  <div class="summary-caption">Уже зафиксировано системой</div>
+                </div>
+
+                <div class="summary-box">
+                  <div class="summary-label">Осталось</div>
+                  <div id="summaryRemaining" class="summary-value">0</div>
+                  <div class="summary-caption">Нужно закрыть для перехода</div>
+                </div>
+              </div>
+
+              <div>
+                <div class="card-subtitle" style="margin-bottom: 12px;">Текущие задачи этапа</div>
+                <div id="taskList" class="task-list">
+                  <div class="loading-note">Загружаем список задач...</div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Рекомендованные материалы</h3>
+              <button class="secondary-btn" onclick="window.location.href='knowledge.html'">Вся база знаний</button>
+            </div>
+
+            <div class="card-subtitle">
+              Рекомендации берутся из backend template. Если template временно недоступен — используется системный fallback.
+            </div>
+
+            <div id="recommendedGrid" class="recommended-grid"></div>
+          </article>
+        </div>
+
+        <div class="stack">
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Быстрый доступ</h3>
+            </div>
+
+            <div class="access-grid">
+              <div class="mini-card">
+                <div class="mini-icon">🚀</div>
+                <div class="mini-title">Маршрут адаптации</div>
+                <div class="mini-copy">Откройте задачи текущего этапа, прогресс и статусы перехода между этапами.</div>
+                <div class="mini-actions">
+                  <button class="secondary-btn" onclick="window.location.href='onboarding.html'">Открыть</button>
+                </div>
+              </div>
+
+              <div class="mini-card">
+                <div class="mini-icon">📚</div>
+                <div class="mini-title">База знаний</div>
+                <div class="mini-copy">Найдите ответы на типовые вопросы, материалы по адаптации и внутренние инструкции.</div>
+                <div class="mini-actions">
+                  <button class="secondary-btn" onclick="window.location.href='knowledge.html'">Перейти</button>
+                </div>
+              </div>
+
+              <div class="mini-card">
+                <div class="mini-icon">👤</div>
+                <div class="mini-title">Профиль сотрудника</div>
+                <div class="mini-copy">Проверьте контактные и рабочие данные, а при необходимости отредактируйте карточку.</div>
+                <div class="mini-actions">
+                  <button class="secondary-btn" onclick="window.location.href='profile.html'">Открыть</button>
+                </div>
+              </div>
+
+              <div id="adminQuickAccessCard" class="mini-card hidden">
+                <div class="mini-icon">🛠️</div>
+                <div class="mini-title">HR Admin</div>
+                <div class="mini-copy">Откройте builder, чтобы посмотреть или изменить конфигурацию маршрута адаптации.</div>
+                <div class="mini-actions">
+                  <button class="secondary-btn" onclick="window.location.href='admin.html'">Открыть</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Нужна помощь?</h3>
+            </div>
+
+            <div class="card-subtitle">
+              Ассистент встроен в общий сценарий адаптации. Здесь можно быстро перейти к типовым вопросам без лишнего поиска.
+            </div>
+
+            <div class="support-grid">
+              <div class="mini-card">
+                <div class="mini-icon">🧭</div>
+                <div class="mini-title">По маршруту адаптации</div>
+                <div class="mini-copy">Если нужно понять, что делать дальше на текущем этапе, откройте чат с готовым вопросом.</div>
+                <div class="mini-actions">
+                  <button class="secondary-btn" onclick="askAssistantPreset('Расскажи про мою адаптацию')">Спросить</button>
+                </div>
+              </div>
+
+              <div class="mini-card">
+                <div class="mini-icon">⏳</div>
+                <div class="mini-title">По испытательному сроку</div>
+                <div class="mini-copy">Быстрый вход в сценарий про ожидания, этапы и ответы на частые вопросы по периоду адаптации.</div>
+                <div class="mini-actions">
+                  <button class="secondary-btn" onclick="askAssistantPreset('Что важно знать про испытательный срок?')">Открыть</button>
+                </div>
+              </div>
+
+              <div class="mini-card">
+                <div class="mini-icon">🧠</div>
+                <div class="mini-title">По роли и ожиданиям</div>
+                <div class="mini-copy">Используйте ассистента как навигацию по зоне ответственности, ожиданиям и роли внутри команды.</div>
+                <div class="mini-actions">
+                  <button class="secondary-btn" onclick="askAssistantPreset('Расскажи про мою роль')">Открыть</button>
+                </div>
+              </div>
+
+              <div class="mini-card">
+                <div class="mini-icon">❓</div>
+                <div class="mini-title">Свободный вопрос</div>
+                <div class="mini-copy">Если ваш запрос не подходит ни под один сценарий, просто откройте окно чата и спросите напрямую.</div>
+                <div class="mini-actions">
+                  <button class="secondary-btn" onclick="openAssistant()">Задать вопрос</button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title-row">
+              <h3 class="card-title">Активность в системе</h3>
+            </div>
+
+            <div class="card-subtitle">
+              Пока это MVP-лента состояния, но она уже показывает backend-статус, текущий stage context и согласованность с template layer.
+            </div>
+
+            <div id="activityList" class="activity-list"></div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const AUTH_KEY = "galactic_tours_auth";
+    const USER_LOGIN_KEY = "galactic_tours_login";
+    const USER_NAME_KEY = "galactic_tours_user_name";
+    const USER_ROLE_KEY = "galactic_tours_role";
+    const SESSION_KEY = "galactic_tours_session_id";
+    const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
+    const API_BASE_STORAGE_KEY = "galactic_tours_api_base";
+
+    function getApiBase() {
+      const stored = localStorage.getItem(API_BASE_STORAGE_KEY);
+      if (!stored) {
+        return "https://galactic-tours-demo-backend-production.up.railway.app";
       }
-    });
-
-    assistantUiInitialized = true;
-  }
-
-  function openAssistant() {
-    ensureAssistantRoot();
-
-    const overlay = document.getElementById("assistantOverlay");
-    if (!overlay) return;
-
-    overlay.classList.add("open");
-    startAssistantBot();
-  }
-
-  function closeAssistant() {
-    const overlay = document.getElementById("assistantOverlay");
-    if (!overlay) return;
-    overlay.classList.remove("open");
-  }
-
-  function addAssistantMessage(text, type) {
-    const chat = document.getElementById("assistantChat");
-    if (!chat) return;
-
-    const msg = document.createElement("div");
-    msg.className = `assistant-message ${type}`;
-    msg.innerText = text;
-    chat.appendChild(msg);
-    chat.scrollTop = chat.scrollHeight;
-  }
-
-  function clearAssistantReplies() {
-    const replies = document.getElementById("assistantReplies");
-    if (replies) {
-      replies.innerHTML = "";
-    }
-  }
-
-  function renderAssistantReplies(replies) {
-    clearAssistantReplies();
-
-    if (!replies || !Array.isArray(replies) || !replies.length) return;
-
-    const container = document.getElementById("assistantReplies");
-    if (!container) return;
-
-    replies.forEach(reply => {
-      const btn = document.createElement("button");
-      btn.className = "assistant-reply-btn";
-      btn.type = "button";
-      btn.innerText = reply;
-      btn.addEventListener("click", function() {
-        callAssistant(reply, true);
-      });
-      container.appendChild(btn);
-    });
-  }
-
-  async function callAssistant(text, showUserMessage = true) {
-    if (showUserMessage) {
-      addAssistantMessage(text, "user");
+      return stored.replace(/\/+$/, "");
     }
 
-    clearAssistantReplies();
+    const API_BASE = getApiBase();
 
-    try {
-      const res = await fetch(MESSAGE_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          session_id: SESSION_ID,
-          text: text
+    function buildApiUrl(path) {
+      if (!path.startsWith("/")) {
+        return `${API_BASE}/${path}`;
+      }
+      return `${API_BASE}${path}`;
+    }
+
+    const KNOWLEDGE_LIBRARY = {
+      "welcome-start": {
+        icon: "🚀",
+        title: "Первые шаги нового сотрудника",
+        copy: "Базовые материалы для старта, ориентации и первых действий внутри рабочего контура.",
+        href: "knowledge.html"
+      },
+      "company-navigation": {
+        icon: "🛰️",
+        title: "Навигация по рабочему контуру",
+        copy: "Где искать ключевые разделы платформы и как быстрее освоиться в системе.",
+        href: "knowledge.html"
+      },
+      "probation-overview": {
+        icon: "⏳",
+        title: "Что важно знать про испытательный срок",
+        copy: "Материал о логике испытательного срока, ожиданиях и контрольных точках периода адаптации.",
+        href: "knowledge.html"
+      },
+      "role-expectations": {
+        icon: "🧠",
+        title: "Как понять свою роль и ожидания",
+        copy: "Подборка про зону ответственности, формат работы и ожидания к роли сотрудника.",
+        href: "knowledge.html"
+      },
+      "communication-process": {
+        icon: "🤝",
+        title: "Как устроены рабочие взаимодействия",
+        copy: "Материал о координации, внутренних процессах и коммуникации с руководителем и коллегами.",
+        href: "knowledge.html"
+      },
+      "knowledge-usage": {
+        icon: "📚",
+        title: "Как пользоваться базой знаний",
+        copy: "Короткая навигация по knowledge layer и логике рекомендаций внутри системы.",
+        href: "knowledge.html"
+      },
+      "support-entry": {
+        icon: "💬",
+        title: "Когда лучше идти к ассистенту",
+        copy: "Как использовать встроенного ассистента для типовых HR-вопросов и быстрой навигации.",
+        assistantPrompt: "В чём ты можешь помочь?"
+      },
+      "self-sufficiency": {
+        icon: "✅",
+        title: "Переход к самостоятельной работе",
+        copy: "Финальный материал про завершение базовой адаптации и переход в рабочий ритм.",
+        href: "knowledge.html"
+      }
+    };
+
+    const FALLBACK_STAGE_MESSAGES = {
+      1: "Ваш маршрут адаптации активирован. Начните с ключевых организационных шагов и базовых материалов, чтобы быстро войти в рабочий контур.",
+      2: "Вы перешли к следующему этапу. Сейчас важно закрепить рабочие процессы, ожидания по роли и ориентиры испытательного срока.",
+      3: "Финальный этап маршрута: фокус на самостоятельной работе, закреплении роли и подготовке к полноценному рабочему ритму."
+    };
+
+    const FALLBACK_STAGE_NAMES = {
+      1: "Стартовый этап адаптации",
+      2: "Закрепление роли и процессов",
+      3: "Выход в самостоятельный ритм"
+    };
+
+    const FALLBACK_STAGE_DESCRIPTIONS = {
+      1: "Стартовый модуль знакомства с системой, базовой навигацией и логикой первых действий.",
+      2: "Этап, где сотрудник закрепляет понимание роли, процессов и взаимодействия с рабочим контуром.",
+      3: "Финальный базовый модуль с фокусом на самостоятельности и завершении стартового онбординга."
+    };
+
+    const FALLBACK_RECOMMENDED = {
+      1: ["welcome-start", "company-navigation", "knowledge-usage"],
+      2: ["probation-overview", "role-expectations", "communication-process"],
+      3: ["self-sufficiency", "support-entry", "role-expectations"]
+    };
+
+    const isAuthorized = localStorage.getItem(AUTH_KEY) === "true";
+    if (!isAuthorized) {
+      window.location.href = "login.html";
+    }
+
+    const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
+    const isAdmin = currentRole === "admin";
+
+    const adminNavLink = document.getElementById("adminNavLink");
+    if (adminNavLink) {
+      adminNavLink.classList.toggle("hidden", !isAdmin);
+    }
+
+    const adminQuickAccessCard = document.getElementById("adminQuickAccessCard");
+    if (adminQuickAccessCard) {
+      adminQuickAccessCard.classList.toggle("hidden", !isAdmin);
+    }
+
+    const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
+    const savedName = localStorage.getItem(USER_NAME_KEY) || "";
+    const profileChip = document.getElementById("profileChip");
+
+    document.getElementById("logoutBtn").addEventListener("click", function () {
+      localStorage.removeItem(AUTH_KEY);
+      localStorage.removeItem(USER_LOGIN_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(USER_NAME_KEY);
+      localStorage.removeItem(USER_ROLE_KEY);
+      window.location.href = "login.html";
+    });
+
+    function getDisplayName() {
+      const rawProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
+
+      if (rawProfile) {
+        try {
+          const profile = JSON.parse(rawProfile);
+          const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
+          if (fullName) return fullName;
+          if (profile.firstName) return profile.firstName;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      return savedName || savedLogin || "сотрудник";
+    }
+
+    function getFallbackDashboardState() {
+      return {
+        stage: 1,
+        progress: 0,
+        tasks: [],
+        stage_title: FALLBACK_STAGE_NAMES[1],
+        stage_description: FALLBACK_STAGE_DESCRIPTIONS[1],
+        stage_message: FALLBACK_STAGE_MESSAGES[1]
+      };
+    }
+
+    function normalizeTask(task) {
+      return {
+        id: task?.id || "",
+        title: task?.title || "Задача без названия",
+        done: Boolean(task?.done),
+        required: Boolean(task?.required)
+      };
+    }
+
+    function normalizeDashboardData(data) {
+      const safe = data && typeof data === "object" ? data : {};
+      const stage = Number(safe.stage) || 1;
+      const progressValue = Number(safe.progress);
+      const progress = Number.isFinite(progressValue) ? progressValue : 0;
+      const tasks = Array.isArray(safe.tasks) ? safe.tasks.map(normalizeTask) : [];
+
+      return {
+        stage,
+        progress: Math.max(0, Math.min(100, progress)),
+        tasks,
+        stage_title: safe.stage_title || FALLBACK_STAGE_NAMES[stage] || `Этап ${stage}`,
+        stage_description: safe.stage_description || FALLBACK_STAGE_DESCRIPTIONS[stage] || "",
+        stage_message: safe.stage_message || FALLBACK_STAGE_MESSAGES[stage] || FALLBACK_STAGE_MESSAGES[1]
+      };
+    }
+
+    function normalizeTemplate(template) {
+      const safe = template && typeof template === "object" ? template : {};
+      const stages = Array.isArray(safe.stages) ? safe.stages : [];
+
+      return {
+        id: safe.id || "base-template",
+        name: safe.name || "Базовый маршрут адаптации",
+        audience: safe.audience || "",
+        description: safe.description || "",
+        stages: stages.map((stage, index) => ({
+          id: stage?.id || `stage-${index + 1}`,
+          title: stage?.title || `Этап ${index + 1}`,
+          description: stage?.description || "",
+          message: stage?.message || "",
+          tasks: Array.isArray(stage?.tasks) ? stage.tasks : [],
+          knowledgeItems: Array.isArray(stage?.knowledgeItems) ? stage.knowledgeItems : []
+        }))
+      };
+    }
+
+    function getTemplateStage(template, stageNumber) {
+      if (!template || !Array.isArray(template.stages)) return null;
+      const index = Math.max(stageNumber - 1, 0);
+      return template.stages[index] || null;
+    }
+
+    function getTaskStats(tasks) {
+      const total = tasks.length;
+      const completed = tasks.filter(task => Boolean(task.done)).length;
+      const remaining = Math.max(total - completed, 0);
+      return { total, completed, remaining };
+    }
+
+    function getNextStep(data) {
+      const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      const incompleteTask = tasks.find(task => !task.done);
+
+      if (incompleteTask) {
+        return {
+          title: `Продолжить этап «${data.stage_title}»`,
+          sub: `Следующий приоритет — завершить текущие задачи маршрута и продвинуться по этапу ${data.stage}.`,
+          button: "Продолжить адаптацию"
+        };
+      }
+
+      if (tasks.length > 0 && data.progress >= 100) {
+        return {
+          title: "Проверить переход на следующий этап",
+          sub: "Текущий этап выглядит завершённым. Откройте маршрут адаптации и проверьте, к какому следующему модулю вас ведёт система.",
+          button: "Открыть маршрут"
+        };
+      }
+
+      return {
+        title: `Открыть этап «${data.stage_title}»`,
+        sub: "Перейдите в маршрут, чтобы увидеть актуальные задачи, проверить этап и продолжить движение по онбордингу.",
+        button: "Продолжить маршрут"
+      };
+    }
+
+    function getStatusText(stage, progress) {
+      if (progress >= 100) return "Этап завершён";
+      if (stage === 1) return "Адаптация активна";
+      if (stage === 2) return "Этап закрепления роли";
+      if (stage === 3) return "Финальный этап адаптации";
+      return "Маршрут в работе";
+    }
+
+    function renderHero(displayName, data, stats) {
+      const stageDescription = data.stage_description
+        ? `Сейчас активен модуль «${data.stage_title}». ${data.stage_description}`
+        : `Сейчас активен этап «${data.stage_title}».`;
+
+      document.getElementById("heroTitle").textContent = `${displayName}, ваш маршрут адаптации под контролем`;
+      document.getElementById("heroSub").textContent = `${stageDescription} Сейчас у вас ${stats.remaining} незавершённых ${pluralizeTasks(stats.remaining)} и общий прогресс ${data.progress}%.`;
+      document.getElementById("heroStage").textContent = data.stage;
+      document.getElementById("heroProgress").textContent = `${data.progress}%`;
+      document.getElementById("statusPillText").textContent = getStatusText(data.stage, data.progress);
+    }
+
+    function renderMetrics(data, stats, hasTemplate) {
+      document.getElementById("metricStage").textContent = data.stage;
+      document.getElementById("metricProgress").textContent = `${data.progress}%`;
+      document.getElementById("metricCompleted").textContent = stats.completed;
+      document.getElementById("metricRemaining").textContent = stats.remaining;
+
+      document.getElementById("stageBadge").textContent = `Этап ${data.stage} · Активен`;
+      document.getElementById("stageNameInline").textContent = data.stage_title;
+      document.getElementById("stageMessage").textContent = data.stage_message;
+      document.getElementById("progressInlineValue").textContent = `${data.progress}%`;
+      document.getElementById("progressBarFill").style.width = `${data.progress}%`;
+
+      document.getElementById("summaryTotal").textContent = stats.total;
+      document.getElementById("summaryCompleted").textContent = stats.completed;
+      document.getElementById("summaryRemaining").textContent = stats.remaining;
+
+      const note = document.getElementById("stageTemplateNote");
+      note.style.display = hasTemplate ? "block" : "none";
+    }
+
+    function renderNextStep(data) {
+      const next = getNextStep(data);
+      document.getElementById("nextStepTitle").textContent = next.title;
+      document.getElementById("nextStepSub").textContent = next.sub;
+      document.getElementById("nextStepButton").textContent = next.button;
+    }
+
+    function renderTasks(tasks) {
+      const taskList = document.getElementById("taskList");
+
+      if (!tasks.length) {
+        taskList.innerHTML = `
+          <div class="empty-note">
+            Для текущего этапа backend пока не вернул задачи. Вы всё равно можете открыть маршрут адаптации и продолжить сценарий.
+          </div>
+        `;
+        return;
+      }
+
+      taskList.innerHTML = tasks
+        .slice(0, 5)
+        .map(task => {
+          const safeTitle = escapeHtml(task.title || "Задача без названия");
+          const doneClass = task.done ? "done" : "";
+          const meta = task.done
+            ? "Статус: выполнено"
+            : (task.required ? "Статус: ожидает выполнения · обязательная" : "Статус: ожидает выполнения · необязательная");
+
+          return `
+            <div class="task-item ${doneClass}">
+              <div class="task-check"></div>
+              <div class="task-copy">
+                <div class="task-title">${safeTitle}</div>
+                <div class="task-meta">${meta}</div>
+              </div>
+            </div>
+          `;
         })
-      });
-
-      if (!res.ok) {
-        addAssistantMessage("Ошибка сервера: " + res.status, "system");
-        return;
-      }
-
-      const data = await res.json();
-
-      if (!data.reply) {
-        addAssistantMessage("Ответ пустой", "system");
-        return;
-      }
-
-      const waitNameState = data.state === "wait_name";
-      const savedName = getStoredUserName();
-
-      if (!waitNameState && showUserMessage && !savedName && text !== "__start__") {
-        setStoredUserName(text);
-      }
-
-      addAssistantMessage(data.reply, "bot");
-      renderAssistantReplies(data.quick_replies);
-    } catch (error) {
-      addAssistantMessage("Ошибка подключения: " + error.message, "system");
-      console.error(error);
+        .join("");
     }
-  }
 
-  async function startAssistantBot() {
-    if (assistantBotStarted) return;
-    assistantBotStarted = true;
-    await callAssistant("__start__", false);
-  }
+    function renderRecommended(stageNumber, templateStage) {
+      const container = document.getElementById("recommendedGrid");
+      const ids = templateStage?.knowledgeItems?.length
+        ? templateStage.knowledgeItems
+        : (FALLBACK_RECOMMENDED[stageNumber] || []);
 
-  async function sendAssistantMessage() {
-    const input = document.getElementById("assistantInput");
-    if (!input) return;
+      if (!ids.length) {
+        container.innerHTML = `
+          <div class="empty-note">
+            Для этого этапа пока нет рекомендованных материалов.
+          </div>
+        `;
+        return;
+      }
 
-    const text = input.value.trim();
-    if (!text) return;
+      container.innerHTML = ids.slice(0, 4).map(id => {
+        const item = KNOWLEDGE_LIBRARY[id];
+        if (!item) {
+          return `
+            <div class="mini-card">
+              <div class="mini-icon">📄</div>
+              <div class="mini-title">${escapeHtml(id)}</div>
+              <div class="mini-copy">Материал есть в шаблоне, но пока не описан в frontend-каталоге.</div>
+              <div class="mini-actions">
+                <button class="secondary-btn" onclick="window.location.href='knowledge.html'">Открыть базу знаний</button>
+              </div>
+            </div>
+          `;
+        }
 
-    await callAssistant(text, true);
-    input.value = "";
-    input.focus();
-  }
+        const actionButton = item.assistantPrompt
+          ? `<button class="secondary-btn" onclick="askAssistantPreset('${escapeJsString(item.assistantPrompt)}')">Открыть через ассистента</button>`
+          : `<button class="secondary-btn" onclick="window.location.href='${item.href}'">Открыть материал</button>`;
 
-  function bootstrapAssistant() {
-    ensureAssistantRoot();
-  }
+        return `
+          <div class="mini-card">
+            <div class="mini-icon">${item.icon}</div>
+            <div class="mini-title">${escapeHtml(item.title)}</div>
+            <div class="mini-copy">${escapeHtml(item.copy)}</div>
+            <div class="mini-actions">
+              ${actionButton}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", bootstrapAssistant);
-  } else {
-    bootstrapAssistant();
-  }
+    function renderActivity(data, stats, hasTemplate) {
+      const displayName = getDisplayName();
+      const sourceNote = hasTemplate
+        ? "Knowledge recommendations и stage mapping дополнительно согласованы с backend template layer."
+        : "Template layer временно недоступен, поэтому recommendations подставлены из системного fallback.";
 
-  window.openAssistant = openAssistant;
-  window.closeAssistant = closeAssistant;
-  window.callAssistant = callAssistant;
-  window.addAssistantMessage = addAssistantMessage;
-})();
+      const activityList = document.getElementById("activityList");
+      const items = [
+        {
+          title: `Активен этап ${data.stage}: ${data.stage_title}`,
+          sub: `Маршрут адаптации синхронизирован. Для сотрудника ${displayName} сейчас отображается актуальный модуль employee-side.`
+        },
+        {
+          title: `Зафиксирован прогресс ${data.progress}%`,
+          sub: "Система пересчитала прогресс по задачам текущего этапа и обновила главный экран автоматически."
+        },
+        {
+          title: `Выполнено ${stats.completed} из ${stats.total} задач`,
+          sub: stats.total
+            ? `До перехода дальше осталось ${stats.remaining} ${pluralizeTasks(stats.remaining)}.`
+            : "Когда backend вернёт задачи этапа, этот блок покажет детальную активность."
+        },
+        {
+          title: "Stage context загружен",
+          sub: sourceNote
+        }
+      ];
+
+      activityList.innerHTML = items.map(item => `
+        <div class="activity-item">
+          <div class="activity-dot"></div>
+          <div class="activity-copy">
+            <div class="activity-title">${escapeHtml(item.title)}</div>
+            <div class="activity-sub">${escapeHtml(item.sub)}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function pluralizeTasks(count) {
+      const n = Math.abs(count) % 100;
+      const n1 = n % 10;
+      if (n > 10 && n < 20) return "задач";
+      if (n1 > 1 && n1 < 5) return "задачи";
+      if (n1 === 1) return "задача";
+      return "задач";
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeJsString(value) {
+      return String(value)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, " ");
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return response.json();
+    }
+
+    async function loadTemplateFromBackend() {
+      try {
+        const data = await fetchJson(buildApiUrl("/api/template"));
+        return normalizeTemplate(data);
+      } catch (error) {
+        console.error("Failed to load template:", error);
+        return null;
+      }
+    }
+
+    async function askAssistantPreset(text) {
+      if (typeof openAssistant === "function") {
+        openAssistant();
+      }
+
+      setTimeout(async () => {
+        if (typeof callAssistant === "function") {
+          try {
+            await callAssistant(text);
+            return;
+          } catch (error) {
+            console.error(error);
+          }
+        }
+
+        if (typeof addAssistantMessage === "function") {
+          addAssistantMessage(text, "user");
+        }
+      }, 180);
+    }
+
+    async function loadDashboard() {
+      const sessionId = localStorage.getItem(SESSION_KEY);
+      let state = getFallbackDashboardState();
+
+      if (sessionId) {
+        try {
+          const data = await fetchJson(buildApiUrl(`/api/tasks?session_id=${encodeURIComponent(sessionId)}`));
+          state = normalizeDashboardData(data);
+        } catch (error) {
+          console.error("Failed to load dashboard tasks:", error);
+        }
+      }
+
+      const template = await loadTemplateFromBackend();
+      const templateStage = getTemplateStage(template, state.stage);
+
+      if (!state.stage_title && templateStage?.title) {
+        state.stage_title = templateStage.title;
+      }
+      if (!state.stage_description && templateStage?.description) {
+        state.stage_description = templateStage.description;
+      }
+      if (!state.stage_message && templateStage?.message) {
+        state.stage_message = templateStage.message;
+      }
+
+      const displayName = getDisplayName();
+      const stats = getTaskStats(state.tasks);
+      const hasTemplate = Boolean(templateStage);
+
+      renderHero(displayName, state, stats);
+      renderMetrics(state, stats, hasTemplate);
+      renderNextStep(state);
+      renderTasks(state.tasks);
+      renderRecommended(state.stage, templateStage);
+      renderActivity(state, stats, hasTemplate);
+      profileChip.textContent = displayName;
+    }
+
+    loadDashboard();
+    window.askAssistantPreset = askAssistantPreset;
+  </script>
+
+  <script src="assistant.js"></script>
+  <script src="notifications.js"></script>
+</body>
+</html>
