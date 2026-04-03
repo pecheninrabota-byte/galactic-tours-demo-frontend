@@ -27,7 +27,8 @@
       box-sizing: border-box;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       min-height: 100%;
@@ -51,6 +52,10 @@
     textarea,
     select {
       font: inherit;
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     .app-shell {
@@ -876,7 +881,7 @@
       </div>
 
       <div class="sidebar-footer">
-        Главный экран сотрудника: прогресс адаптации, следующий шаг, знания и быстрый доступ к ключевым разделам. Stage context теперь приходит из backend, а knowledge recommendations синхронизируются с template layer.
+        Главный экран сотрудника: прогресс адаптации, следующий шаг, знания и быстрый доступ к ключевым разделам платформы. Stage context теперь приходит из backend, а knowledge recommendations синхронизируются с template layer.
       </div>
     </aside>
 
@@ -1103,7 +1108,7 @@
                 </div>
               </div>
 
-              <div class="mini-card">
+              <div id="adminQuickAccessCard" class="mini-card hidden">
                 <div class="mini-icon">🛠️</div>
                 <div class="mini-title">HR Admin</div>
                 <div class="mini-copy">Откройте builder, чтобы посмотреть или изменить конфигурацию маршрута адаптации.</div>
@@ -1182,6 +1187,7 @@
     const AUTH_KEY = "galactic_tours_auth";
     const USER_LOGIN_KEY = "galactic_tours_login";
     const USER_NAME_KEY = "galactic_tours_user_name";
+    const USER_ROLE_KEY = "galactic_tours_role";
     const SESSION_KEY = "galactic_tours_session_id";
     const PROFILE_STORAGE_KEY = "galactic_tours_profile_data";
     const API_BASE_STORAGE_KEY = "galactic_tours_api_base";
@@ -1283,12 +1289,19 @@
       window.location.href = "login.html";
     }
 
-    const currentRole = localStorage.getItem("galactic_tours_role") || "employee";
+    const currentRole = localStorage.getItem(USER_ROLE_KEY) || "employee";
     const isAdmin = currentRole === "admin";
+
     const adminNavLink = document.getElementById("adminNavLink");
     if (adminNavLink) {
-    adminNavLink.classList.toggle("hidden", !isAdmin);
+      adminNavLink.classList.toggle("hidden", !isAdmin);
     }
+
+    const adminQuickAccessCard = document.getElementById("adminQuickAccessCard");
+    if (adminQuickAccessCard) {
+      adminQuickAccessCard.classList.toggle("hidden", !isAdmin);
+    }
+
     const savedLogin = localStorage.getItem(USER_LOGIN_KEY) || "Test User";
     const savedName = localStorage.getItem(USER_NAME_KEY) || "";
     const profileChip = document.getElementById("profileChip");
@@ -1298,6 +1311,7 @@
       localStorage.removeItem(USER_LOGIN_KEY);
       localStorage.removeItem(SESSION_KEY);
       localStorage.removeItem(USER_NAME_KEY);
+      localStorage.removeItem(USER_ROLE_KEY);
       window.location.href = "login.html";
     });
 
@@ -1369,327 +1383,4 @@
           title: stage?.title || `Этап ${index + 1}`,
           description: stage?.description || "",
           message: stage?.message || "",
-          tasks: Array.isArray(stage?.tasks) ? stage.tasks : [],
-          knowledgeItems: Array.isArray(stage?.knowledgeItems) ? stage.knowledgeItems : []
-        }))
-      };
-    }
-
-    function getTemplateStage(template, stageNumber) {
-      if (!template || !Array.isArray(template.stages)) return null;
-      const index = Math.max(stageNumber - 1, 0);
-      return template.stages[index] || null;
-    }
-
-    function getTaskStats(tasks) {
-      const total = tasks.length;
-      const completed = tasks.filter(task => Boolean(task.done)).length;
-      const remaining = Math.max(total - completed, 0);
-      return { total, completed, remaining };
-    }
-
-    function getNextStep(data) {
-      const tasks = Array.isArray(data.tasks) ? data.tasks : [];
-      const incompleteTask = tasks.find(task => !task.done);
-
-      if (incompleteTask) {
-        return {
-          title: `Продолжить этап «${data.stage_title}»`,
-          sub: `Следующий приоритет — завершить текущие задачи маршрута и продвинуться по этапу ${data.stage}.`,
-          button: "Продолжить адаптацию"
-        };
-      }
-
-      if (tasks.length > 0 && data.progress >= 100) {
-        return {
-          title: "Проверить переход на следующий этап",
-          sub: "Текущий этап выглядит завершённым. Откройте маршрут адаптации и проверьте, к какому следующему модулю вас ведёт система.",
-          button: "Открыть маршрут"
-        };
-      }
-
-      return {
-        title: `Открыть этап «${data.stage_title}»`,
-        sub: "Перейдите в маршрут, чтобы увидеть актуальные задачи, проверить этап и продолжить движение по онбордингу.",
-        button: "Продолжить маршрут"
-      };
-    }
-
-    function getStatusText(stage, progress) {
-      if (progress >= 100) return "Этап завершён";
-      if (stage === 1) return "Адаптация активна";
-      if (stage === 2) return "Этап закрепления роли";
-      if (stage === 3) return "Финальный этап адаптации";
-      return "Маршрут в работе";
-    }
-
-    function renderHero(displayName, data, stats) {
-      const stageDescription = data.stage_description
-        ? `Сейчас активен модуль «${data.stage_title}». ${data.stage_description}`
-        : `Сейчас активен этап «${data.stage_title}».`;
-
-      document.getElementById("heroTitle").textContent = `${displayName}, ваш маршрут адаптации под контролем`;
-      document.getElementById("heroSub").textContent = `${stageDescription} Сейчас у вас ${stats.remaining} незавершённых ${pluralizeTasks(stats.remaining)} и общий прогресс ${data.progress}%.`;
-      document.getElementById("heroStage").textContent = data.stage;
-      document.getElementById("heroProgress").textContent = `${data.progress}%`;
-      document.getElementById("statusPillText").textContent = getStatusText(data.stage, data.progress);
-    }
-
-    function renderMetrics(data, stats, hasTemplate) {
-      document.getElementById("metricStage").textContent = data.stage;
-      document.getElementById("metricProgress").textContent = `${data.progress}%`;
-      document.getElementById("metricCompleted").textContent = stats.completed;
-      document.getElementById("metricRemaining").textContent = stats.remaining;
-
-      document.getElementById("stageBadge").textContent = `Этап ${data.stage} · Активен`;
-      document.getElementById("stageNameInline").textContent = data.stage_title;
-      document.getElementById("stageMessage").textContent = data.stage_message;
-      document.getElementById("progressInlineValue").textContent = `${data.progress}%`;
-      document.getElementById("progressBarFill").style.width = `${data.progress}%`;
-
-      document.getElementById("summaryTotal").textContent = stats.total;
-      document.getElementById("summaryCompleted").textContent = stats.completed;
-      document.getElementById("summaryRemaining").textContent = stats.remaining;
-
-      const note = document.getElementById("stageTemplateNote");
-      note.style.display = hasTemplate ? "block" : "none";
-    }
-
-    function renderNextStep(data) {
-      const next = getNextStep(data);
-      document.getElementById("nextStepTitle").textContent = next.title;
-      document.getElementById("nextStepSub").textContent = next.sub;
-      document.getElementById("nextStepButton").textContent = next.button;
-    }
-
-    function renderTasks(tasks) {
-      const taskList = document.getElementById("taskList");
-
-      if (!tasks.length) {
-        taskList.innerHTML = `
-          <div class="empty-note">
-            Для текущего этапа backend пока не вернул задачи. Вы всё равно можете открыть маршрут адаптации и продолжить сценарий.
-          </div>
-        `;
-        return;
-      }
-
-      taskList.innerHTML = tasks
-        .slice(0, 5)
-        .map(task => {
-          const safeTitle = escapeHtml(task.title || "Задача без названия");
-          const doneClass = task.done ? "done" : "";
-          const meta = task.done
-            ? "Статус: выполнено"
-            : (task.required ? "Статус: ожидает выполнения · обязательная" : "Статус: ожидает выполнения · необязательная");
-
-          return `
-            <div class="task-item ${doneClass}">
-              <div class="task-check"></div>
-              <div class="task-copy">
-                <div class="task-title">${safeTitle}</div>
-                <div class="task-meta">${meta}</div>
-              </div>
-            </div>
-          `;
-        })
-        .join("");
-    }
-
-    function renderRecommended(stageNumber, templateStage) {
-      const container = document.getElementById("recommendedGrid");
-      const ids = templateStage?.knowledgeItems?.length
-        ? templateStage.knowledgeItems
-        : (FALLBACK_RECOMMENDED[stageNumber] || []);
-
-      if (!ids.length) {
-        container.innerHTML = `
-          <div class="empty-note">
-            Для этого этапа пока нет рекомендованных материалов.
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = ids.slice(0, 4).map(id => {
-        const item = KNOWLEDGE_LIBRARY[id];
-        if (!item) {
-          return `
-            <div class="mini-card">
-              <div class="mini-icon">📄</div>
-              <div class="mini-title">${escapeHtml(id)}</div>
-              <div class="mini-copy">Материал есть в шаблоне, но пока не описан в frontend-каталоге.</div>
-              <div class="mini-actions">
-                <button class="secondary-btn" onclick="window.location.href='knowledge.html'">Открыть базу знаний</button>
-              </div>
-            </div>
-          `;
-        }
-
-        const actionButton = item.assistantPrompt
-          ? `<button class="secondary-btn" onclick="askAssistantPreset('${escapeJsString(item.assistantPrompt)}')">Открыть через ассистента</button>`
-          : `<button class="secondary-btn" onclick="window.location.href='${item.href}'">Открыть материал</button>`;
-
-        return `
-          <div class="mini-card">
-            <div class="mini-icon">${item.icon}</div>
-            <div class="mini-title">${escapeHtml(item.title)}</div>
-            <div class="mini-copy">${escapeHtml(item.copy)}</div>
-            <div class="mini-actions">
-              ${actionButton}
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderActivity(data, stats, hasTemplate) {
-      const displayName = getDisplayName();
-      const sourceNote = hasTemplate
-        ? "Knowledge recommendations и stage mapping дополнительно согласованы с backend template layer."
-        : "Template layer временно недоступен, поэтому recommendations подставлены из системного fallback.";
-
-      const activityList = document.getElementById("activityList");
-      const items = [
-        {
-          title: `Активен этап ${data.stage}: ${data.stage_title}`,
-          sub: `Маршрут адаптации синхронизирован. Для сотрудника ${displayName} сейчас отображается актуальный модуль employee-side.`
-        },
-        {
-          title: `Зафиксирован прогресс ${data.progress}%`,
-          sub: "Система пересчитала прогресс по задачам текущего этапа и обновила главный экран автоматически."
-        },
-        {
-          title: `Выполнено ${stats.completed} из ${stats.total} задач`,
-          sub: stats.total
-            ? `До перехода дальше осталось ${stats.remaining} ${pluralizeTasks(stats.remaining)}.`
-            : "Когда backend вернёт задачи этапа, этот блок покажет детальную активность."
-        },
-        {
-          title: "Stage context загружен",
-          sub: sourceNote
-        }
-      ];
-
-      activityList.innerHTML = items.map(item => `
-        <div class="activity-item">
-          <div class="activity-dot"></div>
-          <div class="activity-copy">
-            <div class="activity-title">${escapeHtml(item.title)}</div>
-            <div class="activity-sub">${escapeHtml(item.sub)}</div>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function pluralizeTasks(count) {
-      const n = Math.abs(count) % 100;
-      const n1 = n % 10;
-      if (n > 10 && n < 20) return "задач";
-      if (n1 > 1 && n1 < 5) return "задачи";
-      if (n1 === 1) return "задача";
-      return "задач";
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function escapeJsString(value) {
-      return String(value)
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'")
-        .replace(/\n/g, " ");
-    }
-
-    async function fetchJson(url) {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      return response.json();
-    }
-
-    async function loadTemplateFromBackend() {
-      try {
-        const data = await fetchJson(buildApiUrl("/api/template"));
-        return normalizeTemplate(data);
-      } catch (error) {
-        console.error("Failed to load template:", error);
-        return null;
-      }
-    }
-
-    async function askAssistantPreset(text) {
-      if (typeof openAssistant === "function") {
-        openAssistant();
-      }
-
-      setTimeout(async () => {
-        if (typeof callAssistant === "function") {
-          try {
-            await callAssistant(text);
-            return;
-          } catch (error) {
-            console.error(error);
-          }
-        }
-
-        if (typeof addAssistantMessage === "function") {
-          addAssistantMessage("user", text);
-        }
-      }, 180);
-    }
-
-    async function loadDashboard() {
-      const sessionId = localStorage.getItem(SESSION_KEY);
-      let state = getFallbackDashboardState();
-
-      if (sessionId) {
-        try {
-          const data = await fetchJson(buildApiUrl(`/api/tasks?session_id=${encodeURIComponent(sessionId)}`));
-          state = normalizeDashboardData(data);
-        } catch (error) {
-          console.error("Failed to load dashboard tasks:", error);
-        }
-      }
-
-      const template = await loadTemplateFromBackend();
-      const templateStage = getTemplateStage(template, state.stage);
-
-      if (!state.stage_title && templateStage?.title) {
-        state.stage_title = templateStage.title;
-      }
-      if (!state.stage_description && templateStage?.description) {
-        state.stage_description = templateStage.description;
-      }
-      if (!state.stage_message && templateStage?.message) {
-        state.stage_message = templateStage.message;
-      }
-
-      const displayName = getDisplayName();
-      const stats = getTaskStats(state.tasks);
-      const hasTemplate = Boolean(templateStage);
-
-      renderHero(displayName, state, stats);
-      renderMetrics(state, stats, hasTemplate);
-      renderNextStep(state);
-      renderTasks(state.tasks);
-      renderRecommended(state.stage, templateStage);
-      renderActivity(state, stats, hasTemplate);
-      profileChip.textContent = displayName;
-    }
-
-    loadDashboard();
-    window.askAssistantPreset = askAssistantPreset;
-  </script>
-
-  <script src="assistant.js"></script>
-  <script src="notifications.js"></script>
-</body>
-</html>
+          tasks: Array.isArray(stage?.tasks) ? stage.tasks :
